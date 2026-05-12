@@ -1,0 +1,53 @@
+/* XQube Admin Panel — Custom Branding */
+:root {
+  --theme-bg: #000000;
+  --theme-elevation-0: #0a0a0a;
+  --theme-elevation-50: #0e0e0e;
+  --theme-elevation-100: #111111;
+  --theme-elevation-150: #161616;
+  --theme-elevation-200: #1a1a1a;
+  --theme-elevation-250: #1f1f1f;
+  --theme-elevation-300: #242424;
+  --theme-elevation-400: #2e2e2e;
+  --theme-elevation-500: #383838;
+  --theme-elevation-800: #888888;
+  --theme-elevation-900: #c4cad8;
+  --theme-elevation-1000: #ffffff;
+
+  --theme-success-50: #0a2e1a;
+  --theme-success-100: #14cb72;
+  --theme-success-500: #14cb72;
+
+  --color-base-0: #000000;
+  --color-base-100: #0e0e0e;
+  --color-base-200: #111111;
+  --color-base-300: #1a1a1a;
+  --color-base-400: #8d95a8;
+  --color-base-500: #c4cad8;
+  --color-base-600: #ffffff;
+
+  --color-success-500: #14cb72;
+}
+
+/* XQube accent color throughout */
+.btn--style-primary,
+.nav__link.active,
+.field-type .label--active {
+  background-color: #14cb72 !important;
+  color: #000000 !important;
+}
+
+.nav__link.active {
+  border-left: 3px solid #14cb72;
+}
+
+/* Admin sidebar */
+.nav {
+  border-right: 1px solid #1a1a1a;
+}
+
+/* Logo area */
+.nav__header {
+  border-bottom: 1px solid #1a1a1a;
+  padding: 1.5rem;
+}

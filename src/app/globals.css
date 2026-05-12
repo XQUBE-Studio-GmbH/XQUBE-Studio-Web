@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #000000;
+  --card: #0E0E0E;
+  --card-hover: #141414;
+  --accent: #14CB72;
+  --accent-hover: #10b863;
+  --muted: #8D95A8;
+  --light: #C4CAD8;
+  --white: #FFFFFF;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(20, 203, 114, 0.3);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: #000;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0E0E0E; }
+::-webkit-scrollbar-thumb { background: #14CB72; border-radius: 3px; }
+::selection { background: #14CB72; color: #000; }
+
+@layer utilities {
+  .container-xqube { @apply max-w-7xl mx-auto px-6 lg:px-8; }
+  .section-py { @apply py-20 lg:py-28; }
+  .btn-primary { @apply inline-flex items-center gap-2 px-6 py-3 bg-[#14CB72] text-black font-semibold text-sm rounded-sm hover:bg-[#10b863] transition-all duration-200 tracking-wide; }
+  .btn-outline { @apply inline-flex items-center gap-2 px-6 py-3 border border-white/15 text-white font-semibold text-sm rounded-sm hover:border-[#14CB72] hover:text-[#14CB72] transition-all duration-200 tracking-wide; }
+  .card-xqube { @apply bg-[#0E0E0E] border border-white/[0.08] rounded-sm hover:border-[#14CB72]/30 transition-all duration-300; }
+  .tag-xqube { @apply inline-flex items-center px-3 py-1 text-xs font-semibold tracking-widest uppercase text-[#14CB72] bg-[#14CB72]/10 rounded-sm; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+
+.stagger-children > * { animation: fadeInUp 0.6s ease forwards; opacity: 0; }
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
