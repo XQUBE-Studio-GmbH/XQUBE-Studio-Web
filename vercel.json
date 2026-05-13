@@ -4,11 +4,15 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["fra1"],
-  "env": {
-    "PAYLOAD_SECRET": "@payload-secret",
-    "DATABASE_URI": "@database-uri",
-    "RESEND_API_KEY": "@resend-api-key",
-    "NEXT_PUBLIC_SERVER_URL": "@next-public-server-url",
-    "NEXT_PUBLIC_GA4_MEASUREMENT_ID": "@next-public-ga4-measurement-id"
-  }
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
 }
