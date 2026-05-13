@@ -14,7 +14,7 @@ export default function PortfolioPage() {
       <section className="xq-section">
         <div className="xq-container">
           <div className="xq-label mb-4">Our Work</div>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-6">Portfolio</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">Portfolio</h1>
           <p className="text-xq-muted text-lg max-w-xl">
             AAA-quality game art delivered for studios worldwide. Browse by category below.
           </p>
@@ -38,7 +38,7 @@ export default function PortfolioPage() {
           </div>
 
           {/* Portfolio grid placeholder */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="xq-card aspect-[4/3] flex items-center justify-center">
                 <div className="text-center">

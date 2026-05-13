@@ -37,7 +37,7 @@ export default function AboutPage() {
         <div className="xq-container">
           <div className="max-w-3xl">
             <div className="xq-label mb-4">About Us</div>
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
               A studio built for precision
             </h1>
             <p className="text-xq-muted text-lg leading-relaxed mb-6">
@@ -57,7 +57,7 @@ export default function AboutPage() {
       {/* Credentials */}
       <section className="border-t border-xq-border bg-xq-surface">
         <div className="xq-container py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {credentials.map((c) => (
               <div key={c.label} className="text-center">
                 <div className="text-4xl font-black text-xq-accent mb-1">{c.value}</div>

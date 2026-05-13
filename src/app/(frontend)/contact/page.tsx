@@ -33,12 +33,12 @@ export default function ContactPage() {
   return (
     <section className="xq-section">
       <div className="xq-container">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 max-w-5xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 max-w-5xl">
 
           {/* Left — Info */}
           <div>
             <div className="xq-label mb-4">Get in Touch</div>
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
               Let's talk about your project
             </h1>
             <p className="text-xq-muted mb-10 leading-relaxed">
@@ -58,7 +58,7 @@ export default function ContactPage() {
             <div className="space-y-4 mt-10">
               {contactInfo.map((item) => (
                 <div key={item.label} className="flex gap-4 border-b border-xq-border pb-4">
-                  <div className="text-xq-muted text-sm w-24 shrink-0">{item.label}</div>
+                  <div className="text-xq-muted text-sm w-20 sm:w-24 shrink-0">{item.label}</div>
                   {item.href ? (
                     <a href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined}
                       rel="noopener noreferrer"

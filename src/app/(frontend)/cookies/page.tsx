@@ -29,8 +29,8 @@ export default function CookiePolicyPage() {
               <p className="text-xq-muted leading-relaxed mb-4">
                 This website uses only analytics cookies, and only after you provide your consent via the cookie banner.
               </p>
-              <div className="xq-card">
-                <table className="w-full text-sm">
+              <div className="xq-card overflow-x-auto">
+                <table className="w-full text-sm min-w-[480px]">
                   <thead>
                     <tr className="border-b border-xq-border">
                       <th className="text-left text-white font-semibold pb-3 pr-4">Cookie</th>

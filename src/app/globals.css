@@ -43,8 +43,8 @@ p { color: var(--muted); line-height: 1.6; }
 a { color: inherit; text-decoration: none; }
 
 @layer components {
-  .xq-container { @apply max-w-7xl mx-auto px-6 lg:px-8; }
-  .xq-section   { @apply py-24 lg:py-32; }
+  .xq-container { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12; }
+  .xq-section   { @apply py-16 md:py-24 lg:py-32; }
 
   .xq-card {
     @apply bg-xq-card border border-xq-border rounded-lg p-6;

@@ -10,7 +10,7 @@ export default function BlogPage() {
     <section className="xq-section">
       <div className="xq-container">
         <div className="xq-label mb-4">Insights</div>
-        <h1 className="text-4xl md:text-5xl font-black text-white mb-6">Blog</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">Blog</h1>
         <p className="text-xq-muted text-lg max-w-xl mb-16">
           Insights on game art production, XR development, and studio operations.
           Articles coming soon — powered by Pritom AI.
