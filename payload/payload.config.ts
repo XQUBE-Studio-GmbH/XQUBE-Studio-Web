@@ -219,7 +219,13 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI,
+      // Supabase requires SSL for remote connections (e.g. Vercel serverless)
+      ssl: process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }
+        : false,
     },
+    // Pushes schema directly to the DB on startup — safe for a fresh project with no existing data
+    push: true,
   }),
 
   typescript: {
