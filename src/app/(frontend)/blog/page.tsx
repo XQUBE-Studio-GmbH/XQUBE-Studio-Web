@@ -3,6 +3,16 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Blog & Insights',
   description: 'Insights on game art production, XR development, and studio operations from XQube Studio.',
+  openGraph: {
+    title: 'Blog & Insights | XQube Studio',
+    description: 'Insights on game art production, XR development, and studio operations.',
+    url: 'https://www.xqubestudio.com/blog',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Blog | XQube Studio',
+    description: 'Insights on game art production, XR development, and studio operations.',
+  },
 }
 
 export default function BlogPage() {

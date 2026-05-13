@@ -4,6 +4,16 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Portfolio',
   description: 'Browse XQube Studio\'s portfolio of AAA game art — characters, weapons, vehicles, environments, props, and VR assets.',
+  openGraph: {
+    title: 'Portfolio | XQube Studio',
+    description: 'AAA game art for studios worldwide — characters, weapons, environments, VR assets.',
+    url: 'https://www.xqubestudio.com/portfolio',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Portfolio | XQube Studio',
+    description: 'AAA game art — characters, weapons, environments, VR assets.',
+  },
 }
 
 const categories = ['All', 'Characters', 'Weapons', 'Vehicles', 'Environments', 'Props', 'VR Assets']

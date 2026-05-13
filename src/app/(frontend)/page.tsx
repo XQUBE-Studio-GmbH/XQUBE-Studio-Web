@@ -4,6 +4,16 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'XQube Studio | AAA Game Art & XR Production',
   description: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
+  openGraph: {
+    title: 'XQube Studio | AAA Game Art & XR Production',
+    description: 'AAA-quality game art and XR production. Vienna · Dubai · Dhaka.',
+    url: 'https://www.xqubestudio.com',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'XQube Studio | AAA Game Art & XR Production',
+    description: 'AAA-quality game art and XR production. Vienna · Dubai · Dhaka.',
+  },
 }
 
 const services = [

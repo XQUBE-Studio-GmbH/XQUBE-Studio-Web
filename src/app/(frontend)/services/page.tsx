@@ -4,6 +4,16 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Services',
   description: 'Game art production, VR game assets, interactive development for UEFN and Roblox, and staff augmentation for game studios worldwide.',
+  openGraph: {
+    title: 'Services | XQube Studio',
+    description: 'Game Art · VR Assets · Interactive Dev · Staff Augmentation. Delivered to your pipeline.',
+    url: 'https://www.xqubestudio.com/services',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Services | XQube Studio',
+    description: 'Game Art · VR Assets · Interactive Dev · Staff Augmentation.',
+  },
 }
 
 // ─── Services ────────────────────────────────────────────────────────────────
