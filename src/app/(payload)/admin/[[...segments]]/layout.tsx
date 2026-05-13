@@ -8,12 +8,17 @@ type Args = {
   children: React.ReactNode
 }
 
+const serverFunction: ServerFunctionClient = async function (args) {
+  'use server'
+  return handleServerFunctions({ ...args, config, importMap })
+}
+
 const Layout = ({ children }: Args) =>
   RootLayout({
     config,
     children,
     importMap,
-    serverFunction: handleServerFunctions as ServerFunctionClient,
+    serverFunction,
   })
 
 export default Layout
