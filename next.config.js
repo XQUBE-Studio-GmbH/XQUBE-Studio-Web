@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
-const { withPayload } = require('@payloadcms/next-payload')
-
 const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'cdn.artstation.com' },
       { protocol: 'https', hostname: '**.artstation.com' },
       { protocol: 'https', hostname: 'drive.google.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
@@ -13,10 +10,8 @@ const nextConfig = {
     ],
   },
   experimental: {
-    serverComponentsExternalPackages: ['@payloadcms/db-postgres', 'payload'],
+    serverComponentsExternalPackages: ['payload', '@payloadcms/db-postgres'],
   },
 }
 
-module.exports = withPayload(nextConfig, {
-  configPath: './payload/payload.config.ts',
-})
+module.exports = nextConfig
