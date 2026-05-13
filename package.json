@@ -1,0 +1,42 @@
+{
+  "name": "xqube-studio-web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "generate:types": "payload generate:types"
+  },
+  "dependencies": {
+    "next": "15.3.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "payload": "3.84.1",
+    "@payloadcms/next": "3.84.1",
+    "@payloadcms/db-postgres": "3.84.1",
+    "@payloadcms/richtext-lexical": "3.84.1",
+    "@payloadcms/ui": "3.84.1",
+    "@supabase/supabase-js": "2.44.4",
+    "resend": "3.4.0",
+    "sharp": "0.32.6",
+    "slugify": "1.6.6",
+    "lucide-react": "0.383.0",
+    "graphql": "16.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.10",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.0",
+    "typescript": "5.5.3",
+    "tailwindcss": "3.4.6",
+    "autoprefixer": "10.4.19",
+    "postcss": "8.4.39",
+    "eslint": "8.57.0",
+    "eslint-config-next": "15.3.2"
+  },
+  "engines": {
+    "node": ">=18.20.2"
+  }
+}
