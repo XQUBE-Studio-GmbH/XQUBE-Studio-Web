@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload'
 import { RootPage, generatePageMetadata } from '@payloadcms/next/views'
-import { importMap } from '../importMap.js'
+import { importMap } from '../importMap'
 
 type Args = {
   params: Promise<{
