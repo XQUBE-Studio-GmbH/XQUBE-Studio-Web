@@ -27,11 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {GA_ID && (
           <>
             <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`,
-              }}
-            />
+            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');` }} />
           </>
         )}
         <script
@@ -43,8 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: 'XQube Studio GmbH',
               url: 'https://www.xqubestudio.com',
               description: 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.',
-              address: { '@type': 'PostalAddress', addressLocality: 'Vienna', addressCountry: 'AT' },
-              contactPoint: { '@type': 'ContactPoint', email: 'info@xqubestudio.com' },
+              address: { '@type': 'PostalAddress', streetAddress: 'Rathausstrasse 21/12', addressLocality: 'Vienna', postalCode: '1010', addressCountry: 'AT' },
+              contactPoint: { '@type': 'ContactPoint', email: 'info@xqubestudio.com', telephone: '+43 650 5207329' },
               sameAs: ['https://www.linkedin.com/company/xqubestudio', 'https://www.artstation.com/xqubestudio'],
             }),
           }}
