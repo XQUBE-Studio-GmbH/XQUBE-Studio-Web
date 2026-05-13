@@ -222,6 +222,10 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI,
       // Supabase requires SSL for all external connections (Vercel, CI, etc.)
       ssl: { rejectUnauthorized: false },
+      // Supabase session pooler (PgBouncer session mode) caps at 15 connections
+      // total. Vercel serverless spins up a pool per function invocation, so
+      // limit each to 1 connection to avoid EMAXCONNSESSION exhaustion.
+      max: 1,
     },
     // push: true only runs when NODE_ENV !== 'production' — useless on Vercel.
     // prodMigrations is the correct production mechanism: Payload runs these
