@@ -1,5 +1,5 @@
-import type { AdminViewProps } from 'payload'
 import { RootPage, generatePageMetadata } from '@payloadcms/next/views'
+import config from '@payload-config'
 import { importMap } from '../importMap'
 
 type Args = {
@@ -11,13 +11,11 @@ type Args = {
   }>
 }
 
+// config is already a Promise<SanitizedConfig> — no need to wrap it
 export const generateMetadata = ({ params, searchParams }: Args) =>
-  generatePageMetadata({ config: configPromise, params, searchParams })
-
-import config from '@payload-config'
-const configPromise = Promise.resolve(config)
+  generatePageMetadata({ config, params, searchParams })
 
 const Page = ({ params, searchParams }: Args) =>
-  RootPage({ config: configPromise, importMap, params, searchParams })
+  RootPage({ config, importMap, params, searchParams })
 
 export default Page

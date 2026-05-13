@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import CookieBanner from '@/components/CookieBanner'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com'),
@@ -18,33 +17,15 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
-
+// Minimal root layout — just the required html/body shell.
+// suppressHydrationWarning is needed because Payload's RootLayout injects
+// its own data-theme / dir / lang attributes onto <html> at runtime.
+// All frontend-specific chrome (CookieBanner, LD-JSON, Navbar, etc.)
+// lives in (frontend)/layout.tsx so it never leaks into the admin panel.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        {/* GA is intentionally NOT loaded here — CookieBanner injects it only after explicit user consent (GDPR Article 7) */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'XQube Studio GmbH',
-              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com',
-              description: 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.',
-              address: { '@type': 'PostalAddress', streetAddress: 'Rathausstrasse 21/12', addressLocality: 'Vienna', postalCode: '1010', addressCountry: 'AT' },
-              contactPoint: { '@type': 'ContactPoint', email: 'info@xqubestudio.com', telephone: '+43 650 5207329' },
-              sameAs: ['https://www.linkedin.com/company/xqubestudio', 'https://www.artstation.com/xqubestudio'],
-            }),
-          }}
-        />
-      </head>
-      <body>
-        {children}
-        <CookieBanner gaId={GA_ID} />
-      </body>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   )
 }

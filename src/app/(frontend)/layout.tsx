@@ -2,6 +2,7 @@ import '../globals.css'
 import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/Navbar'
+import CookieBanner from '@/components/CookieBanner'
 
 function Footer() {
   return (
@@ -109,12 +110,33 @@ function Footer() {
   )
 }
 
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+      {/* Organisation structured data — frontend only */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'XQube Studio GmbH',
+            url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com',
+            description: 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.',
+            address: { '@type': 'PostalAddress', streetAddress: 'Rathausstrasse 21/12', addressLocality: 'Vienna', postalCode: '1010', addressCountry: 'AT' },
+            contactPoint: { '@type': 'ContactPoint', email: 'info@xqubestudio.com', telephone: '+43 650 5207329' },
+            sameAs: ['https://www.linkedin.com/company/xqubestudio', 'https://www.artstation.com/xqubestudio'],
+          }),
+        }}
+      />
       <Navbar />
       <main className="pt-[72px] relative z-0">{children}</main>
       <Footer />
+      {/* CookieBanner is intentionally NOT loaded here — it injects GA only after
+          explicit user consent (GDPR Article 7). Admin routes never get it. */}
+      <CookieBanner gaId={GA_ID} />
     </>
   )
 }
