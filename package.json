@@ -17,12 +17,14 @@
     "@payloadcms/bundler-webpack": "1.0.9",
     "@payloadcms/db-postgres": "0.8.10",
     "@payloadcms/richtext-lexical": "0.11.4",
+    "@payloadcms/next-payload": "1.2.0",
     "@supabase/supabase-js": "2.44.4",
     "resend": "3.4.0",
     "sharp": "0.33.4",
     "slugify": "1.6.6",
     "express": "4.19.2",
-    "dotenv": "16.4.5"
+    "dotenv": "16.4.5",
+    "lucide-react": "0.383.0"
   },
   "devDependencies": {
     "@types/node": "20.14.10",
