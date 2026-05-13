@@ -4,6 +4,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import * as initialMigration from './migrations/20250513_initial'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -222,8 +223,17 @@ export default buildConfig({
       // Supabase requires SSL for all external connections (Vercel, CI, etc.)
       ssl: { rejectUnauthorized: false },
     },
-    // Auto-sync schema to DB on startup — creates tables if they don't exist
-    push: true,
+    // push: true only runs when NODE_ENV !== 'production' — useless on Vercel.
+    // prodMigrations is the correct production mechanism: Payload runs these
+    // on every cold start but skips already-applied ones via payload_migrations.
+    push: true, // still useful for local dev
+    prodMigrations: [
+      {
+        name: '20250513_initial',
+        up: initialMigration.up,
+        down: initialMigration.down,
+      },
+    ],
     migrationDir: path.resolve(dirname, 'migrations'),
   }),
 
