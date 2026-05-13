@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import CookieBanner from '@/components/CookieBanner'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com'),
@@ -24,12 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        {GA_ID && (
-          <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
-            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');` }} />
-          </>
-        )}
+        {/* GA is intentionally NOT loaded here — CookieBanner injects it only after explicit user consent (GDPR Article 7) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -37,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'XQube Studio GmbH',
-              url: 'https://www.xqubestudio.com',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com',
               description: 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.',
               address: { '@type': 'PostalAddress', streetAddress: 'Rathausstrasse 21/12', addressLocality: 'Vienna', postalCode: '1010', addressCountry: 'AT' },
               contactPoint: { '@type': 'ContactPoint', email: 'info@xqubestudio.com', telephone: '+43 650 5207329' },
@@ -46,7 +42,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieBanner gaId={GA_ID} />
+      </body>
     </html>
   )
 }
