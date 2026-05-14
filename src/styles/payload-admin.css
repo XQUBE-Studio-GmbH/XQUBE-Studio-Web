@@ -1,0 +1,10 @@
+/* Hide built-in password fields in the Users form.
+   The Generate Password button fills them automatically — they don't need to be visible. */
+div:has(> input#field-password),
+div:has(> input#field-confirm-password) {
+  display: none !important;
+}
+label[for="field-password"],
+label[for="field-confirm-password"] {
+  display: none !important;
+}

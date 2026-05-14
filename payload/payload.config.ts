@@ -1,6 +1,7 @@
 import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { resendAdapter } from '@payloadcms/email-resend'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -45,9 +46,14 @@ export default buildConfig({
         Logo: '@/components/admin/AdminLogo#default',
         Icon: '@/components/admin/AdminLogo#default',
       },
-      beforeNavLinks: ['@/components/admin/AdminStyles#default'],
     },
   },
+
+  email: resendAdapter({
+    defaultFromAddress: 'noreply@xqubestudio.com',
+    defaultFromName: 'XQube Studio',
+    apiKey: process.env.RESEND_API_KEY || '',
+  }),
 
   editor: lexicalEditor(),
 

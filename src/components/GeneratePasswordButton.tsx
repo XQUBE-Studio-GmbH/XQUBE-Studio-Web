@@ -32,6 +32,13 @@ export default function GeneratePasswordButton() {
 
   return (
     <div style={{ marginBottom: '24px' }}>
+      {/* Hide the built-in password fields — this button handles them */}
+      <style>{`
+        div:has(> input#field-password),
+        div:has(> input#field-confirm-password),
+        label[for="field-password"],
+        label[for="field-confirm-password"] { display: none !important; }
+      `}</style>
       <p style={{ fontSize: '13px', color: '#a0a0a0', marginBottom: '8px' }}>
         Generate a strong temporary password. It will auto-fill the fields below — copy it to share with the new user.
       </p>
