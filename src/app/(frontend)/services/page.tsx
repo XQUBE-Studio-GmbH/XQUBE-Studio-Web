@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getPayload } from 'payload'
+import config from '../../../../payload/payload.config'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Services',
@@ -17,61 +21,90 @@ export const metadata: Metadata = {
   },
 }
 
-// ─── Services ────────────────────────────────────────────────────────────────
-const services = [
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ServiceItem {
+  id: string | number
+  title: string
+  shortDescription?: string
+  icon?: string
+  features?: { id: string; feature: string }[]
+  platforms?: string
+}
+
+// ─── Services fallback ───────────────────────────────────────────────────────
+
+const FB_SERVICES: ServiceItem[] = [
   {
+    id: 'game-art',
     title: 'Game Art Production',
-    description: 'Full-spectrum 3D art production from a single hero asset to an entire game world. Delivered to your pipeline specifications, on time, at AAA quality.',
+    shortDescription: 'Full-spectrum 3D art production from a single hero asset to an entire game world. Delivered to your pipeline specifications, on time, at AAA quality.',
     features: [
-      'Characters & Creatures — heroes, NPCs, enemies, rig-ready',
-      'Weapons — firearms, melee, sci-fi, PBR textured',
-      'Vehicles — ground, air, sci-fi variants',
-      'Environments — modular level art, biomes, interior sets',
-      'Props & Items — environmental props, interactive objects',
-      'UI/UX & 2D — HUDs, menus, key art, marketing assets',
+      { id: '1', feature: 'Characters & Creatures — heroes, NPCs, enemies, rig-ready' },
+      { id: '2', feature: 'Weapons — firearms, melee, sci-fi, PBR textured' },
+      { id: '3', feature: 'Vehicles — ground, air, sci-fi variants' },
+      { id: '4', feature: 'Environments — modular level art, biomes, interior sets' },
+      { id: '5', feature: 'Props & Items — environmental props, interactive objects' },
+      { id: '6', feature: 'UI/UX & 2D — HUDs, menus, key art, marketing assets' },
     ],
     platforms: 'Unreal Engine 5 · Unity · UEFN · Roblox · Meta Quest · PSVR2',
   },
   {
+    id: 'vr-assets',
     title: 'VR Game Assets',
-    description: 'Production-ready VR assets and immersive game environments built for performance. We understand the constraints of real-time VR and design to them.',
+    shortDescription: 'Production-ready VR assets and immersive game environments built for performance. We understand the constraints of real-time VR and design to them.',
     features: [
-      'High-fidelity VR character and prop assets',
-      'Immersive VR environment design',
-      'Optimized for Meta Quest, HTC Vive, PlayStation VR',
-      'LOD chains and draw call budgets built in',
-      'Interaction-ready asset preparation',
-      'VR game environment lighting and post-processing',
+      { id: '1', feature: 'High-fidelity VR character and prop assets' },
+      { id: '2', feature: 'Immersive VR environment design' },
+      { id: '3', feature: 'Optimized for Meta Quest, HTC Vive, PlayStation VR' },
+      { id: '4', feature: 'LOD chains and draw call budgets built in' },
+      { id: '5', feature: 'Interaction-ready asset preparation' },
+      { id: '6', feature: 'VR game environment lighting and post-processing' },
     ],
     platforms: 'Meta Quest · HTC Vive · PSVR2 · 6DoF ready · OpenXR',
   },
   {
+    id: 'interactive-dev',
     title: 'Interactive Development',
-    description: 'End-to-end development for UEFN islands, Roblox experiences, and VR games. We\'ve shipped on all three platforms — including a live Fortnite island with Fresh TV.',
+    shortDescription: "End-to-end development for UEFN islands, Roblox experiences, and VR games. We've shipped on all three platforms — including a live Fortnite island with Fresh TV.",
     features: [
-      'UEFN island development — design, scripting, publish',
-      'Roblox Studio — Lua scripting, game systems, publish',
-      'VR game development — Unity (C#) and Unreal (Blueprint)',
-      'Complex VR application development',
-      'Performance optimization across all platforms',
-      'Post-launch support and iteration',
+      { id: '1', feature: 'UEFN island development — design, scripting, publish' },
+      { id: '2', feature: 'Roblox Studio — Lua scripting, game systems, publish' },
+      { id: '3', feature: 'VR game development — Unity (C#) and Unreal (Blueprint)' },
+      { id: '4', feature: 'Complex VR application development' },
+      { id: '5', feature: 'Performance optimization across all platforms' },
+      { id: '6', feature: 'Post-launch support and iteration' },
     ],
     platforms: 'UEFN · Roblox Studio · Unity · Unreal Engine · Blueprint · C#',
   },
   {
+    id: 'staff-aug',
     title: 'Staff Augmentation',
-    description: 'Dedicated resources embedded directly in your team. Your tools, your pipeline, your standards — our people.',
+    shortDescription: 'Dedicated resources embedded directly in your team. Your tools, your pipeline, your standards — our people.',
     features: [
-      'Resources onboard to your stack from day one',
-      'Sprint cycles, standups, review loops — your cadence',
-      'Naming conventions, file structures, poly budgets followed exactly',
-      'Direct access — no account managers, no middlemen',
-      'Scale up or down per milestone',
-      'EU-compliant IP ownership, GDPR-compliant data handling',
+      { id: '1', feature: 'Resources onboard to your stack from day one' },
+      { id: '2', feature: 'Sprint cycles, standups, review loops — your cadence' },
+      { id: '3', feature: 'Naming conventions, file structures, poly budgets followed exactly' },
+      { id: '4', feature: 'Direct access — no account managers, no middlemen' },
+      { id: '5', feature: 'Scale up or down per milestone' },
+      { id: '6', feature: 'EU-compliant IP ownership, GDPR-compliant data handling' },
     ],
     platforms: 'Any engine · Any platform · Any pipeline',
   },
 ]
+
+// ─── Data fetcher ────────────────────────────────────────────────────────────
+
+async function getServices(): Promise<ServiceItem[]> {
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({ collection: 'services', sort: 'order', limit: 20, depth: 1 })
+    const docs = res.docs as unknown as ServiceItem[]
+    return docs.length > 0 ? docs : FB_SERVICES
+  } catch {
+    return FB_SERVICES
+  }
+}
 
 // ─── Tools ───────────────────────────────────────────────────────────────────
 const tools = [
@@ -165,7 +198,8 @@ const pipelines = [
   },
 ]
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const services = await getServices()
   return (
     <>
       {/* Hero */}
@@ -185,20 +219,29 @@ export default function ServicesPage() {
       <section className="border-t border-xq-border pb-24">
         <div className="xq-container space-y-8 mt-12">
           {services.map((service) => (
-            <div key={service.title} className="xq-card p-5 sm:p-6 md:p-8">
-              <h2 className="text-2xl font-black text-white mb-3">{service.title}</h2>
-              <p className="text-xq-muted leading-relaxed mb-6 max-w-2xl">{service.description}</p>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
-                {service.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-xq-muted">
-                    <span className="text-xq-accent mt-0.5 shrink-0">→</span> {f}
-                  </li>
-                ))}
-              </ul>
-              <div className="text-xs text-xq-muted border-t border-xq-border pt-4">
-                <span className="text-xq-accent font-semibold">Platforms & Engines: </span>
-                {service.platforms}
+            <div key={String(service.id)} className="xq-card p-5 sm:p-6 md:p-8">
+              <div className="flex items-start gap-3 mb-3">
+                {service.icon && <span className="text-2xl shrink-0">{service.icon}</span>}
+                <h2 className="text-2xl font-black text-white">{service.title}</h2>
               </div>
+              {service.shortDescription && (
+                <p className="text-xq-muted leading-relaxed mb-6 max-w-2xl">{service.shortDescription}</p>
+              )}
+              {service.features && service.features.length > 0 && (
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
+                  {service.features.map((f) => (
+                    <li key={f.id} className="flex items-start gap-2 text-sm text-xq-muted">
+                      <span className="text-xq-accent mt-0.5 shrink-0">→</span> {f.feature}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {service.platforms && (
+                <div className="text-xs text-xq-muted border-t border-xq-border pt-4">
+                  <span className="text-xq-accent font-semibold">Platforms & Engines: </span>
+                  {service.platforms}
+                </div>
+              )}
             </div>
           ))}
         </div>

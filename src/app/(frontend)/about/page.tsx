@@ -1,5 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getPayload } from 'payload'
+import config from '../../../../payload/payload.config'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -16,33 +20,86 @@ export const metadata: Metadata = {
   },
 }
 
-const hubs = [
-  { city: 'Vienna', country: 'Austria', role: 'HQ — Strategy, Leadership & Business Development', detail: 'EU IP protection · enterprise contracts', flag: '🇦🇹' },
-  { city: 'Dubai',  country: 'UAE',     role: 'MENA Hub — Strategic Market Access & Partnerships', detail: 'MENA expansion · enterprise & government access', flag: '🇦🇪' },
-  { city: 'Dhaka',  country: 'Bangladesh', role: 'Production Hub — Scalable Delivery & Game Art', detail: 'Cost efficiency · deep talent pool', flag: '🇧🇩' },
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface Credential { id?: string; value: string; label: string; detail?: string }
+interface Hub        { id?: string; flag?: string; city: string; country: string; role?: string; detail?: string }
+interface WhyCard    { id?: string; title: string; body: string }
+interface ClientItem { id: string | number; name: string; sector?: string; note?: string }
+interface AboutGlobal {
+  intro?: { body1?: string; body2?: string }
+  credentials?: Credential[]
+  hubs?: Hub[]
+  whyXqube?: WhyCard[]
+}
+
+// ─── Fallbacks ────────────────────────────────────────────────────────────────
+
+const FB_CREDENTIALS: Credential[] = [
+  { value: '15+', label: 'Years Experience', detail: 'XR · game art · AI simulation · delivered across 3 continents' },
+  { value: '80+', label: 'Clients Worldwide', detail: 'Gaming · XR · flight sim · digital twin · entertainment' },
+  { value: '20+', label: 'Core Team Members', detail: 'Artists, engineers, developers, designers, operations' },
+  { value: '3',   label: 'Global Hubs',       detail: 'Vienna · Dubai · Dhaka' },
 ]
 
-const credentials = [
-  { value: '15+',  label: 'Years Experience', detail: 'XR · game art · AI simulation · delivered across 3 continents' },
-  { value: '80+',  label: 'Clients Worldwide', detail: 'Gaming · XR · flight sim · digital twin · entertainment' },
-  { value: '20+',  label: 'Core Team Members', detail: 'Artists, engineers, developers, designers, operations' },
-  { value: '3',    label: 'Global Hubs', detail: 'Vienna · Dubai · Dhaka' },
+const FB_HUBS: Hub[] = [
+  { flag: '🇦🇹', city: 'Vienna',  country: 'Austria',    role: 'HQ — Strategy, Leadership & Business Development', detail: 'EU IP protection · enterprise contracts' },
+  { flag: '🇦🇪', city: 'Dubai',   country: 'UAE',         role: 'MENA Hub — Strategic Market Access & Partnerships', detail: 'MENA expansion · enterprise & government access' },
+  { flag: '🇧🇩', city: 'Dhaka',   country: 'Bangladesh', role: 'Production Hub — Scalable Delivery & Game Art',     detail: 'Cost efficiency · deep talent pool' },
 ]
 
-const clients = [
-  { name: 'Fresh TV',        sector: 'Media & TV',    note: 'Total Drama Island · UEFN — shipped & live' },
-  { name: 'BMW',             sector: 'Automotive',    note: 'Interactive configurators & simulation models' },
-  { name: 'C3D',             sector: 'Game Studio',   note: 'AAA 3D assets and environment art production' },
-  { name: 'Barney Studio',   sector: 'Creative',      note: 'Characters, rigged animations & concept art' },
-  { name: 'INDG',            sector: 'CGI Tech',      note: 'Photorealistic CGI & digital twin — automotive' },
-  { name: 'Cyberfox',        sector: 'Game Studio',   note: 'Game-ready assets · VR environments' },
-  { name: 'FlightSim Studio',sector: 'Flight Sim',    note: 'Aircraft & scenery to sim-ready spec' },
+const FB_WHY: WhyCard[] = [
+  { title: 'Zero Handoff Overhead',      body: 'Your brief goes directly to the senior artists doing the work — no account manager layer. Deliverables arrive pipeline-native: FBX, UE5, Unity, your naming conventions, your LOD specs. Zero integration overhead.' },
+  { title: '24-Hour Production Cycle',   body: 'Vienna, Dubai, and Dhaka span nine time zones. While your team sleeps, work continues. 30–50% faster delivery across 80+ clients — because three hubs in sequence never stop.' },
+  { title: 'Engine Agnostic',            body: 'UE5, Unity, Godot, UEFN, Roblox. We match your pipeline, your stack, your standards.' },
+  { title: 'Senior Artists Only',        body: 'No juniors on your work. Your Art Director works directly with ours. Your feedback actioned in 24 hours.' },
+  { title: 'Pilot-First Model',          body: 'Try one asset before signing anything. Fee credited to Month 1 if you proceed. Zero obligation.' },
+  { title: 'End-to-End Pipeline',        body: 'Concept to engine-ready — ZBrush, Substance, UE5, Unity. Full ownership of the deliverable.' },
 ]
 
-export default function AboutPage() {
+const FB_CLIENTS = [
+  { id: 'fresh-tv',  name: 'Fresh TV',         sector: 'Media & TV',  note: 'Total Drama Island · UEFN — shipped & live' },
+  { id: 'bmw',       name: 'BMW',              sector: 'Automotive',  note: 'Interactive configurators & simulation models' },
+  { id: 'c3d',       name: 'C3D',             sector: 'Game Studio', note: 'AAA 3D assets and environment art production' },
+  { id: 'barney',    name: 'Barney Studio',    sector: 'Creative',    note: 'Characters, rigged animations & concept art' },
+  { id: 'indg',      name: 'INDG',             sector: 'CGI Tech',    note: 'Photorealistic CGI & digital twin — automotive' },
+  { id: 'cyberfox',  name: 'Cyberfox',         sector: 'Game Studio', note: 'Game-ready assets · VR environments' },
+  { id: 'flightsim', name: 'FlightSim Studio', sector: 'Flight Sim',  note: 'Aircraft & scenery to sim-ready spec' },
+]
+
+// ─── Data fetcher ─────────────────────────────────────────────────────────────
+
+async function getData() {
+  try {
+    const payload = await getPayload({ config })
+    const [ap, clientsRes] = await Promise.all([
+      payload.findGlobal({ slug: 'about-page' }) as Promise<AboutGlobal>,
+      payload.find({ collection: 'clients', sort: 'order', limit: 20, depth: 0 }),
+    ])
+    return {
+      ap:      ap as AboutGlobal,
+      clients: clientsRes.docs as unknown as ClientItem[],
+    }
+  } catch {
+    return { ap: {} as AboutGlobal, clients: [] }
+  }
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default async function AboutPage() {
+  const { ap, clients } = await getData()
+
+  const introBody1  = ap.intro?.body1 ?? 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.'
+  const introBody2  = ap.intro?.body2 ?? 'Our three-hub model combines European business standards with world-class production capability — giving clients the reliability of a Vienna GmbH with the speed and depth of a Dhaka production team.'
+  const credentials = ap.credentials && ap.credentials.length > 0 ? ap.credentials : FB_CREDENTIALS
+  const hubs        = ap.hubs        && ap.hubs.length > 0        ? ap.hubs        : FB_HUBS
+  const whyCards    = ap.whyXqube    && ap.whyXqube.length > 0    ? ap.whyXqube    : FB_WHY
+  const clientList  = clients.length > 0 ? clients : FB_CLIENTS
+
   return (
     <>
-      {/* Intro */}
+      {/* ── Intro ────────────────────────────────────────────── */}
       <section className="xq-section">
         <div className="xq-container">
           <div className="max-w-3xl">
@@ -50,55 +107,47 @@ export default function AboutPage() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
               A studio built for precision
             </h1>
-            <p className="text-xq-muted text-lg leading-relaxed mb-6">
-              XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria.
-              With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work
-              with studios worldwide to deliver AAA-quality assets at scale.
-            </p>
-            <p className="text-xq-muted text-lg leading-relaxed">
-              Our three-hub model combines European business standards with world-class production
-              capability — giving clients the reliability of a Vienna GmbH with the speed and
-              depth of a Dhaka production team.
-            </p>
+            <p className="text-xq-muted text-lg leading-relaxed mb-6">{introBody1}</p>
+            <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
           </div>
         </div>
       </section>
 
-      {/* Credentials */}
+      {/* ── Credentials ──────────────────────────────────────── */}
       <section className="border-t border-xq-border bg-xq-surface">
         <div className="xq-container py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {credentials.map((c) => (
-              <div key={c.label} className="text-center">
+            {credentials.map((c, i) => (
+              <div key={c.id ?? i} className="text-center">
                 <div className="text-4xl font-black text-xq-accent mb-1">{c.value}</div>
                 <div className="text-white font-semibold text-sm mb-1">{c.label}</div>
-                <div className="text-xq-muted text-xs">{c.detail}</div>
+                {c.detail && <div className="text-xq-muted text-xs">{c.detail}</div>}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Hubs */}
+      {/* ── Hubs ─────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
           <div className="xq-label mb-4">Our Hubs</div>
           <h2 className="text-3xl font-black text-white mb-12">Global presence, unified delivery</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {hubs.map((hub) => (
-              <div key={hub.city} className="xq-card">
-                <div className="text-4xl mb-4">{hub.flag}</div>
+            {hubs.map((hub, i) => (
+              <div key={hub.id ?? i} className="xq-card">
+                {hub.flag && <div className="text-4xl mb-4">{hub.flag}</div>}
                 <h3 className="text-xl font-bold text-white mb-1">{hub.city}</h3>
                 <p className="text-xq-accent text-sm font-semibold mb-3">{hub.country}</p>
-                <p className="text-xq-muted text-sm mb-2">{hub.role}</p>
-                <p className="text-xq-muted text-xs opacity-70">{hub.detail}</p>
+                {hub.role   && <p className="text-xq-muted text-sm mb-2">{hub.role}</p>}
+                {hub.detail && <p className="text-xq-muted text-xs opacity-70">{hub.detail}</p>}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Clients */}
+      {/* ── Clients ──────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
           <div className="xq-label mb-4">Clients & Partners</div>
@@ -106,34 +155,29 @@ export default function AboutPage() {
             Trusted by leading brands across gaming, automotive, simulation, and entertainment
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {clients.map((client) => (
-              <div key={client.name} className="xq-card py-4">
+            {clientList.map((client) => (
+              <div key={String(client.id)} className="xq-card py-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-white font-bold">{client.name}</h3>
-                  <span className="text-xs text-xq-accent border border-xq-accent/30 px-2 py-0.5 rounded">{client.sector}</span>
+                  {client.sector && (
+                    <span className="text-xs text-xq-accent border border-xq-accent/30 px-2 py-0.5 rounded">{client.sector}</span>
+                  )}
                 </div>
-                <p className="text-xq-muted text-sm">{client.note}</p>
+                {client.note && <p className="text-xq-muted text-sm">{client.note}</p>}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why XQube */}
+      {/* ── Why XQube ────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
           <div className="xq-label mb-4">Why XQube</div>
           <h2 className="text-3xl font-black text-white mb-10">Built for serious studios</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { title: 'Zero Handoff Overhead', body: 'Your brief goes directly to the senior artists doing the work — no account manager layer. Deliverables arrive pipeline-native: FBX, UE5, Unity, your naming conventions, your LOD specs. Zero integration overhead.' },
-              { title: '24-Hour Production Cycle', body: 'Vienna, Dubai, and Dhaka span nine time zones. While your team sleeps, work continues. 30–50% faster delivery across 80+ clients — because three hubs in sequence never stop.' },
-              { title: 'Engine Agnostic', body: 'UE5, Unity, Godot, UEFN, Roblox. We match your pipeline, your stack, your standards.' },
-              { title: 'Senior Artists Only', body: 'No juniors on your work. Your Art Director works directly with ours. Your feedback actioned in 24 hours.' },
-              { title: 'Pilot-First Model', body: 'Try one asset before signing anything. Fee credited to Month 1 if you proceed. Zero obligation.' },
-              { title: 'End-to-End Pipeline', body: 'Concept to engine-ready — ZBrush, Substance, UE5, Unity. Full ownership of the deliverable.' },
-            ].map((item) => (
-              <div key={item.title} className="xq-card">
+            {whyCards.map((item, i) => (
+              <div key={item.id ?? i} className="xq-card">
                 <h3 className="text-white font-bold mb-2">{item.title}</h3>
                 <p className="text-xq-muted text-sm leading-relaxed">{item.body}</p>
               </div>
@@ -142,7 +186,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ── CTA ──────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container text-center">
           <h2 className="text-3xl font-black text-white mb-6">Ready to work together?</h2>

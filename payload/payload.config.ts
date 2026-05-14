@@ -7,6 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import * as initialMigration from './migrations/20250513_initial'
 import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enhanced'
+import * as pageGlobalsMigration from './migrations/20250515_page_globals'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -231,12 +232,32 @@ export default buildConfig({
           admin: { description: 'Used in the page URL. Lowercase, hyphens only.' },
         },
         {
+          name: 'icon',
+          label: 'Icon (emoji)',
+          type: 'text',
+          admin: { description: 'Single emoji shown on homepage card, e.g. 🎮' },
+        },
+        {
           name: 'shortDescription',
           label: 'Summary',
           type: 'textarea',
+          admin: { description: 'Short description shown on the homepage services card.' },
         },
-        { name: 'description', type: 'richText' },
-        { name: 'featured', type: 'checkbox', defaultValue: false },
+        { name: 'description', type: 'richText', admin: { description: 'Full description shown on the Services page.' } },
+        {
+          name: 'features',
+          label: 'Feature Bullets',
+          type: 'array',
+          admin: { description: 'Bullet points shown on the Services page.' },
+          fields: [{ name: 'feature', type: 'text', required: true }],
+        },
+        {
+          name: 'platforms',
+          label: 'Platforms & Engines',
+          type: 'text',
+          admin: { description: 'e.g. Unreal Engine 5 · Unity · UEFN · Roblox' },
+        },
+        { name: 'featured', type: 'checkbox', defaultValue: false, admin: { description: 'Show on homepage services section.' } },
         {
           name: 'order',
           label: 'Display Order',
@@ -285,6 +306,18 @@ export default buildConfig({
       fields: [
         { name: 'name', type: 'text', required: true },
         { name: 'logo', type: 'upload', relationTo: 'media', required: true },
+        {
+          name: 'sector',
+          label: 'Industry Sector',
+          type: 'text',
+          admin: { description: 'e.g. Game Studio, Automotive, Media & TV — shown on About page.' },
+        },
+        {
+          name: 'note',
+          label: 'Project Note',
+          type: 'text',
+          admin: { description: 'One-line description of the work done — shown on About page.' },
+        },
         {
           name: 'featured',
           label: 'Show on Homepage',
@@ -368,6 +401,8 @@ export default buildConfig({
           type: 'group',
           fields: [
             { name: 'email',      type: 'email', defaultValue: 'info@xqubestudio.com' },
+            { name: 'phone',      type: 'text',  defaultValue: '+43 650 5207329' },
+            { name: 'address',    type: 'text',  defaultValue: 'Rathausstrasse 21/12, 1010 Vienna, Austria' },
             { name: 'calendly',   type: 'text',  defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
             { name: 'linkedin',   type: 'text',  defaultValue: 'https://www.linkedin.com/company/xqubestudio' },
             { name: 'artstation', type: 'text',  defaultValue: 'https://www.artstation.com/xqubestudio' },
@@ -407,6 +442,110 @@ export default buildConfig({
           label: 'Footer Text',
           type: 'text',
           defaultValue: '© 2025 XQube Studio GmbH. All rights reserved.',
+        },
+      ],
+    },
+
+    // ─── Homepage ────────────────────────────────────────────
+    {
+      slug: 'home-page',
+      label: 'Homepage',
+      admin: {
+        group: 'Page Content',
+        description: 'Edit the homepage hero, stats, and bottom CTA.',
+      },
+      access: { read: isLoggedIn, update: isAdminOrAbove },
+      fields: [
+        {
+          name: 'hero',
+          label: 'Hero Section',
+          type: 'group',
+          fields: [
+            { name: 'label',          label: 'Eyebrow Label',    type: 'text',     defaultValue: 'Vienna · Dubai · Dhaka' },
+            { name: 'headline',       label: 'Headline',         type: 'text',     defaultValue: 'Where Art Meets Precision', admin: { description: 'The last word will be highlighted in green.' } },
+            { name: 'subtitle',       label: 'Subtitle',         type: 'textarea', defaultValue: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.' },
+            { name: 'primaryLabel',   label: 'Primary CTA Text', type: 'text',     defaultValue: 'Book a Discovery Call' },
+            { name: 'primaryUrl',     label: 'Primary CTA URL',  type: 'text',     defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
+            { name: 'secondaryLabel', label: 'Secondary CTA Text', type: 'text',   defaultValue: 'View Portfolio' },
+            { name: 'secondaryUrl',   label: 'Secondary CTA URL',  type: 'text',   defaultValue: '/portfolio' },
+          ],
+        },
+        {
+          name: 'stats',
+          label: 'Stats Bar',
+          type: 'array',
+          admin: { description: 'Numbers shown below the hero. Leave empty to hide the stats bar.' },
+          fields: [
+            { name: 'value', type: 'text', required: true, admin: { description: 'e.g. 15+' } },
+            { name: 'label', type: 'text', required: true, admin: { description: 'e.g. Years Experience' } },
+          ],
+        },
+        {
+          name: 'cta',
+          label: 'Bottom CTA Section',
+          type: 'group',
+          fields: [
+            { name: 'headline',    label: 'Headline',    type: 'text', defaultValue: 'Looking for a long-term art partner?' },
+            { name: 'subtitle',    label: 'Subtitle',    type: 'text', defaultValue: 'We might be the right fit.' },
+            { name: 'buttonLabel', label: 'Button Text', type: 'text', defaultValue: 'Start a Conversation' },
+            { name: 'buttonUrl',   label: 'Button URL',  type: 'text', defaultValue: '/contact' },
+          ],
+        },
+      ],
+    },
+
+    // ─── About Page ──────────────────────────────────────────
+    {
+      slug: 'about-page',
+      label: 'About Page',
+      admin: {
+        group: 'Page Content',
+        description: 'Edit the About page intro, credentials, hubs, and Why XQube cards.',
+      },
+      access: { read: isLoggedIn, update: isAdminOrAbove },
+      fields: [
+        {
+          name: 'intro',
+          label: 'Intro Text',
+          type: 'group',
+          fields: [
+            { name: 'body1', label: 'Paragraph 1', type: 'textarea', defaultValue: 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.' },
+            { name: 'body2', label: 'Paragraph 2', type: 'textarea', defaultValue: 'Our three-hub model combines European business standards with world-class production capability — giving clients the reliability of a Vienna GmbH with the speed and depth of a Dhaka production team.' },
+          ],
+        },
+        {
+          name: 'credentials',
+          label: 'Credentials / Stats',
+          type: 'array',
+          admin: { description: 'The 4 stat numbers shown below the intro. Leave empty to use defaults.' },
+          fields: [
+            { name: 'value',  type: 'text', required: true, admin: { description: 'e.g. 15+' } },
+            { name: 'label',  type: 'text', required: true, admin: { description: 'e.g. Years Experience' } },
+            { name: 'detail', type: 'text', admin: { description: 'e.g. XR · game art · delivered across 3 continents' } },
+          ],
+        },
+        {
+          name: 'hubs',
+          label: 'Global Hubs',
+          type: 'array',
+          admin: { description: 'The three office/hub cards. Leave empty to use defaults.' },
+          fields: [
+            { name: 'flag',    type: 'text', admin: { description: 'Flag emoji, e.g. 🇦🇹' } },
+            { name: 'city',    type: 'text', required: true },
+            { name: 'country', type: 'text', required: true },
+            { name: 'role',    type: 'text', admin: { description: 'One-line hub role description.' } },
+            { name: 'detail',  type: 'text', admin: { description: 'Secondary detail line.' } },
+          ],
+        },
+        {
+          name: 'whyXqube',
+          label: 'Why XQube Cards',
+          type: 'array',
+          admin: { description: 'The 6 cards in the "Why XQube" section.' },
+          fields: [
+            { name: 'title', type: 'text',     required: true },
+            { name: 'body',  type: 'textarea', required: true },
+          ],
         },
       ],
     },
@@ -472,6 +611,11 @@ export default buildConfig({
         name: '20250515_portfolio_enhanced',
         up: portfolioEnhancedMigration.up,
         down: portfolioEnhancedMigration.down,
+      },
+      {
+        name: '20250515_page_globals',
+        up: pageGlobalsMigration.up,
+        down: pageGlobalsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

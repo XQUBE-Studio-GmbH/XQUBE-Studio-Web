@@ -1,14 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-
-const contactInfo = [
-  { label: 'Email',      value: 'info@xqubestudio.com',                    href: 'mailto:info@xqubestudio.com' },
-  { label: 'Phone',      value: '+43 650 5207329',                          href: 'tel:+436505207329' },
-  { label: 'Address',    value: 'Rathausstrasse 21/12, 1010 Vienna, Austria', href: null },
-  { label: 'LinkedIn',   value: 'linkedin.com/company/xqubestudio',          href: 'https://www.linkedin.com/company/xqubestudio' },
-  { label: 'ArtStation', value: 'artstation.com/xqubestudio',                href: 'https://www.artstation.com/xqubestudio' },
-]
+import type { ContactInfo } from './page'
 
 const PROJECT_TYPES = [
   { value: '', label: 'Select project type' },
@@ -63,7 +56,7 @@ interface FormState {
   message: string
 }
 
-export default function ContactForm() {
+export default function ContactForm({ contactInfo: ci }: { contactInfo: ContactInfo }) {
   const [form, setForm] = useState<FormState>({
     name: '', email: '', company: '', projectType: '', engine: '', budget: '', timeline: '', message: '',
   })
@@ -105,7 +98,7 @@ export default function ContactForm() {
             </p>
 
             <Link
-              href="https://calendly.com/tanvirkhandlxqsmgs"
+              href={ci.calendly}
               target="_blank"
               rel="noopener noreferrer"
               className="xq-btn-primary mb-10 w-full justify-center"
@@ -114,7 +107,13 @@ export default function ContactForm() {
             </Link>
 
             <div className="space-y-4 mt-10">
-              {contactInfo.map((item) => (
+              {[
+                { label: 'Email',      value: ci.email,      href: `mailto:${ci.email}` },
+                { label: 'Phone',      value: ci.phone,      href: `tel:${ci.phone.replace(/\s/g, '')}` },
+                { label: 'Address',    value: ci.address,    href: null },
+                { label: 'LinkedIn',   value: ci.linkedin.replace('https://www.', '').replace('https://', ''),   href: ci.linkedin },
+                { label: 'ArtStation', value: ci.artstation.replace('https://www.', '').replace('https://', ''), href: ci.artstation },
+              ].map((item) => (
                 <div key={item.label} className="flex gap-4 border-b border-xq-border pb-4">
                   <div className="text-xq-muted text-sm w-20 sm:w-24 shrink-0">{item.label}</div>
                   {item.href ? (
@@ -205,7 +204,7 @@ export default function ContactForm() {
                 {status === 'error' && (
                   <p className="text-red-400 text-sm">
                     Something went wrong. Email us directly at{' '}
-                    <a href="mailto:info@xqubestudio.com" className="text-xq-accent">info@xqubestudio.com</a>
+                    <a href={`mailto:${ci.email}`} className="text-xq-accent">{ci.email}</a>
                   </p>
                 )}
 
