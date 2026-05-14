@@ -231,13 +231,14 @@ import Image from 'next/image'
   Go to **Vercel → Project Settings → General → Node.js Version → remove the override (set to default)**.
   Vercel will then read `engines.node` from `package.json` as the single source of truth.
 
-**Current state:** `package.json` has `"engines": { "node": "22.x" }`. The Vercel project
-setting override must be removed from the dashboard for the warning to disappear.
+**Final fix:** Remove the `engines` field from `package.json` entirely.
+Vercel's project-level Node.js version setting takes over as the single source of truth.
+No conflict = no warning. The Node.js version is still pinned via Vercel project settings.
 
-**Rule:** Never set a Node.js version in both `package.json` engines AND Vercel project settings.
-Pick one source of truth:
-- Prefer `engines.node` in `package.json` (version-controlled, visible to all devs)
-- Leave Vercel project settings Node.js version unset (default)
+**Rule:** Do NOT add an `engines` field to `package.json` for this project.
+Vercel controls the Node.js version through its project settings. Having both causes the
+"Node.js Version Override" warning on every build. If the Node.js version needs changing,
+update it in **Vercel → Project Settings** only.
 
 ---
 
