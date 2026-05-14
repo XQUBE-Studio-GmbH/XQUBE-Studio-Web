@@ -18,7 +18,9 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 60
+// force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
+// Pages are server-rendered at request time; DB is always reachable then.
+export const dynamic = 'force-dynamic'
 
 interface BlogPost {
   id: string

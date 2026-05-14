@@ -19,8 +19,9 @@ export const metadata: Metadata = {
   },
 }
 
-// Revalidate every 60s so new items appear without a redeploy
-export const revalidate = 60
+// force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
+// Pages are server-rendered at request time; DB is always reachable then.
+export const dynamic = 'force-dynamic'
 
 const CATEGORY_LABELS: Record<string, string> = {
   characters:   'Characters',

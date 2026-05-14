@@ -5,7 +5,8 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '../../../../../payload/payload.config'
 
-export const revalidate = 60
+// force-dynamic: prevents build-time DB calls; rendered at request time instead.
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -80,7 +81,7 @@ export async function generateStaticParams() {
       limit: 500,
       select: { slug: true },
     })
-    return res.docs.map((item: any) => ({ slug: item.slug }))
+    return res.docs.map((item: { slug: string }) => ({ slug: item.slug }))
   } catch {
     return []
   }
