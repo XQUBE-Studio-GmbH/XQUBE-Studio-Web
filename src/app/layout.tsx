@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true },
   icons: {
-    icon: '/xqube-logo.svg',
-    shortcut: '/xqube-logo.svg',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
   },
 }
 
