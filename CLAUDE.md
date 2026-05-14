@@ -231,15 +231,19 @@ transaction pooler (port 6543), use `max: 5` or higher. Always add
 ---
 
 ### WARNING 1 — `<img>` tag LCP warning
-**Where:** Build warning — `src/app/(frontend)/services/page.tsx`
-**Root cause:** Raw `<img>` tag used for pipeline showcase images instead of Next.js `<Image>`.
-**Fix:** Always use `<Image>` from `next/image`. For fill-mode inside a positioned container:
+**Where:** Build warning — any file using a raw `<img>` tag (hit in `services/page.tsx` and `AdminLogo.tsx`)
+**Root cause:** Raw `<img>` tag used instead of Next.js `<Image>`. Applies to ALL files including Payload admin custom components.
+**Fix:** Always use `<Image>` from `next/image`:
 ```tsx
 import Image from 'next/image'
-// container must have position: relative (or aspect-* class)
+
+// Fixed dimensions (e.g. logos):
+<Image src="/logo.svg" alt="..." width={320} height={183} priority />
+
+// Fill-mode inside a positioned container:
 <Image src={url} alt="..." fill className="object-cover" />
 ```
-**Never use:** `<img src={...} />` — always `<Image>`.
+**Never use:** `<img src={...} />` anywhere — frontend pages, admin components, or otherwise. Always `<Image>`.
 
 ---
 

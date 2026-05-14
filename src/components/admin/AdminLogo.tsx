@@ -1,12 +1,16 @@
 'use client'
 
+import Image from 'next/image'
+
 export default function AdminLogo() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-      <img
+      <Image
         src="/xqube-logo.svg"
         alt="XQube Studio"
-        style={{ width: '180px', height: 'auto' }}
+        width={320}
+        height={183}
+        priority
       />
       <span style={{
         fontSize: '11px',

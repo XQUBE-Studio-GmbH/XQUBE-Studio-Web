@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true },
+  icons: {
+    icon: '/xqube-logo.svg',
+    shortcut: '/xqube-logo.svg',
+  },
 }
 
 // Minimal root layout — just the required html/body shell.
