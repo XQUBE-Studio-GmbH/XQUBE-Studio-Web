@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -238,10 +239,11 @@ export default function ServicesPage() {
                 {/* Image placeholder */}
                 <div className="aspect-video bg-xq-surface border-b border-xq-border flex items-center justify-center relative">
                   {pipeline.image ? (
-                    <img
+                    <Image
                       src={pipeline.image}
                       alt={pipeline.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="text-center px-6">
