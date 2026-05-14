@@ -81,7 +81,7 @@ export async function generateStaticParams() {
       limit: 500,
       select: { slug: true },
     })
-    return res.docs.map((item: { slug: string }) => ({ slug: item.slug }))
+    return res.docs.map((item) => ({ slug: item.slug as string }))
   } catch {
     return []
   }
