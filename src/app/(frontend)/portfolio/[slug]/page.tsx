@@ -72,20 +72,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export async function generateStaticParams() {
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'portfolio',
-      where: { status: { equals: 'published' } },
-      limit: 500,
-      select: { slug: true },
-    })
-    return res.docs.map((item) => ({ slug: item.slug as string }))
-  } catch {
-    return []
-  }
-}
+// generateStaticParams removed: force-dynamic renders all slugs on-demand at
+// request time. No pre-rendering happens at build, so no build-time DB call.
 
 export default async function PortfolioItemPage({ params }: Props) {
   const { slug } = await params

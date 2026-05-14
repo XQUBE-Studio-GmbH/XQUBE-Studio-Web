@@ -63,20 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export async function generateStaticParams() {
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'blog-posts',
-      where: { status: { equals: 'published' } },
-      limit: 500,
-      select: { slug: true },
-    })
-    return res.docs.map((post) => ({ slug: post.slug as string }))
-  } catch {
-    return []
-  }
-}
+// generateStaticParams removed: force-dynamic renders all slugs on-demand at
+// request time. No pre-rendering happens at build, so no build-time DB call.
 
 // Minimal Lexical-to-HTML serialiser — handles the core node types Payload uses
 function serializeLexical(content: unknown): string {

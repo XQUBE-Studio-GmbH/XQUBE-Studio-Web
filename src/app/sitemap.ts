@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 import { getPayload } from 'payload'
 import config from '../../payload/payload.config'
 
@@ -17,6 +18,12 @@ const staticRoutes: MetadataRoute.Sitemap = [
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Skip DB during next build — build runners can't reach the Supabase pooler.
+  // At runtime the sitemap is regenerated with live DB data.
+  if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
+    return staticRoutes
+  }
+
   try {
     const payload = await getPayload({ config })
 
