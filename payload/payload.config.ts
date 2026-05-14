@@ -9,6 +9,28 @@ import * as initialMigration from './migrations/20250513_initial'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// ─── Access helpers ───────────────────────────────────────────────────────────
+
+const isSuperAdmin    = ({ req }: { req: any }) => req.user?.role === 'super-admin'
+const isAdminOrAbove  = ({ req }: { req: any }) => !!req.user && ['super-admin', 'admin'].includes(req.user.role)
+const isEditorOrAbove = ({ req }: { req: any }) => !!req.user && ['super-admin', 'admin', 'content-editor'].includes(req.user.role)
+const isLoggedIn      = ({ req }: { req: any }) => !!req.user
+
+// Content editors and viewers can only edit their own user record
+const canUpdateUser = ({ req }: { req: any }) => {
+  if (!req.user) return false
+  if (['super-admin', 'admin'].includes(req.user.role)) return true
+  return { id: { equals: req.user.id } }
+}
+
+// ─── Shared access for content collections ────────────────────────────────────
+const contentAccess = {
+  read:   isLoggedIn,
+  create: isEditorOrAbove,
+  update: isEditorOrAbove,
+  delete: isAdminOrAbove,
+}
+
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
@@ -33,6 +55,12 @@ export default buildConfig({
         group: 'Access',
         description: 'People who can log into this admin panel.',
       },
+      access: {
+        read:   isAdminOrAbove,
+        create: isAdminOrAbove,
+        update: canUpdateUser,
+        delete: isSuperAdmin,
+      },
       fields: [
         { name: 'name', type: 'text' },
         {
@@ -44,7 +72,6 @@ export default buildConfig({
           options: [
             { label: 'Super Admin',    value: 'super-admin' },
             { label: 'Admin',          value: 'admin' },
-            { label: 'BD Manager',     value: 'bd-manager' },
             { label: 'Content Editor', value: 'content-editor' },
             { label: 'Viewer',         value: 'viewer' },
           ],
@@ -60,6 +87,12 @@ export default buildConfig({
       admin: {
         group: 'Access',
         description: 'Images and files used across the website.',
+      },
+      access: {
+        read:   isLoggedIn,
+        create: isEditorOrAbove,
+        update: isEditorOrAbove,
+        delete: isAdminOrAbove,
       },
       fields: [
         {
@@ -81,6 +114,7 @@ export default buildConfig({
         group: 'Website Content',
         description: 'Work samples shown in the Portfolio section.',
       },
+      access: contentAccess,
       fields: [
         { name: 'title', type: 'text', required: true },
         {
@@ -137,6 +171,7 @@ export default buildConfig({
         group: 'Website Content',
         description: 'Services listed on the Services page.',
       },
+      access: contentAccess,
       fields: [
         { name: 'title', type: 'text', required: true },
         {
@@ -173,6 +208,7 @@ export default buildConfig({
         group: 'Website Content',
         description: 'Team profiles shown on the About page.',
       },
+      access: contentAccess,
       fields: [
         { name: 'name',  type: 'text', required: true },
         { name: 'role',  type: 'text', required: true },
@@ -197,6 +233,7 @@ export default buildConfig({
         group: 'Website Content',
         description: 'Client logos shown in the homepage logo strip.',
       },
+      access: contentAccess,
       fields: [
         { name: 'name', type: 'text', required: true },
         { name: 'logo', type: 'upload', relationTo: 'media', required: true },
@@ -226,6 +263,7 @@ export default buildConfig({
         group: 'Website Content',
         description: 'Articles published in the Blog section.',
       },
+      access: contentAccess,
       fields: [
         { name: 'title', type: 'text', required: true },
         {
@@ -264,6 +302,10 @@ export default buildConfig({
       admin: {
         group: 'Settings',
         description: 'Global settings that apply across the entire website.',
+      },
+      access: {
+        read:   isLoggedIn,
+        update: isAdminOrAbove,
       },
       fields: [
         {
@@ -329,6 +371,10 @@ export default buildConfig({
         group: 'Settings',
         description: 'Manage the header menu links and call-to-action button.',
       },
+      access: {
+        read:   isLoggedIn,
+        update: isAdminOrAbove,
+      },
       fields: [
         {
           name: 'mainNav',
@@ -364,14 +410,10 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI,
       ssl: { rejectUnauthorized: false },
-      // Transaction pooler (port 6543) handles multiplexing at PgBouncer level,
-      // so higher max is safe. Payload admin init uses Promise.all() internally —
-      // max: 1 caused a pool deadlock (concurrent queries queued forever → 300s timeout).
       max: 5,
-      // Fail fast if all pool slots are busy, instead of hanging until Vercel kills the function.
       connectionTimeoutMillis: 10000,
     },
-    push: process.env.NODE_ENV !== 'production', // never push on Vercel
+    push: process.env.NODE_ENV !== 'production',
     prodMigrations: [
       {
         name: '20250513_initial',
