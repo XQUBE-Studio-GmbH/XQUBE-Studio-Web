@@ -217,12 +217,20 @@ import Image from 'next/image'
 
 ### WARNING 2 — Node engine auto-upgrade warning on Vercel
 **Where:** Build warnings — `package.json`
-**Root cause:** `"node": ">=18.20.2"` has no upper bound, so Vercel warns it will
-auto-upgrade to future major Node versions.
-**Fix:** Pin with an upper bound in `package.json`:
+**Root cause (first attempt):** `"node": ">=18.20.2"` has no upper bound, so Vercel
+warns it will auto-upgrade to future major Node versions.
+**Wrong fix tried:** `"node": ">=18.20.2 <23"` — caused a new warning:
+  > "Due to 'engines'... the Node.js Version defined in your Project Settings
+  > (Node.js 22.x) will be used instead." + "Node.js Version Override" badge
+  Because Vercel's project settings have Node.js **22.x** explicitly pinned, any
+  engines range that doesn't exactly match triggers a conflict/override warning.
+**Correct fix:** Match Vercel's project setting exactly in `package.json`:
 ```json
-"engines": { "node": ">=18.20.2 <23" }
+"engines": { "node": "22.x" }
 ```
+**Rule:** Always check Vercel → Project Settings → Node.js version first, then set
+`engines.node` to match it exactly (e.g. `"22.x"`). If Vercel's version changes,
+update both together.
 
 ---
 
@@ -297,3 +305,15 @@ After reset: redeploy on Vercel so the new cold start runs migrations cleanly.
 ## Git Rule
 **Never push to git unless the user explicitly asks.** Always commit locally first,
 show what was changed, then wait for "push" confirmation.
+
+## CLAUDE.md Maintenance Rule
+**Whenever any error or warning is fixed — in this chat or any future chat — immediately
+update this CLAUDE.md file** with:
+- The error/warning message (exact text)
+- Where it appeared (build log, runtime, which file)
+- Root cause
+- The wrong fix (if one was tried first)
+- The correct fix with code example
+- The rule to prevent recurrence
+
+This file is the single source of truth for this project. Keep it current.
