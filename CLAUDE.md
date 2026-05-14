@@ -215,22 +215,29 @@ import Image from 'next/image'
 
 ---
 
-### WARNING 2 — Node engine auto-upgrade warning on Vercel
-**Where:** Build warnings — `package.json`
-**Root cause (first attempt):** `"node": ">=18.20.2"` has no upper bound, so Vercel
-warns it will auto-upgrade to future major Node versions.
-**Wrong fix tried:** `"node": ">=18.20.2 <23"` — caused a new warning:
-  > "Due to 'engines'... the Node.js Version defined in your Project Settings
-  > (Node.js 22.x) will be used instead." + "Node.js Version Override" badge
-  Because Vercel's project settings have Node.js **22.x** explicitly pinned, any
-  engines range that doesn't exactly match triggers a conflict/override warning.
-**Correct fix:** Match Vercel's project setting exactly in `package.json`:
-```json
-"engines": { "node": "22.x" }
-```
-**Rule:** Always check Vercel → Project Settings → Node.js version first, then set
-`engines.node` to match it exactly (e.g. `"22.x"`). If Vercel's version changes,
-update both together.
+### WARNING 2 — Node.js Version Override / engine conflict warning on Vercel
+**Where:** Build warnings — `package.json` + "Node.js Version Override" badge in Vercel Deployment Settings
+**Attempts and what happened:**
+1. `"node": ">=18.20.2"` → Vercel warns it will auto-upgrade on new major releases
+2. `"node": ">=18.20.2 <23"` → Vercel warns "Node.js Version Override — project settings (22.x) will be used instead"
+3. `"node": "22.x"` → Same "Node.js Version Override" warning still appears
+
+**Root cause:** The warning fires whenever BOTH of these exist simultaneously:
+  - `engines.node` in `package.json`
+  - An explicit Node.js version set in **Vercel → Project Settings → General → Node.js Version**
+  Even if both say the same version, Vercel warns about the override conflict.
+
+**Correct fix (Vercel dashboard — not code):**
+  Go to **Vercel → Project Settings → General → Node.js Version → remove the override (set to default)**.
+  Vercel will then read `engines.node` from `package.json` as the single source of truth.
+
+**Current state:** `package.json` has `"engines": { "node": "22.x" }`. The Vercel project
+setting override must be removed from the dashboard for the warning to disappear.
+
+**Rule:** Never set a Node.js version in both `package.json` engines AND Vercel project settings.
+Pick one source of truth:
+- Prefer `engines.node` in `package.json` (version-controlled, visible to all devs)
+- Leave Vercel project settings Node.js version unset (default)
 
 ---
 
