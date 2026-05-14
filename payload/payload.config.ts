@@ -67,7 +67,7 @@ export default buildConfig({
           type: 'ui',
           admin: {
             components: {
-              Field: '/src/components/GeneratePasswordButton',
+              Field: '@/components/GeneratePasswordButton#default',
             },
             condition: (_data: any) => !_data?.id,
           },
