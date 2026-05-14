@@ -23,17 +23,24 @@ export default buildConfig({
   editor: lexicalEditor(),
 
   collections: [
-    // ─── Users ───────────────────────────────────────────────
+    // ─── Admin Users ─────────────────────────────────────────
     {
       slug: 'users',
       auth: true,
-      admin: { useAsTitle: 'email' },
+      labels: { singular: 'Admin User', plural: 'Admin Users' },
+      admin: {
+        useAsTitle: 'email',
+        group: 'Access',
+        description: 'People who can log into this admin panel.',
+      },
       fields: [
         { name: 'name', type: 'text' },
         {
           name: 'role',
+          label: 'Access Level',
           type: 'select',
           defaultValue: 'viewer',
+          admin: { description: 'Controls what this user can see and edit.' },
           options: [
             { label: 'Super Admin',    value: 'super-admin' },
             { label: 'Admin',          value: 'admin' },
@@ -45,22 +52,46 @@ export default buildConfig({
       ],
     },
 
-    // ─── Media ───────────────────────────────────────────────
+    // ─── Media Library ───────────────────────────────────────
     {
       slug: 'media',
       upload: true,
+      labels: { singular: 'Media File', plural: 'Media Library' },
+      admin: {
+        group: 'Access',
+        description: 'Images and files used across the website.',
+      },
       fields: [
-        { name: 'alt', type: 'text', required: true },
+        {
+          name: 'alt',
+          label: 'Image Description (Alt Text)',
+          type: 'text',
+          required: true,
+          admin: { description: 'Describe the image for accessibility and SEO.' },
+        },
       ],
     },
 
-    // ─── Portfolio ───────────────────────────────────────────
+    // ─── Portfolio Items ─────────────────────────────────────
     {
       slug: 'portfolio',
-      admin: { useAsTitle: 'title' },
+      labels: { singular: 'Portfolio Item', plural: 'Portfolio Items' },
+      admin: {
+        useAsTitle: 'title',
+        group: 'Website Content',
+        description: 'Work samples shown in the Portfolio section.',
+      },
       fields: [
         { name: 'title', type: 'text', required: true },
-        { name: 'slug',  type: 'text', required: true, unique: true, index: true },
+        {
+          name: 'slug',
+          label: 'URL Slug',
+          type: 'text',
+          required: true,
+          unique: true,
+          index: true,
+          admin: { description: 'Used in the page URL — e.g. /portfolio/my-item. Lowercase, hyphens only.' },
+        },
         {
           name: 'category',
           type: 'select',
@@ -73,9 +104,19 @@ export default buildConfig({
             { label: 'VR Assets',    value: 'vr-assets' },
           ],
         },
-        { name: 'heroImage',         type: 'upload', relationTo: 'media' },
-        { name: 'shortDescription',  type: 'textarea' },
-        { name: 'featured',          type: 'checkbox', defaultValue: false },
+        {
+          name: 'heroImage',
+          label: 'Main Image',
+          type: 'upload',
+          relationTo: 'media',
+        },
+        {
+          name: 'shortDescription',
+          label: 'Summary',
+          type: 'textarea',
+          admin: { description: 'A short description shown on the portfolio card and in search results.' },
+        },
+        { name: 'featured', type: 'checkbox', defaultValue: false },
         {
           name: 'status',
           type: 'select',
@@ -91,50 +132,116 @@ export default buildConfig({
     // ─── Services ────────────────────────────────────────────
     {
       slug: 'services',
-      admin: { useAsTitle: 'title' },
+      admin: {
+        useAsTitle: 'title',
+        group: 'Website Content',
+        description: 'Services listed on the Services page.',
+      },
       fields: [
-        { name: 'title',            type: 'text',     required: true },
-        { name: 'slug',             type: 'text',     required: true, unique: true },
-        { name: 'shortDescription', type: 'textarea' },
-        { name: 'description',      type: 'richText' },
-        { name: 'featured',         type: 'checkbox', defaultValue: false },
-        { name: 'order',            type: 'number',   defaultValue: 0 },
+        { name: 'title', type: 'text', required: true },
+        {
+          name: 'slug',
+          label: 'URL Slug',
+          type: 'text',
+          required: true,
+          unique: true,
+          admin: { description: 'Used in the page URL. Lowercase, hyphens only.' },
+        },
+        {
+          name: 'shortDescription',
+          label: 'Summary',
+          type: 'textarea',
+        },
+        { name: 'description', type: 'richText' },
+        { name: 'featured', type: 'checkbox', defaultValue: false },
+        {
+          name: 'order',
+          label: 'Display Order',
+          type: 'number',
+          defaultValue: 0,
+          admin: { description: 'Lower number appears first.' },
+        },
       ],
     },
 
     // ─── Team Members ────────────────────────────────────────
     {
       slug: 'team-members',
-      admin: { useAsTitle: 'name' },
+      labels: { singular: 'Team Member', plural: 'Team Members' },
+      admin: {
+        useAsTitle: 'name',
+        group: 'Website Content',
+        description: 'Team profiles shown on the About page.',
+      },
       fields: [
         { name: 'name',  type: 'text', required: true },
         { name: 'role',  type: 'text', required: true },
         { name: 'bio',   type: 'textarea' },
         { name: 'photo', type: 'upload', relationTo: 'media' },
-        { name: 'order', type: 'number', defaultValue: 0 },
+        {
+          name: 'order',
+          label: 'Display Order',
+          type: 'number',
+          defaultValue: 0,
+          admin: { description: 'Lower number appears first.' },
+        },
       ],
     },
 
-    // ─── Clients (Logo Strip) ────────────────────────────────
+    // ─── Client Logos ────────────────────────────────────────
     {
       slug: 'clients',
-      admin: { useAsTitle: 'name' },
+      labels: { singular: 'Client Logo', plural: 'Client Logos' },
+      admin: {
+        useAsTitle: 'name',
+        group: 'Website Content',
+        description: 'Client logos shown in the homepage logo strip.',
+      },
       fields: [
-        { name: 'name',     type: 'text',     required: true },
-        { name: 'logo',     type: 'upload',   relationTo: 'media', required: true },
-        { name: 'featured', type: 'checkbox', defaultValue: true },
-        { name: 'order',    type: 'number',   defaultValue: 0 },
+        { name: 'name', type: 'text', required: true },
+        { name: 'logo', type: 'upload', relationTo: 'media', required: true },
+        {
+          name: 'featured',
+          label: 'Show on Homepage',
+          type: 'checkbox',
+          defaultValue: true,
+          admin: { description: 'When checked, this logo appears in the homepage client strip.' },
+        },
+        {
+          name: 'order',
+          label: 'Display Order',
+          type: 'number',
+          defaultValue: 0,
+          admin: { description: 'Lower number appears first.' },
+        },
       ],
     },
 
     // ─── Blog Posts ──────────────────────────────────────────
     {
       slug: 'blog-posts',
-      admin: { useAsTitle: 'title' },
+      labels: { singular: 'Blog Post', plural: 'Blog Posts' },
+      admin: {
+        useAsTitle: 'title',
+        group: 'Website Content',
+        description: 'Articles published in the Blog section.',
+      },
       fields: [
-        { name: 'title',   type: 'text',     required: true },
-        { name: 'slug',    type: 'text',     required: true, unique: true },
-        { name: 'excerpt', type: 'textarea' },
+        { name: 'title', type: 'text', required: true },
+        {
+          name: 'slug',
+          label: 'URL Slug',
+          type: 'text',
+          required: true,
+          unique: true,
+          admin: { description: 'Used in the page URL — e.g. /blog/my-post. Lowercase, hyphens only.' },
+        },
+        {
+          name: 'excerpt',
+          label: 'Short Preview',
+          type: 'textarea',
+          admin: { description: 'Shown on the blog listing page and in search results.' },
+        },
         { name: 'content', type: 'richText' },
         {
           name: 'status',
@@ -153,9 +260,19 @@ export default buildConfig({
     // ─── Site Settings ───────────────────────────────────────
     {
       slug: 'site-settings',
+      label: 'Site Settings',
+      admin: {
+        group: 'Settings',
+        description: 'Global settings that apply across the entire website.',
+      },
       fields: [
-        { name: 'siteName', type: 'text',  defaultValue: 'XQube Studio' },
-        { name: 'tagline',  type: 'text',  defaultValue: 'Where Art Meets Precision' },
+        {
+          name: 'siteName',
+          label: 'Studio Name',
+          type: 'text',
+          defaultValue: 'XQube Studio',
+        },
+        { name: 'tagline', type: 'text', defaultValue: 'Where Art Meets Precision' },
         {
           name: 'contact',
           type: 'group',
@@ -168,29 +285,54 @@ export default buildConfig({
         },
         {
           name: 'seo',
+          label: 'SEO',
           type: 'group',
           fields: [
-            { name: 'title',       type: 'text',     defaultValue: 'XQube Studio | AAA Game Art & XR Production' },
-            { name: 'description', type: 'textarea', defaultValue: 'XQube Studio is a GmbH-registered game art and XR production studio with hubs in Vienna, Dubai, and Dhaka. Delivering AAA-quality assets for game studios worldwide.' },
+            {
+              name: 'title',
+              type: 'text',
+              defaultValue: 'XQube Studio | AAA Game Art & XR Production',
+            },
+            {
+              name: 'description',
+              type: 'textarea',
+              defaultValue: 'XQube Studio is a GmbH-registered game art and XR production studio with hubs in Vienna, Dubai, and Dhaka. Delivering AAA-quality assets for game studios worldwide.',
+            },
           ],
         },
         {
           name: 'analytics',
           type: 'group',
           fields: [
-            { name: 'gaMeasurementId', type: 'text', admin: { description: 'Google Analytics ID (G-XXXXXXXXXX)' } },
+            {
+              name: 'gaMeasurementId',
+              label: 'Google Analytics ID',
+              type: 'text',
+              admin: { description: 'Format: G-XXXXXXXXXX' },
+            },
           ],
         },
-        { name: 'footerCopy', type: 'text', defaultValue: '© 2025 XQube Studio GmbH. All rights reserved.' },
+        {
+          name: 'footerCopy',
+          label: 'Footer Text',
+          type: 'text',
+          defaultValue: '© 2025 XQube Studio GmbH. All rights reserved.',
+        },
       ],
     },
 
     // ─── Navigation ──────────────────────────────────────────
     {
       slug: 'navigation',
+      label: 'Navigation',
+      admin: {
+        group: 'Settings',
+        description: 'Manage the header menu links and call-to-action button.',
+      },
       fields: [
         {
           name: 'mainNav',
+          label: 'Menu Links',
           type: 'array',
           fields: [
             { name: 'label', type: 'text', required: true },
@@ -207,6 +349,7 @@ export default buildConfig({
         },
         {
           name: 'ctaButton',
+          label: 'Call-to-Action Button',
           type: 'group',
           fields: [
             { name: 'label', type: 'text', defaultValue: 'Book a Call' },
