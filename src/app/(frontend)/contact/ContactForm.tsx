@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import type { ContactInfo } from './page'
+import type { ContactInfo, ContactPageCopy } from './page'
 
 const PROJECT_TYPES = [
   { value: '', label: 'Select project type' },
@@ -56,7 +56,7 @@ interface FormState {
   message: string
 }
 
-export default function ContactForm({ contactInfo: ci }: { contactInfo: ContactInfo }) {
+export default function ContactForm({ contactInfo: ci, pageCopy: pc }: { contactInfo: ContactInfo; pageCopy: ContactPageCopy }) {
   const [form, setForm] = useState<FormState>({
     name: '', email: '', company: '', projectType: '', engine: '', budget: '', timeline: '', message: '',
   })
@@ -88,14 +88,11 @@ export default function ContactForm({ contactInfo: ci }: { contactInfo: ContactI
 
           {/* Left — Info */}
           <div>
-            <div className="xq-label mb-4">Get in Touch</div>
+            <div className="xq-label mb-4">{pc.label}</div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
-              Let's talk about your project
+              {pc.heading}
             </h1>
-            <p className="text-xq-muted mb-10 leading-relaxed">
-              Book a discovery call for a scoped conversation, or fill out the brief and we'll
-              respond within 24–48 hours.
-            </p>
+            <p className="text-xq-muted mb-10 leading-relaxed">{pc.subtext}</p>
 
             <Link
               href={ci.calendly}
@@ -103,7 +100,7 @@ export default function ContactForm({ contactInfo: ci }: { contactInfo: ContactI
               rel="noopener noreferrer"
               className="xq-btn-primary mb-10 w-full justify-center"
             >
-              Book a Discovery Call
+              {pc.calendlyLabel}
             </Link>
 
             <div className="space-y-4 mt-10">

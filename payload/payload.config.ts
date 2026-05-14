@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import * as initialMigration from './migrations/20250513_initial'
 import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enhanced'
 import * as pageGlobalsMigration from './migrations/20250515_page_globals'
+import * as contactServicesGlobalsMigration from './migrations/20250515_contact_services_globals'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -550,6 +551,64 @@ export default buildConfig({
       ],
     },
 
+    // ─── Contact Page ────────────────────────────────────────
+    {
+      slug: 'contact-page',
+      label: 'Contact Page',
+      admin: {
+        group: 'Page Content',
+        description: 'Edit the Contact page headline, subtext, and Calendly button label.',
+      },
+      access: { read: isLoggedIn, update: isAdminOrAbove },
+      fields: [
+        {
+          name: 'hero',
+          label: 'Hero Section',
+          type: 'group',
+          fields: [
+            { name: 'label',        label: 'Eyebrow Label',        type: 'text',     defaultValue: 'Get in Touch' },
+            { name: 'heading',      label: 'Heading',              type: 'text',     defaultValue: "Let's talk about your project" },
+            { name: 'subtext',      label: 'Subtext',              type: 'textarea', defaultValue: "Book a discovery call for a scoped conversation, or fill out the brief and we'll respond within 24–48 hours." },
+            { name: 'calendlyLabel', label: 'Calendly Button Text', type: 'text',    defaultValue: 'Book a Discovery Call' },
+          ],
+        },
+      ],
+    },
+
+    // ─── Services Page ───────────────────────────────────────
+    {
+      slug: 'services-page',
+      label: 'Services Page',
+      admin: {
+        group: 'Page Content',
+        description: 'Edit the Services page hero text and bottom CTA.',
+      },
+      access: { read: isLoggedIn, update: isAdminOrAbove },
+      fields: [
+        {
+          name: 'hero',
+          label: 'Hero Section',
+          type: 'group',
+          fields: [
+            { name: 'label',    label: 'Eyebrow Label', type: 'text',     defaultValue: 'What We Offer' },
+            { name: 'heading',  label: 'Heading',        type: 'text',     defaultValue: 'Production-grade services for serious studios' },
+            { name: 'subtitle', label: 'Subtitle',       type: 'textarea', defaultValue: 'From a single asset to a fully embedded team — we scale to your needs.' },
+          ],
+        },
+        {
+          name: 'cta',
+          label: 'Bottom CTA Section',
+          type: 'group',
+          fields: [
+            { name: 'heading',     label: 'Heading',     type: 'text', defaultValue: 'Looking for a long-term art partner?' },
+            { name: 'subtitle',    label: 'Subtitle',    type: 'text', defaultValue: 'We might be the right fit.' },
+            { name: 'buttonLabel', label: 'Button Text', type: 'text', defaultValue: 'Start a Conversation' },
+            { name: 'buttonUrl',   label: 'Button URL',  type: 'text', defaultValue: '/contact' },
+          ],
+        },
+      ],
+    },
+
     // ─── Navigation ──────────────────────────────────────────
     {
       slug: 'navigation',
@@ -616,6 +675,11 @@ export default buildConfig({
         name: '20250515_page_globals',
         up: pageGlobalsMigration.up,
         down: pageGlobalsMigration.down,
+      },
+      {
+        name: '20250515_contact_services_globals',
+        up: contactServicesGlobalsMigration.up,
+        down: contactServicesGlobalsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

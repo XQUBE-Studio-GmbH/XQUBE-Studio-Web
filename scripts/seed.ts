@@ -168,6 +168,29 @@ const CLIENTS = [
   { name: 'FlightSim Studio', sector: 'Flight Sim',  note: 'Aircraft & scenery to sim-ready spec', featured: true, order: 7 },
 ]
 
+const CONTACT_PAGE = {
+  hero: {
+    label:         'Get in Touch',
+    heading:       "Let's talk about your project",
+    subtext:       "Book a discovery call for a scoped conversation, or fill out the brief and we'll respond within 24–48 hours.",
+    calendlyLabel: 'Book a Discovery Call',
+  },
+}
+
+const SERVICES_PAGE = {
+  hero: {
+    label:    'What We Offer',
+    heading:  'Production-grade services for serious studios',
+    subtitle: 'From a single asset to a fully embedded team — we scale to your needs.',
+  },
+  cta: {
+    heading:     'Looking for a long-term art partner?',
+    subtitle:    'We might be the right fit.',
+    buttonLabel: 'Start a Conversation',
+    buttonUrl:   '/contact',
+  },
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function seed() {
@@ -187,6 +210,16 @@ async function seed() {
   console.log('Seeding site-settings contact info...')
   await payload.updateGlobal({ slug: 'site-settings', data: { contact: SITE_SETTINGS_CONTACT } })
   console.log('  ✓ site-settings')
+
+  // ── Contact Page global ───────────────────────────────────────────────────
+  console.log('Seeding contact-page global...')
+  await payload.updateGlobal({ slug: 'contact-page', data: CONTACT_PAGE })
+  console.log('  ✓ contact-page')
+
+  // ── Services Page global ──────────────────────────────────────────────────
+  console.log('Seeding services-page global...')
+  await payload.updateGlobal({ slug: 'services-page', data: SERVICES_PAGE })
+  console.log('  ✓ services-page')
 
   // ── Services collection ───────────────────────────────────────────────────
   console.log('Checking services collection...')

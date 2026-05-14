@@ -93,16 +93,39 @@ const FB_SERVICES: ServiceItem[] = [
   },
 ]
 
+// ─── Page copy types & fallbacks ─────────────────────────────────────────────
+
+interface ServicesPageGlobal {
+  hero?: { label?: string; heading?: string; subtitle?: string }
+  cta?:  { heading?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
+}
+
+const FB_PAGE = {
+  heroLabel:   'What We Offer',
+  heroHeading: 'Production-grade services for serious studios',
+  heroSubtitle: 'From a single asset to a fully embedded team — we scale to your needs.',
+  ctaHeading:   'Looking for a long-term art partner?',
+  ctaSubtitle:  'We might be the right fit.',
+  ctaBtnLabel:  'Start a Conversation',
+  ctaBtnUrl:    '/contact',
+}
+
 // ─── Data fetcher ────────────────────────────────────────────────────────────
 
-async function getServices(): Promise<ServiceItem[]> {
+async function getData() {
   try {
     const payload = await getPayload({ config })
-    const res = await payload.find({ collection: 'services', sort: 'order', limit: 20, depth: 1 })
-    const docs = res.docs as unknown as ServiceItem[]
-    return docs.length > 0 ? docs : FB_SERVICES
+    const [servicesRes, sp] = await Promise.all([
+      payload.find({ collection: 'services', sort: 'order', limit: 20, depth: 1 }),
+      payload.findGlobal({ slug: 'services-page' }) as Promise<ServicesPageGlobal>,
+    ])
+    const docs = servicesRes.docs as unknown as ServiceItem[]
+    return {
+      services: docs.length > 0 ? docs : FB_SERVICES,
+      sp,
+    }
   } catch {
-    return FB_SERVICES
+    return { services: FB_SERVICES, sp: {} as ServicesPageGlobal }
   }
 }
 
@@ -199,18 +222,27 @@ const pipelines = [
 ]
 
 export default async function ServicesPage() {
-  const services = await getServices()
+  const { services, sp } = await getData()
+
+  const heroLabel   = sp.hero?.label    ?? FB_PAGE.heroLabel
+  const heroHeading = sp.hero?.heading  ?? FB_PAGE.heroHeading
+  const heroSubtitle = sp.hero?.subtitle ?? FB_PAGE.heroSubtitle
+  const ctaHeading  = sp.cta?.heading   ?? FB_PAGE.ctaHeading
+  const ctaSubtitle = sp.cta?.subtitle  ?? FB_PAGE.ctaSubtitle
+  const ctaBtnLabel = sp.cta?.buttonLabel ?? FB_PAGE.ctaBtnLabel
+  const ctaBtnUrl   = sp.cta?.buttonUrl   ?? FB_PAGE.ctaBtnUrl
+
   return (
     <>
       {/* Hero */}
       <section className="xq-section">
         <div className="xq-container">
-          <div className="xq-label mb-4">What We Offer</div>
+          <div className="xq-label mb-4">{heroLabel}</div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 max-w-2xl">
-            Production-grade services for serious studios
+            {heroHeading}
           </h1>
           <p className="text-xq-muted text-lg max-w-2xl leading-relaxed">
-            From a single asset to a fully embedded team — we scale to your needs.
+            {heroSubtitle}
           </p>
         </div>
       </section>
@@ -329,12 +361,10 @@ export default async function ServicesPage() {
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              Looking for a long-term art partner?
-            </h2>
-            <p className="text-xq-muted text-lg mb-10">We might be the right fit.</p>
-            <Link href="/contact" className="xq-btn-primary text-base px-8 py-4">
-              Start a Conversation
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">{ctaHeading}</h2>
+            <p className="text-xq-muted text-lg mb-10">{ctaSubtitle}</p>
+            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4">
+              {ctaBtnLabel}
             </Link>
           </div>
         </div>

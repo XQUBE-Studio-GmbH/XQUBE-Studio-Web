@@ -31,6 +31,15 @@ interface SiteSettings {
   }
 }
 
+interface ContactPageGlobal {
+  hero?: {
+    label?: string
+    heading?: string
+    subtext?: string
+    calendlyLabel?: string
+  }
+}
+
 export interface ContactInfo {
   email: string
   phone: string
@@ -40,7 +49,14 @@ export interface ContactInfo {
   artstation: string
 }
 
-const FALLBACK: ContactInfo = {
+export interface ContactPageCopy {
+  label: string
+  heading: string
+  subtext: string
+  calendlyLabel: string
+}
+
+const FALLBACK_INFO: ContactInfo = {
   email:      'info@xqubestudio.com',
   phone:      '+43 650 5207329',
   address:    'Rathausstrasse 21/12, 1010 Vienna, Austria',
@@ -49,25 +65,44 @@ const FALLBACK: ContactInfo = {
   artstation: 'https://www.artstation.com/xqubestudio',
 }
 
-async function getContactInfo(): Promise<ContactInfo> {
+const FALLBACK_COPY: ContactPageCopy = {
+  label:        'Get in Touch',
+  heading:      "Let's talk about your project",
+  subtext:      "Book a discovery call for a scoped conversation, or fill out the brief and we'll respond within 24–48 hours.",
+  calendlyLabel: 'Book a Discovery Call',
+}
+
+async function getData(): Promise<{ contactInfo: ContactInfo; pageCopy: ContactPageCopy }> {
   try {
-    const payload  = await getPayload({ config })
-    const settings = await payload.findGlobal({ slug: 'site-settings' }) as SiteSettings
-    const c        = settings.contact ?? {}
+    const payload = await getPayload({ config })
+    const [settings, cp] = await Promise.all([
+      payload.findGlobal({ slug: 'site-settings' }) as Promise<SiteSettings>,
+      payload.findGlobal({ slug: 'contact-page' })  as Promise<ContactPageGlobal>,
+    ])
+    const c = settings.contact ?? {}
+    const h = cp.hero ?? {}
     return {
-      email:      c.email      ?? FALLBACK.email,
-      phone:      c.phone      ?? FALLBACK.phone,
-      address:    c.address    ?? FALLBACK.address,
-      calendly:   c.calendly   ?? FALLBACK.calendly,
-      linkedin:   c.linkedin   ?? FALLBACK.linkedin,
-      artstation: c.artstation ?? FALLBACK.artstation,
+      contactInfo: {
+        email:      c.email      ?? FALLBACK_INFO.email,
+        phone:      c.phone      ?? FALLBACK_INFO.phone,
+        address:    c.address    ?? FALLBACK_INFO.address,
+        calendly:   c.calendly   ?? FALLBACK_INFO.calendly,
+        linkedin:   c.linkedin   ?? FALLBACK_INFO.linkedin,
+        artstation: c.artstation ?? FALLBACK_INFO.artstation,
+      },
+      pageCopy: {
+        label:         h.label         ?? FALLBACK_COPY.label,
+        heading:       h.heading        ?? FALLBACK_COPY.heading,
+        subtext:       h.subtext        ?? FALLBACK_COPY.subtext,
+        calendlyLabel: h.calendlyLabel  ?? FALLBACK_COPY.calendlyLabel,
+      },
     }
   } catch {
-    return FALLBACK
+    return { contactInfo: FALLBACK_INFO, pageCopy: FALLBACK_COPY }
   }
 }
 
 export default async function ContactPage() {
-  const contactInfo = await getContactInfo()
-  return <ContactForm contactInfo={contactInfo} />
+  const { contactInfo, pageCopy } = await getData()
+  return <ContactForm contactInfo={contactInfo} pageCopy={pageCopy} />
 }
