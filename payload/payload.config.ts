@@ -45,6 +45,7 @@ export default buildConfig({
         Logo: '@/components/admin/AdminLogo#default',
         Icon: '@/components/admin/AdminLogo#default',
       },
+      beforeNavLinks: ['@/components/admin/AdminStyles#default'],
     },
   },
 
