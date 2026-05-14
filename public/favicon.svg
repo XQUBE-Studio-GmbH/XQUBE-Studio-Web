@@ -1,15 +1,20 @@
-<svg viewBox="56 161 678 678" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="76.6387" y="251.42" width="27.6885" height="110.754" fill="#14CB72"/>
-  <rect x="215.082" y="223.732" width="27.6885" height="138.443" transform="rotate(90 215.082 223.732)" fill="#14CB72"/>
-  <rect width="27.6885" height="110.754" transform="matrix(1 0 0 -1 76.6387 749.814)" fill="#14CB72"/>
-  <rect width="27.6885" height="138.443" transform="matrix(-4.37114e-08 -1 -1 4.37114e-08 215.082 777.502)" fill="#14CB72"/>
-  <rect x="685.785" y="223.732" width="27.6885" height="110.754" transform="rotate(90 685.785 223.732)" fill="#14CB72"/>
-  <rect x="713.473" y="362.176" width="27.6885" height="138.443" transform="rotate(-180 713.473 362.176)" fill="#14CB72"/>
-  <rect width="27.6885" height="110.754" transform="matrix(-4.37115e-08 -1 -1 4.37113e-08 685.785 777.502)" fill="#14CB72"/>
-  <rect width="27.6885" height="138.443" transform="matrix(-1 8.74227e-08 8.74228e-08 1 713.473 639.059)" fill="#14CB72"/>
-  <path d="M284.91 500.827L125.092 404.394V271.494L395.055 434.377L665.018 271.494V404.394L505.2 500.827L665.018 597.531V730.431L395.055 567.277L125.092 730.431V597.531L284.91 500.827Z" fill="white"/>
-  <rect x="125.092" y="271.494" width="132.905" height="132.905" fill="white"/>
-  <rect x="125.092" y="597.527" width="132.905" height="132.905" fill="white"/>
-  <rect x="532.115" y="271.494" width="132.905" height="132.905" fill="white"/>
-  <rect x="532.115" y="597.527" width="132.905" height="132.905" fill="white"/>
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background with rounded corners -->
+  <rect width="100" height="100" rx="18" fill="#0a0a0a"/>
+  <!-- Logo mark scaled to fit 100x100 -->
+  <g transform="translate(50,50) scale(0.128) translate(-395,-500)">
+    <rect x="76.6387" y="251.42" width="27.6885" height="110.754" fill="#14CB72"/>
+    <rect x="215.082" y="223.732" width="27.6885" height="138.443" transform="rotate(90 215.082 223.732)" fill="#14CB72"/>
+    <rect width="27.6885" height="110.754" transform="matrix(1 0 0 -1 76.6387 749.814)" fill="#14CB72"/>
+    <rect width="27.6885" height="138.443" transform="matrix(-4.37114e-08 -1 -1 4.37114e-08 215.082 777.502)" fill="#14CB72"/>
+    <rect x="685.785" y="223.732" width="27.6885" height="110.754" transform="rotate(90 685.785 223.732)" fill="#14CB72"/>
+    <rect x="713.473" y="362.176" width="27.6885" height="138.443" transform="rotate(-180 713.473 362.176)" fill="#14CB72"/>
+    <rect width="27.6885" height="110.754" transform="matrix(-4.37115e-08 -1 -1 4.37113e-08 685.785 777.502)" fill="#14CB72"/>
+    <rect width="27.6885" height="138.443" transform="matrix(-1 8.74227e-08 8.74228e-08 1 713.473 639.059)" fill="#14CB72"/>
+    <path d="M284.91 500.827L125.092 404.394V271.494L395.055 434.377L665.018 271.494V404.394L505.2 500.827L665.018 597.531V730.431L395.055 567.277L125.092 730.431V597.531L284.91 500.827Z" fill="white"/>
+    <rect x="125.092" y="271.494" width="132.905" height="132.905" fill="white"/>
+    <rect x="125.092" y="597.527" width="132.905" height="132.905" fill="white"/>
+    <rect x="532.115" y="271.494" width="132.905" height="132.905" fill="white"/>
+    <rect x="532.115" y="597.527" width="132.905" height="132.905" fill="white"/>
+  </g>
 </svg>
