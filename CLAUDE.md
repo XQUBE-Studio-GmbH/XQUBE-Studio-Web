@@ -202,6 +202,34 @@ res.docs.map((doc: { slug: string }) => ({ slug: doc.slug }))
 
 ---
 
+### ERROR 13 — Admin panel hangs for 300 seconds then times out
+**Error:** `Vercel Runtime Timeout Error: Task timed out after 300 seconds`
+**Digest:** `1031758794`
+**Where:** `/admin` on every request after fixing DATABASE_URI
+**Root cause:** Payload's admin initialization uses `Promise.all()` internally to run
+multiple DB queries in parallel. With `max: 1` in the pool config, only one query gets
+a connection — all others wait in the pool queue with **no timeout**, so they hang
+indefinitely until Vercel kills the function at 300 seconds.
+The `max: 1` restriction was added to fix EMAXCONNSESSION (ERROR 6), but that issue was
+specific to the **session pooler** (port 5432). Since switching to the **transaction pooler**
+(port 6543), PgBouncer handles multiplexing at its own level — `max: 1` is no longer
+needed and causes a pool deadlock on concurrent queries.
+**Fix:** `payload/payload.config.ts`:
+```ts
+pool: {
+  connectionString: process.env.DATABASE_URI,
+  ssl: { rejectUnauthorized: false },
+  max: 5,                          // was 1 — safe on transaction pooler
+  connectionTimeoutMillis: 10000,  // fail fast instead of hanging 300s
+},
+push: process.env.NODE_ENV !== 'production', // explicit production guard
+```
+**Rule:** `max: 1` is only needed for the session pooler (port 5432). With the
+transaction pooler (port 6543), use `max: 5` or higher. Always add
+`connectionTimeoutMillis` to prevent silent 300s hangs.
+
+---
+
 ### WARNING 1 — `<img>` tag LCP warning
 **Where:** Build warning — `src/app/(frontend)/services/page.tsx`
 **Root cause:** Raw `<img>` tag used for pipeline showcase images instead of Next.js `<Image>`.

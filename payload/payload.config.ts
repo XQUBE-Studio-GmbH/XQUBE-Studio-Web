@@ -220,17 +220,15 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI,
-      // Supabase requires SSL for all external connections (Vercel, CI, etc.)
       ssl: { rejectUnauthorized: false },
-      // Supabase session pooler (PgBouncer session mode) caps at 15 connections
-      // total. Vercel serverless spins up a pool per function invocation, so
-      // limit each to 1 connection to avoid EMAXCONNSESSION exhaustion.
-      max: 1,
+      // Transaction pooler (port 6543) handles multiplexing at PgBouncer level,
+      // so higher max is safe. Payload admin init uses Promise.all() internally —
+      // max: 1 caused a pool deadlock (concurrent queries queued forever → 300s timeout).
+      max: 5,
+      // Fail fast if all pool slots are busy, instead of hanging until Vercel kills the function.
+      connectionTimeoutMillis: 10000,
     },
-    // push: true only runs when NODE_ENV !== 'production' — useless on Vercel.
-    // prodMigrations is the correct production mechanism: Payload runs these
-    // on every cold start but skips already-applied ones via payload_migrations.
-    push: true, // still useful for local dev
+    push: process.env.NODE_ENV !== 'production', // never push on Vercel
     prodMigrations: [
       {
         name: '20250513_initial',
