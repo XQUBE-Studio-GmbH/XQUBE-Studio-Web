@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "generate:types": "payload generate:types",
-    "seed": "npx tsx scripts/seed.ts"
+    "seed": "npx tsx --env-file=.env.local scripts/seed.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

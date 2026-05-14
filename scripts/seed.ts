@@ -9,13 +9,6 @@
  * when the collection is completely empty (0 documents).
  */
 
-import * as dotenv from 'dotenv'
-import * as path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') })
-
 import { getPayload } from 'payload'
 import config from '../payload/payload.config'
 
