@@ -44,7 +44,7 @@ export default buildConfig({
     components: {
       graphics: {
         Logo: '@/components/admin/AdminLogo#default',
-        Icon: '@/components/admin/AdminLogo#default',
+        Icon: '@/components/admin/AdminIcon#default',
       },
     },
   },

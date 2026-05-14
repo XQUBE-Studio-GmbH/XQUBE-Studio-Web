@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormFields } from '@payloadcms/ui'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function generatePassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%'
@@ -24,6 +24,10 @@ export default function GeneratePasswordButton() {
     dispatchFields({ type: 'UPDATE', path: 'confirm-password', value: p })
   }
 
+  // Auto-generate on mount so the form is never missing a password
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { generate() }, [])
+
   const copy = () => {
     navigator.clipboard.writeText(password)
     setCopied(true)
@@ -40,26 +44,11 @@ export default function GeneratePasswordButton() {
         label[for="field-confirm-password"] { display: none !important; }
       `}</style>
       <p style={{ fontSize: '13px', color: '#a0a0a0', marginBottom: '8px' }}>
-        Generate a strong temporary password. It will auto-fill the fields below — copy it to share with the new user.
+        A password has been generated — copy it to share with the new user. Click Regenerate for a different one.
       </p>
-      <button
-        type="button"
-        onClick={generate}
-        style={{
-          padding: '8px 16px',
-          background: '#1f6feb',
-          border: 'none',
-          borderRadius: '4px',
-          color: '#fff',
-          fontSize: '13px',
-          cursor: 'pointer',
-        }}
-      >
-        Generate Password
-      </button>
 
       {password && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
           <code style={{
             background: '#1a1a2e',
             border: '1px solid #333',

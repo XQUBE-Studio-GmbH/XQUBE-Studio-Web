@@ -11,6 +11,7 @@ export default function AdminLogo() {
         width={320}
         height={183}
         priority
+        style={{ width: '100%', maxWidth: '300px', height: 'auto' }}
       />
       <span style={{
         fontSize: '11px',
