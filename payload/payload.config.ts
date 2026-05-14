@@ -62,6 +62,16 @@ export default buildConfig({
         delete: isSuperAdmin,
       },
       fields: [
+        {
+          name: 'generatePassword',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/src/components/GeneratePasswordButton',
+            },
+            condition: (_data: any) => !_data?.id,
+          },
+        },
         { name: 'name', type: 'text' },
         {
           name: 'role',
