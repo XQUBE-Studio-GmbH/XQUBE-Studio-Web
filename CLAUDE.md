@@ -5,108 +5,295 @@
 
 ---
 
-## Build Rules (enforce every commit — these caused real build failures)
+## RESOLVED BUILD & RUNTIME ERRORS (full history)
 
-### 1. Never use `<img>` — always use `<Image>` from next/image
+Every error below was hit, diagnosed, and fixed in production. Do not reintroduce them.
+
+---
+
+### ERROR 1 — "Functions cannot be passed directly to Client Components"
+**Error digest:** `1003323670`
+**Where:** `/admin` on first load
+**Root cause:** `handleServerFunctions` was passed directly as the `serverFunction` prop to
+Payload's `RootLayout`. It must be a Server Action (async function with `'use server'`).
+**Fix:** `src/app/(payload)/admin/[[...segments]]/layout.tsx`
 ```tsx
-// WRONG
-<img src={url} alt="..." className="..." />
+import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
+import '@payloadcms/next/css'  // also required — see ERROR 3
 
-// CORRECT
-import Image from 'next/image'
-<Image src={url} alt="..." width={800} height={600} className="..." />
-// or with fill:
-<Image src={url} alt="..." fill className="object-cover" />
+const serverFunction: ServerFunctionClient = async function (args) {
+  'use server'
+  return handleServerFunctions({ ...args, config, importMap })
+}
 ```
-ESLint will warn, Next.js will penalise LCP. No exceptions.
+**Never:** `serverFunction={handleServerFunctions}` — this passes it directly without 'use server'.
 
 ---
 
-### 2. Pages that call `getPayload()` must use `force-dynamic`
-Vercel build runners cannot reach the Supabase transaction pooler. Any page
-that calls `getPayload()` (directly or via a data-fetching helper) must have:
+### ERROR 2 — `relation "users" does not exist`
+**Error digest:** `2462853924`
+**Where:** Every Payload API endpoint on Vercel
+**Root cause:** `push: true` in `postgresAdapter` is hardcoded to skip when
+`NODE_ENV=production`. Vercel always sets `NODE_ENV=production`. So the schema was
+never created.
+**Fix:** Use `prodMigrations` array in `postgresAdapter`. Payload runs these on every
+cold start and tracks them via `payload_migrations` table.
 ```ts
-export const dynamic = 'force-dynamic'
+prodMigrations: [
+  { name: '20250513_initial', up: initialMigration.up, down: initialMigration.down },
+],
 ```
-Do NOT use `export const revalidate = N` on these pages — it causes build-time
-DB calls that fail with `ENOTFOUND tenant/user`.
 
 ---
 
-### 3. Never add `generateStaticParams` to pages with `force-dynamic`
-Next.js still executes `generateStaticParams` during build even on
-`force-dynamic` pages, which triggers `getPayload()` → DB connection → build
-error. Simply omit it. All slugs render on-demand at request time.
-
----
-
-### 4. Sitemap must skip DB during build
-`app/sitemap.ts` must bail out early during `next build`:
+### ERROR 3 — Admin panel completely unstyled (white/broken UI)
+**Where:** `/admin` after login was reached
+**Root cause:** `@payloadcms/next/css` (306KB Payload admin stylesheet) was never
+imported in the admin layout.
+**Fix:** Add to `src/app/(payload)/admin/[[...segments]]/layout.tsx`:
 ```ts
-import { PHASE_PRODUCTION_BUILD } from 'next/constants'
+import '@payloadcms/next/css'
+```
 
-if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
-  return staticRoutes  // skip DB entirely during build
+---
+
+### ERROR 4 — Admin dashboard blank/black content area
+**Where:** `/admin` dashboard after login
+**Root cause:** `globals.css` was imported in the root `app/layout.tsx`, so its rules
+(`body { background: #000 }`, `* { padding: 0; margin: 0 }`, font overrides) bled into
+Payload's admin panel and destroyed its CSS.
+**Fix:** Remove `globals.css` from root layout entirely. Import it only in
+`src/app/(frontend)/layout.tsx` so it never touches admin routes.
+
+---
+
+### ERROR 5 — ESLint build failure after adding `.eslintrc.json`
+**Where:** Vercel build step (linting)
+**Root cause:** New strict config caught pre-existing `@typescript-eslint/no-explicit-any`
+and `react/no-unescaped-entities` errors across many page files, treating them as errors.
+**Fix:** `.eslintrc.json` — set as warnings, not errors:
+```json
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "react/no-unescaped-entities": "off"
+  }
 }
 ```
 
 ---
 
-### 5. No `any` types — use proper types or targeted casts
-ESLint is set to `"@typescript-eslint/no-explicit-any": "warn"`. Fix the
-underlying type, or use a targeted `as SomeType` cast with a comment explaining
-why. Never silence with `// eslint-disable-next-line`.
-
-Payload's `find()` with `select` returns fields typed as `unknown` — cast after
-access:
+### ERROR 6 — `EMAXCONNSESSION: max clients reached in session mode`
+**Where:** Every Payload API call at runtime (Vercel serverless)
+**Root cause:** Supabase session pooler (PgBouncer session mode, port 5432) caps at
+15 total connections. Vercel serverless creates a new connection pool per function
+invocation (default `max: 10`). 2 warm instances = 20 connections → instant failure.
+**Fix (part A):** Switch `DATABASE_URI` to Supabase **transaction pooler** (port **6543**)
+and append `?pgbouncer=true`:
+```
+postgresql://postgres.PROJECT_REF:PASSWORD@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+```
+**Fix (part B):** Add `max: 1` to the pool config in `payload/payload.config.ts`:
 ```ts
-res.docs.map((doc) => ({ slug: doc.slug as string }))
-// NOT: (doc: { slug: string }) => ...  ← TypeScript rejects this
+pool: {
+  connectionString: process.env.DATABASE_URI,
+  ssl: { rejectUnauthorized: false },
+  max: 1,  // one connection per serverless invocation
+},
+```
+**Never use:** Session pooler (port 5432) for serverless deployments.
+
+---
+
+### ERROR 7 — `ENOTFOUND tenant/user postgres.PROJECT_REF not found`
+**Where:** Vercel build logs during static page generation AND runtime cold starts
+**Root cause:** Two sub-causes:
+  1. Vercel's build runners have different network routing than serverless functions
+     and cannot reliably reach the Supabase pooler at all.
+  2. `generateStaticParams` was calling `getPayload()` during build, triggering a
+     full Payload DB init + migration check from the build runner network.
+**Fix:** See ERROR 8 and ERROR 9 below (force-dynamic + remove generateStaticParams).
+
+---
+
+### ERROR 8 — Fatal DB errors on CMS-dependent pages during build
+**Where:** Build logs — `blog/page.tsx`, `portfolio/page.tsx`, `blog/[slug]`, `portfolio/[slug]`
+**Root cause:** `export const revalidate = 60` causes Next.js to pre-render pages at
+build time, which called `getPayload()` from a build runner that can't reach the DB.
+**Fix:** Replace `revalidate = 60` with `force-dynamic` on ALL pages that call `getPayload()`:
+```ts
+// CORRECT — never pre-rendered, always rendered at request time
+export const dynamic = 'force-dynamic'
+
+// WRONG — triggers DB call from build runner
+export const revalidate = 60
 ```
 
 ---
 
-## Database / Supabase Rules
+### ERROR 9 — `generateStaticParams` still calls DB even with `force-dynamic`
+**Where:** Build logs — `blog/[slug]/page.tsx`, `portfolio/[slug]/page.tsx`
+**Root cause:** Next.js executes `generateStaticParams` during build to discover routes,
+even on `force-dynamic` pages. This triggered `getPayload()` → DB connection → fatal error.
+**Fix:** Remove `generateStaticParams` entirely from `force-dynamic` pages.
+All slugs render on-demand at request time. `dynamicParams = true` (the default) handles unknown slugs.
+```ts
+// DELETE this entire function from force-dynamic pages:
+export async function generateStaticParams() { ... }
+```
 
-### Connection
-- Use **transaction pooler** (port **6543**) for `DATABASE_URI` — not session
-  pooler (port 5432, which caps at 15 connections and causes `EMAXCONNSESSION`
-  on Vercel serverless).
-- Add `?pgbouncer=true` to the connection string.
-- Keep `max: 1` in `postgresAdapter pool` config to limit connections per
-  serverless function invocation.
+---
+
+### ERROR 10 — Sitemap calling DB during build
+**Where:** Build logs — `app/sitemap.ts`
+**Root cause:** `sitemap()` called `getPayload()` unconditionally, including during
+`next build` when the DB is unreachable from build runners.
+**Fix:** Add a build-phase guard at the top of `sitemap()`:
+```ts
+import { PHASE_PRODUCTION_BUILD } from 'next/constants'
+
+export default async function sitemap() {
+  if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
+    return staticRoutes  // skip DB entirely during build
+  }
+  // ... normal DB fetch at runtime
+}
+```
+
+---
+
+### ERROR 11 — Incomplete migration (tables missing in production)
+**Where:** Admin panel — `/api/users/me` and `/api/payload-preferences/nav` returning 500
+**Root cause:** The entire migration was written as a single `await db.execute(sql\`...\`)`
+block with all DDL statements. Drizzle's parameterized query handling does not reliably
+execute multi-statement blocks — tables near the bottom (`payload_preferences`,
+`payload_preferences_rels`, `payload_locked_documents`, etc.) were silently skipped.
+**Fix:** Every single DDL statement must be its own `await db.execute(sql\`...\`)` call:
+```ts
+// CORRECT
+await db.execute(sql`CREATE TABLE IF NOT EXISTS "users" (...);`)
+await db.execute(sql`CREATE TABLE IF NOT EXISTS "media" (...);`)
+await db.execute(sql`CREATE TABLE IF NOT EXISTS "payload_preferences" (...);`)
+
+// WRONG — statements at the bottom silently don't execute
+await db.execute(sql`
+  CREATE TABLE IF NOT EXISTS "users" (...);
+  CREATE TABLE IF NOT EXISTS "media" (...);
+  CREATE TABLE IF NOT EXISTS "payload_preferences" (...);
+`)
+```
+
+---
+
+### ERROR 12 — TypeScript assignability error in `generateStaticParams`
+**Where:** Build — `blog/[slug]/page.tsx`, `portfolio/[slug]/page.tsx`
+**Root cause:** Payload's `find()` with `select: { slug: true }` returns docs with
+`slug` typed as `unknown`. Annotating the map parameter as `{ slug: string }` causes
+a TypeScript assignability conflict.
+**Fix:** Don't annotate the parameter — cast the value after access:
+```ts
+// CORRECT
+res.docs.map((doc) => ({ slug: doc.slug as string }))
+
+// WRONG — TS error: Type '{ slug: unknown }' is not assignable to '{ slug: string }'
+res.docs.map((doc: { slug: string }) => ({ slug: doc.slug }))
+```
+
+---
+
+### WARNING 1 — `<img>` tag LCP warning
+**Where:** Build warning — `src/app/(frontend)/services/page.tsx`
+**Root cause:** Raw `<img>` tag used for pipeline showcase images instead of Next.js `<Image>`.
+**Fix:** Always use `<Image>` from `next/image`. For fill-mode inside a positioned container:
+```tsx
+import Image from 'next/image'
+// container must have position: relative (or aspect-* class)
+<Image src={url} alt="..." fill className="object-cover" />
+```
+**Never use:** `<img src={...} />` — always `<Image>`.
+
+---
+
+### WARNING 2 — Node engine auto-upgrade warning on Vercel
+**Where:** Build warnings — `package.json`
+**Root cause:** `"node": ">=18.20.2"` has no upper bound, so Vercel warns it will
+auto-upgrade to future major Node versions.
+**Fix:** Pin with an upper bound in `package.json`:
+```json
+"engines": { "node": ">=18.20.2 <23" }
+```
+
+---
+
+## Payload Admin — Architecture Rules
+
+### Admin layout (`src/app/(payload)/admin/[[...segments]]/layout.tsx`)
+Must always have:
+1. `import '@payloadcms/next/css'` — without this the admin UI is completely unstyled
+2. `serverFunction` must be an async function with `'use server'` in the body
+3. Never import `globals.css` here or anywhere in `(payload)` routes
+
+### Root layout (`src/app/layout.tsx`)
+Must be a minimal shell — no CSS imports, no client code:
+```tsx
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}</body>
+    </html>
+  )
+}
+```
+`suppressHydrationWarning` on both `<html>` and `<body>` is required — Payload's
+`RootLayout` injects `data-theme`, `dir`, and `lang` attributes at runtime.
+
+### Frontend layout (`src/app/(frontend)/layout.tsx`)
+This is the only place for:
+- `import '../globals.css'`
+- `CookieBanner`
+- Organisation LD-JSON structured data
+
+---
+
+## Database Rules
+
+### Connection (Vercel + Supabase)
+- **Transaction pooler only** — port `6543`, append `?pgbouncer=true`
+- **Never session pooler** — port `5432` caps at 15 connections, causes `EMAXCONNSESSION`
+- **`max: 1`** in pool config — one connection per serverless function
+- SSL required: `ssl: { rejectUnauthorized: false }`
 
 ### Migrations
-- `push: true` is ignored in production (`NODE_ENV=production`). Use
-  `prodMigrations` array in `postgresAdapter` for schema changes on Vercel.
-- Write each DDL statement as a separate `await db.execute(sql\`...\`)` call —
-  never one giant multi-statement block (Drizzle doesn't reliably execute them).
-- Always use `IF NOT EXISTS` / `DO $$ BEGIN ... EXCEPTION WHEN duplicate_object`
-  patterns for idempotency.
-- Resetting the DB (`DROP SCHEMA public CASCADE`) also wipes `payload_migrations`,
-  so the next cold start re-runs all `prodMigrations` from scratch. This is
-  intentional and required after a DB reset.
+- `push: true` is ignored in production — use `prodMigrations` array
+- Each DDL statement = its own `await db.execute(sql\`...\`)` — no multi-statement blocks
+- Always `IF NOT EXISTS` / `DO $$ BEGIN ... EXCEPTION WHEN duplicate_object` for idempotency
+- DB reset (`DROP SCHEMA public CASCADE`) wipes `payload_migrations` — next cold start re-runs all migrations from scratch
+
+### DB reset procedure (when needed)
+```sql
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+```
+After reset: redeploy on Vercel so the new cold start runs migrations cleanly.
 
 ---
 
-## Payload CMS Rules
-
-### Admin layout
-- `handleServerFunctions` must be wrapped in an async function with `'use server'`
-  before being passed as `serverFunction` prop — it cannot be passed directly.
-- `import '@payloadcms/next/css'` must be in the admin layout or the UI renders
-  completely unstyled.
-
-### CSS isolation
-- `globals.css` (which sets `body { background: #000 }` etc.) must only be
-  imported in `src/app/(frontend)/layout.tsx` — never in the root layout.
-  If it bleeds into `(payload)` routes it destroys Payload's admin CSS.
+## ESLint Config (`.eslintrc.json`)
+```json
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "react/no-unescaped-entities": "off"
+  }
+}
+```
 
 ---
 
-## Vercel / Next.js Rules
-
-- `package.json` engines must be pinned with an upper bound:
-  `"node": ">=18.20.2 <23"` — prevents Vercel auto-upgrading to an untested
-  future major Node version.
-- Never push to git unless explicitly asked by the user.
+## Git Rule
+**Never push to git unless the user explicitly asks.** Always commit locally first,
+show what was changed, then wait for "push" confirmation.
