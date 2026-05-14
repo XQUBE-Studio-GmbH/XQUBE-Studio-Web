@@ -72,6 +72,23 @@ a { color: inherit; text-decoration: none; }
   }
   .xq-input:focus { border-color: var(--accent); }
   .xq-input::placeholder { color: var(--muted); }
+  select.xq-input { color: var(--light); }
+  select.xq-input option { background: var(--surface); color: var(--light); }
+
+  /* Rich text output from Lexical serializer */
+  .prose-xq { @apply text-xq-muted leading-relaxed; }
+  .prose-xq p  { @apply mb-4 text-xq-muted leading-relaxed; }
+  .prose-xq h2 { @apply text-white font-bold text-xl mb-3 mt-6; }
+  .prose-xq h3 { @apply text-white font-bold text-lg mb-2 mt-5; }
+  .prose-xq ul { @apply list-disc list-inside mb-4 space-y-1; }
+  .prose-xq ol { @apply list-decimal list-inside mb-4 space-y-1; }
+  .prose-xq li { @apply text-xq-muted text-sm; }
+  .prose-xq strong { @apply text-white font-semibold; }
+  .prose-xq em    { @apply italic; }
+  .prose-xq a     { @apply text-xq-accent hover:underline; }
+  .prose-xq blockquote { @apply border-l-2 border-xq-accent pl-4 text-xq-muted italic mb-4; }
+  .prose-xq pre  { @apply bg-xq-surface border border-xq-border rounded p-4 overflow-x-auto mb-4; }
+  .prose-xq code { @apply font-mono text-xq-accent text-sm; }
 }
 
 @keyframes fadeUp {

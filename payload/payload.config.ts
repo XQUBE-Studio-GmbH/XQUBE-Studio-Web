@@ -6,6 +6,7 @@ import { resendAdapter } from '@payloadcms/email-resend'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import * as initialMigration from './migrations/20250513_initial'
+import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enhanced'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -174,6 +175,29 @@ export default buildConfig({
           type: 'textarea',
           admin: { description: 'A short description shown on the portfolio card and in search results.' },
         },
+        { name: 'client', label: 'Client / Project', type: 'text' },
+        { name: 'year',   label: 'Year',             type: 'number' },
+        { name: 'videoUrl', label: 'Video / Reel URL', type: 'text', admin: { description: 'YouTube or Vimeo embed URL.' } },
+        {
+          name: 'gallery',
+          label: 'Image Gallery',
+          type: 'array',
+          admin: { description: 'Wireframes, clay renders, process shots, in-engine screenshots.' },
+          fields: [
+            { name: 'image',   type: 'upload', relationTo: 'media', required: true },
+            { name: 'caption', type: 'text' },
+          ],
+        },
+        { name: 'overview', label: 'Project Overview', type: 'richText' },
+        {
+          name: 'software',
+          label: 'Software Used',
+          type: 'array',
+          fields: [{ name: 'tool', type: 'text', required: true }],
+        },
+        { name: 'polyCount',     label: 'Poly Count',         type: 'text' },
+        { name: 'textureRes',    label: 'Texture Resolution', type: 'text' },
+        { name: 'deliveryTime',  label: 'Delivery Time',      type: 'text' },
         { name: 'featured', type: 'checkbox', defaultValue: false },
         {
           name: 'status',
@@ -443,6 +467,11 @@ export default buildConfig({
         name: '20250513_initial',
         up: initialMigration.up,
         down: initialMigration.down,
+      },
+      {
+        name: '20250515_portfolio_enhanced',
+        up: portfolioEnhancedMigration.up,
+        down: portfolioEnhancedMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

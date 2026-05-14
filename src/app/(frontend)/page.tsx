@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
+import { getPayload } from 'payload'
+import config from '../../../payload/payload.config'
+
+// force-dynamic required: page fetches featured portfolio items from DB at request time.
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'XQube Studio | AAA Game Art & XR Production',
@@ -14,6 +20,39 @@ export const metadata: Metadata = {
     title: 'XQube Studio | AAA Game Art & XR Production',
     description: 'AAA-quality game art and XR production. Vienna · Dubai · Dhaka.',
   },
+}
+
+interface PortfolioItem {
+  id: string
+  title: string
+  slug: string
+  category?: string
+  shortDescription?: string
+  heroImage?: { url?: string; alt?: string }
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  characters:   'Characters',
+  weapons:      'Weapons',
+  vehicles:     'Vehicles',
+  environments: 'Environments',
+  props:        'Props',
+  'vr-assets':  'VR Assets',
+}
+
+async function getFeaturedWork(): Promise<PortfolioItem[]> {
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'portfolio',
+      where: { featured: { equals: true }, status: { equals: 'published' } },
+      limit: 6,
+      depth: 1,
+    })
+    return res.docs as unknown as PortfolioItem[]
+  } catch {
+    return []
+  }
 }
 
 const services = [
@@ -48,7 +87,9 @@ const stats = [
   { value: '3',   label: 'Global Hubs' },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featured = await getFeaturedWork()
+
   return (
     <>
       {/* Hero */}
@@ -108,6 +149,71 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured Work */}
+      {featured.length > 0 && (
+        <section className="xq-section border-b border-xq-border">
+          <div className="xq-container">
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <div className="xq-label mb-4">Featured Work</div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
+                  Built for production pipelines
+                </h2>
+              </div>
+              <Link href="/portfolio" className="xq-btn-ghost text-sm hidden md:flex shrink-0 ml-8">
+                View All Work →
+              </Link>
+            </div>
+
+            {/* Asymmetric grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featured.map((item, i) => (
+                <Link
+                  key={item.id}
+                  href={`/portfolio/${item.slug}`}
+                  className={`group relative overflow-hidden rounded-xl border border-xq-border bg-xq-surface block ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
+                >
+                  <div className={`relative overflow-hidden ${i === 0 ? 'aspect-[4/3] md:aspect-auto md:h-full min-h-[300px]' : 'aspect-video'}`}>
+                    {item.heroImage?.url ? (
+                      <Image
+                        src={item.heroImage.url}
+                        alt={item.heroImage.alt || item.title}
+                        fill
+                        className="object-cover group-hover:scale-[1.04] transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-xq-surface flex items-center justify-center">
+                        <span className="text-xq-muted text-xs">No image</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    {item.category && (
+                      <div className="text-xq-accent text-xs font-semibold uppercase tracking-wider mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {CATEGORY_LABELS[item.category] ?? item.category}
+                      </div>
+                    )}
+                    <h3 className={`font-black text-white drop-shadow-md ${i === 0 ? 'text-xl md:text-2xl' : 'text-base'}`}>
+                      {item.title}
+                    </h3>
+                    {i === 0 && item.shortDescription && (
+                      <p className="text-white/70 text-sm mt-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {item.shortDescription}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-8 text-center md:hidden">
+              <Link href="/portfolio" className="xq-btn-ghost">View All Work →</Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Services */}
       <section className="xq-section">

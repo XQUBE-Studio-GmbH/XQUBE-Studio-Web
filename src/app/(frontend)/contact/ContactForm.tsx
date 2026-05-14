@@ -10,9 +10,67 @@ const contactInfo = [
   { label: 'ArtStation', value: 'artstation.com/xqubestudio',                href: 'https://www.artstation.com/xqubestudio' },
 ]
 
+const PROJECT_TYPES = [
+  { value: '', label: 'Select project type' },
+  { value: 'game-art-production', label: 'Game Art Production' },
+  { value: 'vr-xr-assets',        label: 'VR / XR Assets' },
+  { value: 'interactive-dev',      label: 'Interactive Development' },
+  { value: 'staff-augmentation',   label: 'Staff Augmentation' },
+  { value: 'full-game-production', label: 'Full Game Production' },
+  { value: 'other',                label: 'Other / Not Sure Yet' },
+]
+
+const ENGINES = [
+  { value: '', label: 'Select engine / platform' },
+  { value: 'unreal-engine-5',  label: 'Unreal Engine 5' },
+  { value: 'unity',            label: 'Unity' },
+  { value: 'uefn-fortnite',    label: 'UEFN / Fortnite' },
+  { value: 'roblox',           label: 'Roblox' },
+  { value: 'godot',            label: 'Godot' },
+  { value: 'custom-engine',    label: 'Custom / Proprietary Engine' },
+  { value: 'vr-platform',      label: 'VR Platform (Meta Quest, PSVR, etc.)' },
+  { value: 'not-sure',         label: 'Not Sure Yet' },
+]
+
+const BUDGETS = [
+  { value: '', label: 'Select budget range' },
+  { value: 'under-10k',   label: 'Under $10K' },
+  { value: '10k-50k',     label: '$10K – $50K' },
+  { value: '50k-150k',    label: '$50K – $150K' },
+  { value: '150k-500k',   label: '$150K – $500K' },
+  { value: '500k-plus',   label: '$500K+' },
+  { value: 'not-sure',    label: 'Not Sure Yet' },
+]
+
+const TIMELINES = [
+  { value: '', label: 'Select timeline' },
+  { value: 'asap',         label: 'ASAP — we need to start immediately' },
+  { value: '1-3-months',   label: '1–3 months' },
+  { value: '3-6-months',   label: '3–6 months' },
+  { value: '6-12-months',  label: '6–12 months' },
+  { value: '12-plus',      label: '12+ months (ongoing)' },
+  { value: 'exploring',    label: 'Just exploring options' },
+]
+
+interface FormState {
+  name: string
+  email: string
+  company: string
+  projectType: string
+  engine: string
+  budget: string
+  timeline: string
+  message: string
+}
+
 export default function ContactForm() {
-  const [form, setForm]     = useState({ name: '', email: '', message: '' })
+  const [form, setForm] = useState<FormState>({
+    name: '', email: '', company: '', projectType: '', engine: '', budget: '', timeline: '', message: '',
+  })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+
+  const set = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,7 +82,7 @@ export default function ContactForm() {
         body: JSON.stringify(form),
       })
       setStatus(res.ok ? 'success' : 'error')
-      if (res.ok) setForm({ name: '', email: '', message: '' })
+      if (res.ok) setForm({ name: '', email: '', company: '', projectType: '', engine: '', budget: '', timeline: '', message: '' })
     } catch {
       setStatus('error')
     }
@@ -33,7 +91,7 @@ export default function ContactForm() {
   return (
     <section className="xq-section">
       <div className="xq-container">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 max-w-6xl">
 
           {/* Left — Info */}
           <div>
@@ -42,7 +100,7 @@ export default function ContactForm() {
               Let's talk about your project
             </h1>
             <p className="text-xq-muted mb-10 leading-relaxed">
-              Book a discovery call for a scoped conversation, or fill out the form and we'll
+              Book a discovery call for a scoped conversation, or fill out the brief and we'll
               respond within 24–48 hours.
             </p>
 
@@ -78,50 +136,87 @@ export default function ContactForm() {
 
           {/* Right — Form */}
           <div>
-            <div className="xq-label mb-6">Or send a message</div>
+            <div className="xq-label mb-6">Send a project brief</div>
 
             {status === 'success' ? (
               <div className="xq-card text-center py-12">
                 <div className="text-4xl mb-4 text-xq-accent">✓</div>
-                <h3 className="text-white font-bold text-xl mb-2">Message sent</h3>
+                <h3 className="text-white font-bold text-xl mb-2">Brief received</h3>
                 <p className="text-xq-muted">We'll be in touch within 24–48 hours.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-sm text-xq-muted mb-2">Name</label>
-                  <input
-                    type="text" required className="xq-input" placeholder="Your name"
-                    value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm text-xq-muted mb-2">Name <span className="text-xq-accent">*</span></label>
+                    <input type="text" required className="xq-input" placeholder="Your name"
+                      value={form.name} onChange={set('name')} />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-xq-muted mb-2">Work Email <span className="text-xq-accent">*</span></label>
+                    <input type="email" required className="xq-input" placeholder="you@studio.com"
+                      value={form.email} onChange={set('email')} />
+                  </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm text-xq-muted mb-2">Email</label>
-                  <input
-                    type="email" required className="xq-input" placeholder="your@email.com"
-                    value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
+                  <label className="block text-sm text-xq-muted mb-2">Studio / Company</label>
+                  <input type="text" className="xq-input" placeholder="Your studio or company name"
+                    value={form.company} onChange={set('company')} />
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm text-xq-muted mb-2">Project Type</label>
+                    <select className="xq-input" value={form.projectType} onChange={set('projectType')}>
+                      {PROJECT_TYPES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-xq-muted mb-2">Engine / Platform</label>
+                    <select className="xq-input" value={form.engine} onChange={set('engine')}>
+                      {ENGINES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm text-xq-muted mb-2">Budget Range</label>
+                    <select className="xq-input" value={form.budget} onChange={set('budget')}>
+                      {BUDGETS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-xq-muted mb-2">Timeline</label>
+                    <select className="xq-input" value={form.timeline} onChange={set('timeline')}>
+                      {TIMELINES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-sm text-xq-muted mb-2">Message</label>
-                  <textarea
-                    required rows={5} className="xq-input resize-none"
-                    placeholder="Tell us about your project, timeline, and what you're looking for..."
-                    value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  />
+                  <label className="block text-sm text-xq-muted mb-2">Project Brief <span className="text-xq-accent">*</span></label>
+                  <textarea required rows={5} className="xq-input resize-none"
+                    placeholder="Describe your project — what you're building, the style direction, asset types, and any pipeline requirements..."
+                    value={form.message} onChange={set('message')} />
                 </div>
+
                 {status === 'error' && (
                   <p className="text-red-400 text-sm">
                     Something went wrong. Email us directly at{' '}
                     <a href="mailto:info@xqubestudio.com" className="text-xq-accent">info@xqubestudio.com</a>
                   </p>
                 )}
-                <button
-                  type="submit" disabled={status === 'loading'}
-                  className="xq-btn-primary w-full justify-center py-4 disabled:opacity-50"
-                >
-                  {status === 'loading' ? 'Sending...' : 'Send Message'}
+
+                <button type="submit" disabled={status === 'loading'}
+                  className="xq-btn-primary w-full justify-center py-4 disabled:opacity-50">
+                  {status === 'loading' ? 'Sending...' : 'Send Project Brief'}
                 </button>
+
+                <p className="text-xq-muted text-xs text-center">
+                  We respond to every qualified inquiry within 24–48 hours.
+                </p>
               </form>
             )}
           </div>
