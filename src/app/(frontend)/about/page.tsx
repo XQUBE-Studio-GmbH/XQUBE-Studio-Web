@@ -126,8 +126,8 @@ export default function AboutPage() {
           <h2 className="text-3xl font-black text-white mb-10">Built for serious studios</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { title: 'GmbH Registered', body: 'Austrian GmbH registration gives EU clients a legally reliable, GDPR-compliant partner with clear IP ownership.' },
-              { title: 'AI-Augmented Pipeline', body: '30–50% faster delivery at every stage. Not a claim — it\'s our production reality across 80+ clients.' },
+              { title: 'Zero Handoff Overhead', body: 'Your brief goes directly to the senior artists doing the work — no account manager layer. Deliverables arrive pipeline-native: FBX, UE5, Unity, your naming conventions, your LOD specs. Zero integration overhead.' },
+              { title: '24-Hour Production Cycle', body: 'Vienna, Dubai, and Dhaka span nine time zones. While your team sleeps, work continues. 30–50% faster delivery across 80+ clients — because three hubs in sequence never stop.' },
               { title: 'Engine Agnostic', body: 'UE5, Unity, Godot, UEFN, Roblox. We match your pipeline, your stack, your standards.' },
               { title: 'Senior Artists Only', body: 'No juniors on your work. Your Art Director works directly with ours. Your feedback actioned in 24 hours.' },
               { title: 'Pilot-First Model', body: 'Try one asset before signing anything. Fee credited to Month 1 if you proceed. Zero obligation.' },
