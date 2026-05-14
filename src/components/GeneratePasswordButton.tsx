@@ -1,5 +1,6 @@
 'use client'
 
+import { useFormFields } from '@payloadcms/ui'
 import { useState } from 'react'
 
 function generatePassword(): string {
@@ -13,10 +14,14 @@ function generatePassword(): string {
 export default function GeneratePasswordButton() {
   const [password, setPassword] = useState('')
   const [copied, setCopied]     = useState(false)
+  const dispatchFields = useFormFields(([, dispatch]) => dispatch)
 
   const generate = () => {
-    setPassword(generatePassword())
+    const p = generatePassword()
+    setPassword(p)
     setCopied(false)
+    dispatchFields({ type: 'UPDATE', path: 'password',         value: p })
+    dispatchFields({ type: 'UPDATE', path: 'confirm-password', value: p })
   }
 
   const copy = () => {
@@ -28,7 +33,7 @@ export default function GeneratePasswordButton() {
   return (
     <div style={{ marginBottom: '24px' }}>
       <p style={{ fontSize: '13px', color: '#a0a0a0', marginBottom: '8px' }}>
-        Generate a strong temporary password to share with the new user. They can change it after logging in.
+        Generate a strong temporary password. It will auto-fill the fields below — copy it to share with the new user.
       </p>
       <button
         type="button"

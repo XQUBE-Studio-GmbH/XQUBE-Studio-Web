@@ -40,6 +40,12 @@ export default buildConfig({
       titleSuffix: '— XQube Admin',
     },
     user: 'users',
+    components: {
+      graphics: {
+        Logo: '@/components/admin/AdminLogo#default',
+        Icon: '@/components/admin/AdminLogo#default',
+      },
+    },
   },
 
   editor: lexicalEditor(),
