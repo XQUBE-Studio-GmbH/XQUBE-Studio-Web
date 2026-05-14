@@ -232,6 +232,11 @@ import Image from 'next/image'
   Vercel will then read `engines.node` from `package.json` as the single source of truth.
 
 **Final fix:** Remove the `engines` field from `package.json` entirely.
+**Gotcha:** When removing the last field in a JSON object, also remove the trailing comma
+from the field above it — JSON does not allow trailing commas. Caused build failure:
+`Expected double-quoted property name in JSON at position 1024`
+
+**Final fix:** Remove the `engines` field from `package.json` entirely.
 Vercel's project-level Node.js version setting takes over as the single source of truth.
 No conflict = no warning. The Node.js version is still pinned via Vercel project settings.
 
