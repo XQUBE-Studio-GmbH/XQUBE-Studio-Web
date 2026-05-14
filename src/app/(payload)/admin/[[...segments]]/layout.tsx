@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import type { ServerFunctionClient } from 'payload'
 import { RootLayout, handleServerFunctions } from '@payloadcms/next/layouts'
 import { importMap } from '../importMap'
@@ -6,12 +5,6 @@ import config from '@payload-config'
 import React from 'react'
 import '@payloadcms/next/css'
 
-export const metadata: Metadata = {
-  icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-  },
-}
 
 type Args = {
   children: React.ReactNode
