@@ -36,8 +36,8 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "about_page" (
       "id"           serial PRIMARY KEY NOT NULL,
-      "intro_body_1" varchar,
-      "intro_body_2" varchar,
+      "intro_body1" varchar,
+      "intro_body2" varchar,
       "updated_at"   timestamp(3) with time zone,
       "created_at"   timestamp(3) with time zone
     );
