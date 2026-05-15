@@ -1,6 +1,8 @@
 /* Hide Payload's built-in password fields on the create-user form.
-   GeneratePasswordButton handles password generation and sets them programmatically. */
-div:has(input#field-password),
-div:has(input#field-confirm-password) {
+   GeneratePasswordButton handles password generation and sets them programmatically.
+   Target the specific field-type wrappers (not :has — that matches ALL ancestor divs,
+   which would hide the entire form container and cause a blank page). */
+.field-type.password,
+.field-type.confirm-password {
   display: none !important;
 }
