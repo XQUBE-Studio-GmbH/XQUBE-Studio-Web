@@ -279,6 +279,35 @@ update it in **Vercel → Project Settings** only.
 
 ---
 
+### ERROR 17 — Blank create-user page (admin form hidden by CSS)
+**Where:** `/admin/collections/users/create` — entire form content area blank
+**Root cause (part A):** `admin.css` used `div:has(input#field-password)` to hide Payload's
+built-in password fields. CSS `:has()` matches **every ancestor div** up the tree, not just
+the immediate parent. This caused the Auth section container, the Form wrapper, and every
+other ancestor `<div>` to be hidden with `display: none !important` — hiding the entire form.
+**Root cause (part B):** The selector was not scoped, so `.field-type.password` also matched
+the login page's password field, hiding it and preventing login.
+**Fix:** `src/app/(payload)/admin/admin.css`:
+```css
+/* CORRECT — targets only Payload's field wrapper, scoped to users collection */
+.collection-edit--users .field-type.password,
+.collection-edit--users .field-type.confirm-password {
+  display: none !important;
+}
+
+/* WRONG — :has() matches ALL ancestor divs, hiding the entire form */
+div:has(input#field-password) { display: none !important; }
+
+/* WRONG — not scoped, also hides the login page password field */
+.field-type.password { display: none !important; }
+```
+**Key facts:**
+- Payload's password field wrapper class: `field-type password` (`fieldBaseClass = 'field-type'` + `'password'`)
+- Payload adds `collection-edit--users` to the `<main>` element on the users create/edit page only
+- The admin login form also uses `field-type password` — never hide it globally
+
+---
+
 ## Payload Admin — Architecture Rules
 
 ### Admin layout (`src/app/(payload)/admin/[[...segments]]/layout.tsx`)
