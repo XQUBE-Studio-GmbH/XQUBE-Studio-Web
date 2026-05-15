@@ -40,15 +40,19 @@ export default function GeneratePasswordButton() {
     dispatch(p)
   }
 
-  // On mount: show UI and generate password immediately, but delay the form
-  // state dispatch. The parent Form fires REPLACE_STATE in its own useEffect
-  // (parent effects run after child effects), which would wipe the password.
-  // setTimeout(0) pushes the dispatch past all synchronous mount effects.
+  // On mount: show UI and generate a password immediately.
+  // Create page (!isSaved): delay form-state dispatch past the parent Form's
+  // REPLACE_STATE effect (parent effects fire after child effects and would
+  // wipe the password). setTimeout(0) pushes past all synchronous mount effects.
+  // Edit page (isSaved): show a password in the UI but do NOT auto-dispatch —
+  // the admin must click Regenerate to intentionally reset the user's password.
   useEffect(() => {
     const p = generatePassword()
     setPassword(p)
     setMounted(true)
-    setTimeout(() => dispatch(p), 0)
+    if (!isSaved) {
+      setTimeout(() => dispatch(p), 0)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -83,7 +87,9 @@ export default function GeneratePasswordButton() {
   return (
     <div style={{ marginBottom: '24px' }}>
       <p style={{ fontSize: '13px', color: '#a0a0a0', marginBottom: '8px' }}>
-        A password has been generated. Copy it manually or send an invitation email directly to the new user.
+        {isSaved
+          ? 'To reset this user\'s password, click Regenerate, then Save the form — then send the invitation email.'
+          : 'A password has been generated. Copy it manually or send an invitation email directly to the new user.'}
       </p>
 
       {password && (
@@ -137,6 +143,11 @@ export default function GeneratePasswordButton() {
       {!isSaved && (
         <p style={{ fontSize: '12px', color: '#f59e0b', marginBottom: '8px' }}>
           Save the user first — then you can send the invitation email.
+        </p>
+      )}
+      {isSaved && inviteStatus === 'idle' && (
+        <p style={{ fontSize: '12px', color: '#f59e0b', marginBottom: '8px' }}>
+          Make sure the password above matches what was saved. If you regenerated, save the form first.
         </p>
       )}
 

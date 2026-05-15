@@ -87,7 +87,6 @@ export default buildConfig({
             components: {
               Field: '@/components/GeneratePasswordButton#default',
             },
-            condition: (_data: any) => !_data?.id,
             disableListColumn: true,
           },
         },
