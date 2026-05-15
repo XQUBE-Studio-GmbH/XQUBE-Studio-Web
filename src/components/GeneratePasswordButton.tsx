@@ -15,6 +15,7 @@ export default function GeneratePasswordButton() {
   const [mounted, setMounted]     = useState(false)
   const [password, setPassword]   = useState('')
   const [copied, setCopied]       = useState(false)
+  const [resetStatus, setReset]   = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [inviteStatus, setInvite] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
 
   const { id } = useDocumentInfo()
@@ -25,36 +26,49 @@ export default function GeneratePasswordButton() {
   const name  = useFormFields(([fields]) => fields?.name?.value as string | undefined)
   const role  = useFormFields(([fields]) => fields?.role?.value as string | undefined)
 
-  const dispatch = (p: string) => {
+  const dispatchToForm = (p: string) => {
     if (dispatchFields) {
       dispatchFields({ type: 'UPDATE', path: 'password',         value: p })
       dispatchFields({ type: 'UPDATE', path: 'confirm-password', value: p })
     }
   }
 
-  const generate = () => {
-    const p = generatePassword()
-    setPassword(p)
-    setCopied(false)
-    setInvite('idle')
-    dispatch(p)
-  }
-
-  // On mount: show UI and generate a password immediately.
-  // Create page (!isSaved): delay form-state dispatch past the parent Form's
-  // REPLACE_STATE effect (parent effects fire after child effects and would
-  // wipe the password). setTimeout(0) pushes past all synchronous mount effects.
-  // Edit page (isSaved): show a password in the UI but do NOT auto-dispatch —
-  // the admin must click Regenerate to intentionally reset the user's password.
+  // Create page: dispatch to form state via setTimeout to survive Form's REPLACE_STATE.
+  // Edit page: generate for display only — password is reset via API, not the form.
   useEffect(() => {
     const p = generatePassword()
     setPassword(p)
     setMounted(true)
     if (!isSaved) {
-      setTimeout(() => dispatch(p), 0)
+      setTimeout(() => dispatchToForm(p), 0)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const newPassword = () => {
+    const p = generatePassword()
+    setPassword(p)
+    setCopied(false)
+    setReset('idle')
+    setInvite('idle')
+    if (!isSaved) dispatchToForm(p)
+  }
+
+  // Edit page only: PATCH the user directly — no form save needed.
+  const resetViaApi = async () => {
+    if (!id) return
+    setReset('loading')
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, confirmPassword: password }),
+      })
+      setReset(res.ok ? 'done' : 'error')
+    } catch {
+      setReset('error')
+    }
+  }
 
   const copy = () => {
     navigator.clipboard.writeText(password)
@@ -80,16 +94,16 @@ export default function GeneratePasswordButton() {
     }
   }
 
-  // Suppress server render entirely — Payload's form context hooks behave
-  // differently during SSR vs client hydration and would cause React #418.
   if (!mounted) return null
+
+  const canSendInvite = isSaved && (!isSaved || resetStatus === 'done')
 
   return (
     <div style={{ marginBottom: '24px' }}>
       <p style={{ fontSize: '13px', color: '#a0a0a0', marginBottom: '8px' }}>
         {isSaved
-          ? 'To reset this user\'s password, click Regenerate, then Save the form — then send the invitation email.'
-          : 'A password has been generated. Copy it manually or send an invitation email directly to the new user.'}
+          ? 'Click Reset Password to save the new password instantly — no need to save the form.'
+          : 'A password has been generated and will be saved when you create this user.'}
       </p>
 
       {password && (
@@ -124,7 +138,7 @@ export default function GeneratePasswordButton() {
           </button>
           <button
             type="button"
-            onClick={generate}
+            onClick={newPassword}
             style={{
               padding: '6px 14px',
               background: 'transparent',
@@ -135,35 +149,74 @@ export default function GeneratePasswordButton() {
               cursor: 'pointer',
             }}
           >
-            Regenerate
+            New Password
           </button>
         </div>
       )}
 
+      {/* Edit page: reset via API — no form save required */}
+      {isSaved && (
+        <div style={{ marginBottom: '16px' }}>
+          <button
+            type="button"
+            onClick={resetViaApi}
+            disabled={resetStatus === 'loading' || resetStatus === 'done'}
+            style={{
+              padding: '8px 18px',
+              background: resetStatus === 'done' ? '#238636' : resetStatus === 'error' ? '#b91c1c' : '#2563eb',
+              border: 'none',
+              borderRadius: '4px',
+              color: '#fff',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: resetStatus === 'loading' || resetStatus === 'done' ? 'not-allowed' : 'pointer',
+              opacity: resetStatus === 'loading' ? 0.7 : 1,
+              transition: 'background 0.2s',
+            }}
+          >
+            {resetStatus === 'loading' && 'Resetting…'}
+            {resetStatus === 'done'    && '✓ Password saved'}
+            {resetStatus === 'error'   && 'Failed — try again'}
+            {resetStatus === 'idle'    && 'Reset Password'}
+          </button>
+          {resetStatus === 'idle' && (
+            <p style={{ fontSize: '12px', color: '#f59e0b', marginTop: '6px' }}>
+              Click Reset Password first — then send the invitation with the correct credentials.
+            </p>
+          )}
+          {resetStatus === 'done' && (
+            <p style={{ color: '#4ade80', fontSize: '12px', marginTop: '6px' }}>
+              Password saved. Copy it above to share manually, or send the invitation email below.
+            </p>
+          )}
+          {resetStatus === 'error' && (
+            <p style={{ color: '#f87171', fontSize: '12px', marginTop: '6px' }}>
+              Could not reset password. Try again.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Create page: must save first */}
       {!isSaved && (
         <p style={{ fontSize: '12px', color: '#f59e0b', marginBottom: '8px' }}>
           Save the user first — then you can send the invitation email.
-        </p>
-      )}
-      {isSaved && inviteStatus === 'idle' && (
-        <p style={{ fontSize: '12px', color: '#f59e0b', marginBottom: '8px' }}>
-          Make sure the password above matches what was saved. If you regenerated, save the form first.
         </p>
       )}
 
       <button
         type="button"
         onClick={sendInvite}
-        disabled={!isSaved || inviteStatus === 'loading' || inviteStatus === 'sent'}
+        disabled={!canSendInvite || inviteStatus === 'loading' || inviteStatus === 'sent'}
         style={{
           padding: '8px 18px',
-          background: !isSaved ? '#1a1a1a' : inviteStatus === 'sent' ? '#238636' : inviteStatus === 'error' ? '#b91c1c' : '#14CB72',
-          border: !isSaved ? '1px solid #333' : 'none',
+          background: !canSendInvite ? '#1a1a1a' : inviteStatus === 'sent' ? '#238636' : inviteStatus === 'error' ? '#b91c1c' : '#14CB72',
+          border: !canSendInvite ? '1px solid #333' : 'none',
           borderRadius: '4px',
-          color: !isSaved ? '#555' : inviteStatus === 'sent' || inviteStatus === 'error' ? '#fff' : '#000',
+          color: !canSendInvite ? '#555' : inviteStatus === 'sent' || inviteStatus === 'error' ? '#fff' : '#000',
           fontSize: '13px',
           fontWeight: 600,
-          cursor: !isSaved || inviteStatus === 'loading' || inviteStatus === 'sent' ? 'not-allowed' : 'pointer',
+          cursor: !canSendInvite || inviteStatus === 'loading' || inviteStatus === 'sent' ? 'not-allowed' : 'pointer',
           opacity: inviteStatus === 'loading' ? 0.7 : 1,
           transition: 'background 0.2s',
         }}
