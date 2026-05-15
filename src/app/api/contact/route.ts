@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       subject:  `New inquiry from ${name}${company ? ` — ${company}` : ''}`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;background:#0e0e0e;color:#c4cad8;padding:32px;border-radius:8px;">
+          <img src="https://www.xqubestudio.com/logo.svg" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
           <div style="border-left:3px solid #14CB72;padding-left:16px;margin-bottom:24px;">
             <h2 style="color:#fff;margin:0;">New Project Brief</h2>
             <p style="color:#8d95a8;margin:4px 0 0;font-size:14px;">via xqubestudio.com</p>
