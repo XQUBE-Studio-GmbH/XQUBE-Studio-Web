@@ -29,7 +29,8 @@
         "./payload/payload.config.ts"
       ]
     },
-    "target": "ES2017"
+    "target": "ES2017",
+    "allowImportingTsExtensions": true
   },
   "include": [
     "next-env.d.ts",

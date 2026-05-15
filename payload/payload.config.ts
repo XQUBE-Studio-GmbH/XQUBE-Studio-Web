@@ -6,11 +6,11 @@ import { s3Storage } from '@payloadcms/storage-s3'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
-import * as initialMigration from './migrations/20250513_initial'
-import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enhanced'
-import * as pageGlobalsMigration from './migrations/20250515_page_globals'
-import * as contactServicesGlobalsMigration from './migrations/20250515_contact_services_globals'
-import * as imageFieldsMigration from './migrations/20250515_image_fields'
+import * as initialMigration from './migrations/20250513_initial.ts'
+import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enhanced.ts'
+import * as pageGlobalsMigration from './migrations/20250515_page_globals.ts'
+import * as contactServicesGlobalsMigration from './migrations/20250515_contact_services_globals.ts'
+import * as imageFieldsMigration from './migrations/20250515_image_fields.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
