@@ -12,9 +12,10 @@ function generatePassword(): string {
 }
 
 export default function GeneratePasswordButton() {
-  const [password, setPassword]     = useState('')
-  const [copied, setCopied]         = useState(false)
-  const [inviteStatus, setInvite]   = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
+  const [mounted, setMounted]     = useState(false)
+  const [password, setPassword]   = useState('')
+  const [copied, setCopied]       = useState(false)
+  const [inviteStatus, setInvite] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
 
   const { id } = useDocumentInfo()
   const isSaved = !!id
@@ -29,13 +30,14 @@ export default function GeneratePasswordButton() {
     setPassword(p)
     setCopied(false)
     setInvite('idle')
-    dispatchFields({ type: 'UPDATE', path: 'password',         value: p })
-    dispatchFields({ type: 'UPDATE', path: 'confirm-password', value: p })
+    if (dispatchFields) {
+      dispatchFields({ type: 'UPDATE', path: 'password',         value: p })
+      dispatchFields({ type: 'UPDATE', path: 'confirm-password', value: p })
+    }
   }
 
-  // Auto-generate on mount so the form is never missing a password
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { generate() }, [])
+  useEffect(() => { setMounted(true); generate() }, [])
 
   const copy = () => {
     navigator.clipboard.writeText(password)
@@ -60,6 +62,10 @@ export default function GeneratePasswordButton() {
       setInvite('error')
     }
   }
+
+  // Suppress server render entirely — Payload's form context hooks behave
+  // differently during SSR vs client hydration and would cause React #418.
+  if (!mounted) return null
 
   return (
     <div style={{ marginBottom: '24px' }}>
