@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { ContactInfo, ContactPageCopy } from './page'
 
@@ -102,6 +103,12 @@ export default function ContactForm({ contactInfo: ci, pageCopy: pc }: { contact
             >
               {pc.calendlyLabel}
             </Link>
+
+            {pc.image?.url && (
+              <div className="relative aspect-video rounded-lg overflow-hidden border border-xq-border mb-10">
+                <Image src={pc.image.url} alt={pc.image.alt || 'XQube Studio'} fill className="object-cover" />
+              </div>
+            )}
 
             <div className="space-y-4 mt-10">
               {[

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
@@ -29,6 +30,7 @@ interface BlogPost {
   excerpt?: string
   createdAt?: string
   updatedAt?: string
+  coverImage?: { url?: string; alt?: string } | null
 }
 
 async function getPosts(): Promise<BlogPost[]> {
@@ -39,6 +41,7 @@ async function getPosts(): Promise<BlogPost[]> {
       where: { status: { equals: 'published' } },
       sort: '-createdAt',
       limit: 100,
+      depth: 1,
     })
     return res.docs as unknown as BlogPost[]
   } catch {
@@ -70,16 +73,28 @@ export default async function BlogPage() {
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group xq-card flex flex-col hover:border-xq-accent/60 transition-colors"
+                className={`group xq-card flex flex-col hover:border-xq-accent/60 transition-colors ${post.coverImage?.url ? 'p-0 overflow-hidden' : ''}`}
               >
-                <div className="text-xq-muted text-xs mb-3">{formatDate(post.createdAt)}</div>
-                <h2 className="text-white font-bold leading-snug mb-3 group-hover:text-xq-accent transition-colors">
-                  {post.title}
-                </h2>
-                {post.excerpt && (
-                  <p className="text-xq-muted text-sm leading-relaxed line-clamp-3 flex-1">{post.excerpt}</p>
+                {post.coverImage?.url && (
+                  <div className="relative aspect-video overflow-hidden">
+                    <Image
+                      src={post.coverImage.url}
+                      alt={post.coverImage.alt || post.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
                 )}
-                <div className="mt-4 text-xq-accent text-xs font-semibold">Read article →</div>
+                <div className={post.coverImage?.url ? 'p-6 flex flex-col flex-1' : 'flex flex-col flex-1'}>
+                  <div className="text-xq-muted text-xs mb-3">{formatDate(post.createdAt)}</div>
+                  <h2 className="text-white font-bold leading-snug mb-3 group-hover:text-xq-accent transition-colors">
+                    {post.title}
+                  </h2>
+                  {post.excerpt && (
+                    <p className="text-xq-muted text-sm leading-relaxed line-clamp-3 flex-1">{post.excerpt}</p>
+                  )}
+                  <div className="mt-4 text-xq-accent text-xs font-semibold">Read article →</div>
+                </div>
               </Link>
             ))}
           </div>

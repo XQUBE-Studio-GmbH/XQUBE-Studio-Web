@@ -30,6 +30,7 @@ interface ServiceItem {
   shortDescription?: string
   icon?: string
   order?: number
+  image?: { url?: string; alt?: string } | null
 }
 interface ClientItem  { id: string | number; name: string }
 interface PortfolioItem {
@@ -41,6 +42,7 @@ interface HomepageGlobal {
     label?: string; headline?: string; subtitle?: string
     primaryLabel?: string; primaryUrl?: string
     secondaryLabel?: string; secondaryUrl?: string
+    showcaseImage?: { url?: string; alt?: string } | null
   }
   stats?: Stat[]
   cta?: { headline?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
@@ -67,7 +69,7 @@ async function getData() {
     const payload = await getPayload({ config })
     const [hp, servicesRes, clientsRes, featuredRes] = await Promise.all([
       payload.findGlobal({ slug: 'home-page' }) as Promise<HomepageGlobal>,
-      payload.find({ collection: 'services', where: { featured: { equals: true } }, sort: 'order', limit: 4, depth: 0 }),
+      payload.find({ collection: 'services', where: { featured: { equals: true } }, sort: 'order', limit: 4, depth: 1 }),
       payload.find({ collection: 'clients',  where: { featured: { equals: true } }, sort: 'order', limit: 20, depth: 0 }),
       payload.find({ collection: 'portfolio', where: { featured: { equals: true }, status: { equals: 'published' } }, limit: 6, depth: 1 }),
     ])
@@ -104,6 +106,8 @@ export default async function HomePage() {
   const ctaBtnLabel = cta.buttonLabel ?? 'Start a Conversation'
   const ctaBtnUrl   = cta.buttonUrl   ?? '/contact'
 
+  const showcaseImage = hero.showcaseImage as { url?: string; alt?: string } | null | undefined
+
   // Split headline — last word gets green accent
   const words       = heroHeadline.trim().split(' ')
   const accentWord  = words.pop() ?? ''
@@ -122,23 +126,36 @@ export default async function HomePage() {
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.05) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-xq-accent/5 rounded-full blur-3xl" />
         <div className="xq-container relative z-10">
-          <div className="max-w-4xl">
-            <div className="xq-label mb-6">{heroLabel}</div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05]">
-              {headlineRest} <span className="text-xq-accent">{accentWord}</span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-xq-muted max-w-2xl mb-10 leading-relaxed">
-              {heroSubtitle}
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href={primaryUrl} target={primaryUrl.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
-                className="xq-btn-primary text-base px-8 py-4">
-                {primaryLabel}
-              </Link>
-              <Link href={secondaryUrl} className="xq-btn-ghost text-base px-8 py-4">
-                {secondaryLabel}
-              </Link>
+          <div className={showcaseImage?.url ? 'grid grid-cols-1 lg:grid-cols-2 gap-12 items-center' : 'max-w-4xl'}>
+            <div>
+              <div className="xq-label mb-6">{heroLabel}</div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05]">
+                {headlineRest} <span className="text-xq-accent">{accentWord}</span>
+              </h1>
+              <p className="text-base sm:text-lg md:text-xl text-xq-muted max-w-2xl mb-10 leading-relaxed">
+                {heroSubtitle}
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href={primaryUrl} target={primaryUrl.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
+                  className="xq-btn-primary text-base px-8 py-4">
+                  {primaryLabel}
+                </Link>
+                <Link href={secondaryUrl} className="xq-btn-ghost text-base px-8 py-4">
+                  {secondaryLabel}
+                </Link>
+              </div>
             </div>
+            {showcaseImage?.url && (
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border hidden lg:block">
+                <Image
+                  src={showcaseImage.url}
+                  alt={showcaseImage.alt || 'XQube Studio'}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -240,12 +257,19 @@ export default async function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {services.map((service) => (
-                <div key={String(service.id)} className="xq-card">
-                  {service.icon && <div className="text-3xl mb-4">{service.icon}</div>}
-                  <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
-                  {service.shortDescription && (
-                    <p className="text-xq-muted text-sm leading-relaxed">{service.shortDescription}</p>
+                <div key={String(service.id)} className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : ''}`}>
+                  {service.image?.url && (
+                    <div className="relative aspect-video">
+                      <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
+                    </div>
                   )}
+                  <div className={service.image?.url ? 'p-6' : ''}>
+                    {service.icon && <div className="text-3xl mb-4">{service.icon}</div>}
+                    <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
+                    {service.shortDescription && (
+                      <p className="text-xq-muted text-sm leading-relaxed">{service.shortDescription}</p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

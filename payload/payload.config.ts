@@ -9,6 +9,7 @@ import * as initialMigration from './migrations/20250513_initial'
 import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enhanced'
 import * as pageGlobalsMigration from './migrations/20250515_page_globals'
 import * as contactServicesGlobalsMigration from './migrations/20250515_contact_services_globals'
+import * as imageFieldsMigration from './migrations/20250515_image_fields'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -239,6 +240,13 @@ export default buildConfig({
           admin: { description: 'Single emoji shown on homepage card, e.g. 🎮' },
         },
         {
+          name: 'image',
+          label: 'Service Image',
+          type: 'upload',
+          relationTo: 'media',
+          admin: { description: 'Thumbnail shown at the top of the service card on the Services page.' },
+        },
+        {
           name: 'shortDescription',
           label: 'Summary',
           type: 'textarea',
@@ -357,6 +365,13 @@ export default buildConfig({
           admin: { description: 'Used in the page URL — e.g. /blog/my-post. Lowercase, hyphens only.' },
         },
         {
+          name: 'coverImage',
+          label: 'Cover Image',
+          type: 'upload',
+          relationTo: 'media',
+          admin: { description: 'Featured image shown on the blog listing card and at the top of the post.' },
+        },
+        {
           name: 'excerpt',
           label: 'Short Preview',
           type: 'textarea',
@@ -469,6 +484,13 @@ export default buildConfig({
             { name: 'primaryUrl',     label: 'Primary CTA URL',  type: 'text',     defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
             { name: 'secondaryLabel', label: 'Secondary CTA Text', type: 'text',   defaultValue: 'View Portfolio' },
             { name: 'secondaryUrl',   label: 'Secondary CTA URL',  type: 'text',   defaultValue: '/portfolio' },
+            {
+              name: 'showcaseImage',
+              label: 'Hero Showcase Image',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. A portfolio image shown to the right of the hero text on large screens.' },
+            },
           ],
         },
         {
@@ -512,6 +534,13 @@ export default buildConfig({
           fields: [
             { name: 'body1', label: 'Paragraph 1', type: 'textarea', defaultValue: 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.' },
             { name: 'body2', label: 'Paragraph 2', type: 'textarea', defaultValue: 'Our three-hub model combines European business standards with world-class production capability — giving clients the reliability of a Vienna GmbH with the speed and depth of a Dhaka production team.' },
+            {
+              name: 'image',
+              label: 'Studio Photo',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. A studio or team photo shown beside the intro text.' },
+            },
           ],
         },
         {
@@ -536,6 +565,13 @@ export default buildConfig({
             { name: 'country', type: 'text', required: true },
             { name: 'role',    type: 'text', admin: { description: 'One-line hub role description.' } },
             { name: 'detail',  type: 'text', admin: { description: 'Secondary detail line.' } },
+            {
+              name: 'image',
+              label: 'Hub Photo',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. Photo shown at the top of the hub card.' },
+            },
           ],
         },
         {
@@ -570,6 +606,13 @@ export default buildConfig({
             { name: 'heading',      label: 'Heading',              type: 'text',     defaultValue: "Let's talk about your project" },
             { name: 'subtext',      label: 'Subtext',              type: 'textarea', defaultValue: "Book a discovery call for a scoped conversation, or fill out the brief and we'll respond within 24–48 hours." },
             { name: 'calendlyLabel', label: 'Calendly Button Text', type: 'text',    defaultValue: 'Book a Discovery Call' },
+            {
+              name: 'image',
+              label: 'Hero Image',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. An image shown in the contact page left column.' },
+            },
           ],
         },
       ],
@@ -593,6 +636,13 @@ export default buildConfig({
             { name: 'label',    label: 'Eyebrow Label', type: 'text',     defaultValue: 'What We Offer' },
             { name: 'heading',  label: 'Heading',        type: 'text',     defaultValue: 'Production-grade services for serious studios' },
             { name: 'subtitle', label: 'Subtitle',       type: 'textarea', defaultValue: 'From a single asset to a fully embedded team — we scale to your needs.' },
+            {
+              name: 'image',
+              label: 'Hero Image',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. A showcase image displayed beside the hero text.' },
+            },
           ],
         },
         {
@@ -604,6 +654,31 @@ export default buildConfig({
             { name: 'subtitle',    label: 'Subtitle',    type: 'text', defaultValue: 'We might be the right fit.' },
             { name: 'buttonLabel', label: 'Button Text', type: 'text', defaultValue: 'Start a Conversation' },
             { name: 'buttonUrl',   label: 'Button URL',  type: 'text', defaultValue: '/contact' },
+          ],
+        },
+        {
+          name: 'pipelines',
+          label: 'Production Pipelines',
+          type: 'array',
+          admin: { description: 'Cards in the "How We Work" section. Leave empty to use built-in defaults.' },
+          fields: [
+            { name: 'title',       type: 'text',     required: true },
+            { name: 'subtitle',    label: 'Subtitle / Workflow Type', type: 'text' },
+            { name: 'description', type: 'textarea' },
+            {
+              name: 'steps',
+              label: 'Pipeline Steps',
+              type: 'array',
+              fields: [{ name: 'step', type: 'text', required: true }],
+            },
+            { name: 'toolsUsed', label: 'Tools Used', type: 'text' },
+            {
+              name: 'image',
+              label: 'Pipeline Image',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Showcase image for this pipeline step (e.g. a rendered asset).' },
+            },
           ],
         },
       ],
@@ -680,6 +755,11 @@ export default buildConfig({
         name: '20250515_contact_services_globals',
         up: contactServicesGlobalsMigration.up,
         down: contactServicesGlobalsMigration.down,
+      },
+      {
+        name: '20250515_image_fields',
+        up: imageFieldsMigration.up,
+        down: imageFieldsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

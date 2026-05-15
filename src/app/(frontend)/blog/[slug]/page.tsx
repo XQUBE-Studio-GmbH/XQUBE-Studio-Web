@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -20,6 +21,7 @@ interface BlogPost {
   createdAt?: string
   updatedAt?: string
   status?: string
+  coverImage?: { url?: string; alt?: string } | null
 }
 
 async function getPost(slug: string): Promise<BlogPost | null> {
@@ -29,6 +31,7 @@ async function getPost(slug: string): Promise<BlogPost | null> {
       collection: 'blog-posts',
       where: { slug: { equals: slug }, status: { equals: 'published' } },
       limit: 1,
+      depth: 1,
     })
     return (res.docs[0] as unknown as BlogPost) ?? null
   } catch {
@@ -141,6 +144,23 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Cover image */}
+      {post.coverImage?.url && (
+        <section className="border-t border-xq-border">
+          <div className="xq-container py-8">
+            <div className="relative aspect-video max-w-4xl rounded-xl overflow-hidden border border-xq-border">
+              <Image
+                src={post.coverImage.url}
+                alt={post.coverImage.alt || post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Article body */}
       <section className="border-t border-xq-border pb-24">

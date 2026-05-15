@@ -37,6 +37,7 @@ interface ContactPageGlobal {
     heading?: string
     subtext?: string
     calendlyLabel?: string
+    image?: { url?: string; alt?: string } | null
   }
 }
 
@@ -54,6 +55,7 @@ export interface ContactPageCopy {
   heading: string
   subtext: string
   calendlyLabel: string
+  image?: { url?: string; alt?: string } | null
 }
 
 const FALLBACK_INFO: ContactInfo = {
@@ -70,6 +72,7 @@ const FALLBACK_COPY: ContactPageCopy = {
   heading:      "Let's talk about your project",
   subtext:      "Book a discovery call for a scoped conversation, or fill out the brief and we'll respond within 24–48 hours.",
   calendlyLabel: 'Book a Discovery Call',
+  image:        null,
 }
 
 async function getData(): Promise<{ contactInfo: ContactInfo; pageCopy: ContactPageCopy }> {
@@ -95,6 +98,7 @@ async function getData(): Promise<{ contactInfo: ContactInfo; pageCopy: ContactP
         heading:       h.heading        ?? FALLBACK_COPY.heading,
         subtext:       h.subtext        ?? FALLBACK_COPY.subtext,
         calendlyLabel: h.calendlyLabel  ?? FALLBACK_COPY.calendlyLabel,
+        image:         (h.image as { url?: string; alt?: string } | null) ?? null,
       },
     }
   } catch {

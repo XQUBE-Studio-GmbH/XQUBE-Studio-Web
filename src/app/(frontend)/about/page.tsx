@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
@@ -22,12 +23,13 @@ export const metadata: Metadata = {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+interface MediaRef    { url?: string; alt?: string }
 interface Credential { id?: string; value: string; label: string; detail?: string }
-interface Hub        { id?: string; flag?: string; city: string; country: string; role?: string; detail?: string }
+interface Hub        { id?: string; flag?: string; city: string; country: string; role?: string; detail?: string; image?: MediaRef | null }
 interface WhyCard    { id?: string; title: string; body: string }
 interface ClientItem { id: string | number; name: string; sector?: string; note?: string }
 interface AboutGlobal {
-  intro?: { body1?: string; body2?: string }
+  intro?: { body1?: string; body2?: string; image?: MediaRef | null }
   credentials?: Credential[]
   hubs?: Hub[]
   whyXqube?: WhyCard[]
@@ -92,6 +94,7 @@ export default async function AboutPage() {
 
   const introBody1  = ap.intro?.body1 ?? 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.'
   const introBody2  = ap.intro?.body2 ?? 'Our three-hub model combines European business standards with world-class production capability — giving clients the reliability of a Vienna GmbH with the speed and depth of a Dhaka production team.'
+  const introImage  = ap.intro?.image as MediaRef | null | undefined
   const credentials = ap.credentials && ap.credentials.length > 0 ? ap.credentials : FB_CREDENTIALS
   const hubs        = ap.hubs        && ap.hubs.length > 0        ? ap.hubs        : FB_HUBS
   const whyCards    = ap.whyXqube    && ap.whyXqube.length > 0    ? ap.whyXqube    : FB_WHY
@@ -102,14 +105,30 @@ export default async function AboutPage() {
       {/* ── Intro ────────────────────────────────────────────── */}
       <section className="xq-section">
         <div className="xq-container">
-          <div className="max-w-3xl">
-            <div className="xq-label mb-4">About Us</div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
-              A studio built for precision
-            </h1>
-            <p className="text-xq-muted text-lg leading-relaxed mb-6">{introBody1}</p>
-            <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
-          </div>
+          {introImage?.url ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+              <div>
+                <div className="xq-label mb-4">About Us</div>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
+                  A studio built for precision
+                </h1>
+                <p className="text-xq-muted text-lg leading-relaxed mb-6">{introBody1}</p>
+                <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
+              </div>
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border">
+                <Image src={introImage.url} alt={introImage.alt || 'XQube Studio'} fill className="object-cover" priority />
+              </div>
+            </div>
+          ) : (
+            <div className="max-w-3xl">
+              <div className="xq-label mb-4">About Us</div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
+                A studio built for precision
+              </h1>
+              <p className="text-xq-muted text-lg leading-relaxed mb-6">{introBody1}</p>
+              <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -135,8 +154,13 @@ export default async function AboutPage() {
           <h2 className="text-3xl font-black text-white mb-12">Global presence, unified delivery</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {hubs.map((hub, i) => (
-              <div key={hub.id ?? i} className="xq-card">
-                {hub.flag && <div className="text-4xl mb-4">{hub.flag}</div>}
+              <div key={hub.id ?? i} className="xq-card overflow-hidden">
+                {hub.image?.url && (
+                  <div className="relative aspect-video -mx-6 -mt-6 mb-6">
+                    <Image src={hub.image.url} alt={hub.image.alt || hub.city} fill className="object-cover" />
+                  </div>
+                )}
+                {hub.flag && !hub.image?.url && <div className="text-4xl mb-4">{hub.flag}</div>}
                 <h3 className="text-xl font-bold text-white mb-1">{hub.city}</h3>
                 <p className="text-xq-accent text-sm font-semibold mb-3">{hub.country}</p>
                 {hub.role   && <p className="text-xq-muted text-sm mb-2">{hub.role}</p>}
