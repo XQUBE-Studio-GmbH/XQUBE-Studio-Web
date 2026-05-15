@@ -27,13 +27,11 @@ export default function CookieBanner({ gaId }: { gaId?: string }) {
     setMounted(true)
     const consent = getCookie(COOKIE_NAME)
     if (consent === 'accepted') {
-      setAccepted(true)   // silently re-load GA on return visits
+      setAccepted(true)
     } else if (!consent) {
-      // Small delay so banner doesn't flash during initial render
       const t = setTimeout(() => setVisible(true), 800)
       return () => clearTimeout(t)
     }
-    // 'declined' → do nothing: no banner, no GA
   }, [])
 
   const accept = () => {
@@ -51,7 +49,7 @@ export default function CookieBanner({ gaId }: { gaId?: string }) {
 
   return (
     <>
-      {/* ── Google Analytics — only injected after explicit consent ── */}
+      {/* Google Analytics — only after explicit consent */}
       {accepted && gaId && (
         <>
           <Script
@@ -69,45 +67,43 @@ export default function CookieBanner({ gaId }: { gaId?: string }) {
         </>
       )}
 
-      {/* ── Consent banner ── */}
+      {/* Compact bottom bar */}
       <div
         role="dialog"
         aria-label="Cookie consent"
         aria-live="polite"
         className={`
-          fixed bottom-5 left-5 z-[60] w-[calc(100vw-2.5rem)] max-w-sm
-          rounded-xl border border-xq-border bg-xq-card/98 backdrop-blur-md shadow-xl
-          p-4 transition-all duration-500 ease-out
-          ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
+          fixed bottom-0 left-0 right-0 z-[60]
+          border-t border-xq-border bg-xq-card/95 backdrop-blur-md
+          transition-transform duration-500 ease-out
+          ${visible ? 'translate-y-0' : 'translate-y-full pointer-events-none'}
         `}
       >
-        {/* Message */}
-        <p className="text-xs text-xq-muted leading-relaxed mb-3">
-          We use analytics cookies to understand how visitors use our site.
-          No personal data is sold.{' '}
-          <Link href="/cookies" className="text-xq-accent hover:underline underline-offset-2">
-            Cookie Policy
-          </Link>
-          {' '}·{' '}
-          <Link href="/privacy" className="text-xq-accent hover:underline underline-offset-2">
-            Privacy Policy
-          </Link>
-        </p>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={accept}
-            className="xq-btn-primary text-xs px-4 py-2 flex-1"
-          >
-            Accept
-          </button>
-          <button
-            onClick={decline}
-            className="xq-btn-ghost text-xs px-4 py-2 flex-1"
-          >
-            Decline
-          </button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-xq-muted leading-relaxed">
+            We use analytics cookies to understand how visitors use our site. No personal data is sold.{' '}
+            <Link href="/cookies" className="text-xq-accent hover:underline underline-offset-2">
+              Cookie Policy
+            </Link>
+            {' '}·{' '}
+            <Link href="/privacy" className="text-xq-accent hover:underline underline-offset-2">
+              Privacy Policy
+            </Link>
+          </p>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={decline}
+              className="text-xs text-xq-muted hover:text-white transition-colors px-3 py-1.5"
+            >
+              Decline
+            </button>
+            <button
+              onClick={accept}
+              className="xq-btn-primary text-xs px-4 py-1.5"
+            >
+              Accept
+            </button>
+          </div>
         </div>
       </div>
     </>
