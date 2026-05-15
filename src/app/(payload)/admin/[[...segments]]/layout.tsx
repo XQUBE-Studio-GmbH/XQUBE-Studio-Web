@@ -4,6 +4,7 @@ import { importMap } from '../importMap'
 import config from '@payload-config'
 import React from 'react'
 import '@payloadcms/next/css'
+import '../admin.css'
 
 
 type Args = {
