@@ -347,6 +347,39 @@ After reset: redeploy on Vercel so the new cold start runs migrations cleanly.
 
 ---
 
+### ERROR 14 — `ERR_REQUIRE_ASYNC_MODULE` during `payload generate:importmap`
+**Error:** `Error [ERR_REQUIRE_ASYNC_MODULE]: require() cannot be used on an ESM graph with top-level await`
+**Where:** Build logs — `payload generate:importmap` step
+**Root cause:** Node.js 22+ added support for `require()`-ing sync ESM modules, but NOT modules with top-level `await`. `@payloadcms/storage-s3` (via AWS SDK v3) uses top-level await. tsx's CJS register hook causes Node.js to attempt `require()` on that ESM graph, which Node.js 22+/24 rejects.
+**Fix:** Change Node.js version to **20.x** in **Vercel → Project Settings → General → Node.js Version**.
+Node.js 20 does not attempt `require(esm)` at all — tsx uses its own transform pipeline and avoids the issue entirely.
+**Never use Node.js 22 or 24** for this project while `@payloadcms/storage-s3` (or any package using top-level await) is in the dependency tree. Stick to Node.js 20.x LTS.
+
+---
+
+### ERROR 15 — `ERR_MODULE_NOT_FOUND` for migration files during `payload generate:importmap`
+**Error:** `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/vercel/path0/payload/migrations/20250513_initial'`
+**Where:** Build logs — `payload generate:importmap` step
+**Root cause:** Migration imports in `payload.config.ts` had no file extension. tsx running in ESM mode requires explicit extensions to resolve TypeScript files.
+**Fix (part A):** Add `.ts` extension to all migration imports in `payload/payload.config.ts`:
+```ts
+import * as initialMigration from './migrations/20250513_initial.ts'
+```
+**Fix (part B):** Add `"allowImportingTsExtensions": true` to `tsconfig.json` so TypeScript's type-checking pass in `next build` doesn't reject `.ts` import extensions.
+Precondition: `"noEmit": true` must already be set (it is, since Next.js handles emission via SWC).
+
+---
+
+### ERROR 16 — `TypeError: Illegal constructor` in undici during `payload generate:importmap`
+**Error:** `TypeError: TypeError: Illegal constructor` at `new CacheStorage` in `undici/lib/web/cache/cachestorage.js`
+**Where:** Build logs — `payload generate:importmap` step (on Node.js 20.x)
+**Root cause:** tsx's CJS register hook (used internally by the Payload CLI) triggers a conflict between the `undici` npm package (pulled in by `@payloadcms/storage-s3` → AWS SDK v3) and Node.js 20's own built-in undici (used for the stable `fetch` API). The two copies use different `Symbol` / `WeakSet` instances for identity checks, so `new CacheStorage()` fails with `Illegal constructor`.
+**Fix:** Remove `payload generate:importmap` from the Vercel build command. Use `"build": "next build"` only. Maintain `importMap.ts` manually and commit it to git.
+**Why not auto-generate:** The Payload CLI's tsx-based config loading is incompatible with Node.js 20 + `@payloadcms/storage-s3` due to the undici conflict. Node.js 24 had `ERR_REQUIRE_ASYNC_MODULE` (async ESM), Node.js 20 has `Illegal constructor` (undici). There is no Vercel-compatible Node.js version where auto-generation works cleanly with the S3 plugin present.
+**Rule for importMap.ts maintenance:** When adding a new custom component to any collection or global, add it to `src/app/(payload)/admin/importMap.ts` manually. The file only needs entries for dynamically-resolved components (custom `admin.components.*` entries and plugin-provided client handlers). Payload's own core components that are statically imported do NOT need entries.
+
+---
+
 ## Git Rule
 **Never push to git unless the user explicitly asks.** Always commit locally first,
 show what was changed, then wait for "push" confirmation.
