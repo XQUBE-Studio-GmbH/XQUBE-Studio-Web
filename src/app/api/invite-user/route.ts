@@ -16,9 +16,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
     }
 
-    const adminUrl = process.env.NEXT_PUBLIC_SITE_URL
-      ? `${process.env.NEXT_PUBLIC_SITE_URL}/admin`
-      : 'https://www.xqubestudio.com/admin'
+    const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL || 'https://xqube-studio-web.vercel.app'
+    const adminUrl = `${siteUrl}/admin`
+    const logoUrl  = `${siteUrl}/logo.svg`
 
     const firstName = name?.split(' ')[0] || 'there'
     const roleLabels: Record<string, string> = {
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       subject: "You've been invited to XQube Studio Admin Panel",
       html: `
         <div style="font-family:sans-serif;max-width:600px;background:#0e0e0e;color:#c4cad8;padding:32px;border-radius:8px;">
-          <img src="https://www.xqubestudio.com/logo.svg" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
+          <img src="${logoUrl}" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
           <div style="border-left:3px solid #14CB72;padding-left:16px;margin-bottom:28px;">
             <h2 style="color:#fff;margin:0;">You've been invited to XQube Studio Admin Panel</h2>
           </div>

@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
     }
 
     const contactEmail = process.env.CONTACT_EMAIL || 'info@xqubestudio.com'
+    const siteUrl      = process.env.NEXT_PUBLIC_SITE_URL || 'https://xqube-studio-web.vercel.app'
+    const logoUrl      = `${siteUrl}/logo.svg`
 
     await resend.emails.send({
       from:     'XQube Contact Form <noreply@xqubestudio.com>',
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
       subject:  `New inquiry from ${name}${company ? ` — ${company}` : ''}`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;background:#0e0e0e;color:#c4cad8;padding:32px;border-radius:8px;">
-          <img src="https://www.xqubestudio.com/logo.svg" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
+          <img src="${logoUrl}" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
           <div style="border-left:3px solid #14CB72;padding-left:16px;margin-bottom:24px;">
             <h2 style="color:#fff;margin:0;">New Project Brief</h2>
             <p style="color:#8d95a8;margin:4px 0 0;font-size:14px;">via xqubestudio.com</p>
@@ -63,7 +65,7 @@ export async function POST(req: NextRequest) {
       subject: `Thanks for reaching out, ${name.split(' ')[0]}`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;background:#0e0e0e;color:#c4cad8;padding:32px;border-radius:8px;">
-          <img src="https://www.xqubestudio.com/logo.svg" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
+          <img src="${logoUrl}" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
           <h2 style="color:#fff;margin:0 0 16px;">We received your brief.</h2>
           <p style="color:#8d95a8;line-height:1.6;">Hi ${name.split(' ')[0]}, thanks for getting in touch. Our team reviews every inquiry and typically responds within 24–48 hours.</p>
           <p style="color:#8d95a8;line-height:1.6;margin-top:16px;">Want to speak sooner? Book a discovery call directly:</p>
