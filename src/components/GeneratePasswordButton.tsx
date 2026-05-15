@@ -25,19 +25,32 @@ export default function GeneratePasswordButton() {
   const name  = useFormFields(([fields]) => fields?.name?.value as string | undefined)
   const role  = useFormFields(([fields]) => fields?.role?.value as string | undefined)
 
-  const generate = () => {
-    const p = generatePassword()
-    setPassword(p)
-    setCopied(false)
-    setInvite('idle')
+  const dispatch = (p: string) => {
     if (dispatchFields) {
       dispatchFields({ type: 'UPDATE', path: 'password',         value: p })
       dispatchFields({ type: 'UPDATE', path: 'confirm-password', value: p })
     }
   }
 
+  const generate = () => {
+    const p = generatePassword()
+    setPassword(p)
+    setCopied(false)
+    setInvite('idle')
+    dispatch(p)
+  }
+
+  // On mount: show UI and generate password immediately, but delay the form
+  // state dispatch. The parent Form fires REPLACE_STATE in its own useEffect
+  // (parent effects run after child effects), which would wipe the password.
+  // setTimeout(0) pushes the dispatch past all synchronous mount effects.
+  useEffect(() => {
+    const p = generatePassword()
+    setPassword(p)
+    setMounted(true)
+    setTimeout(() => dispatch(p), 0)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { setMounted(true); generate() }, [])
+  }, [])
 
   const copy = () => {
     navigator.clipboard.writeText(password)
