@@ -1,12 +1,23 @@
 'use client'
 
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 export default function AdminLogo() {
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    setIsDark(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
       <Image
-        src="/xqube-logo.svg"
+        src={isDark ? '/xqube-logo.svg' : '/xqube-logo-light.svg'}
         alt="XQube Studio"
         width={320}
         height={183}
@@ -18,7 +29,7 @@ export default function AdminLogo() {
         fontWeight: 600,
         letterSpacing: '3px',
         textTransform: 'uppercase',
-        color: '#666',
+        color: isDark ? '#666' : '#888',
       }}>
         Admin Panel
       </span>
