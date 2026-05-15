@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "next build",
+  "buildCommand": "npm run build",
   "installCommand": "npm install --legacy-peer-deps",
   "regions": ["fra1"],
   "headers": [
