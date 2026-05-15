@@ -21,7 +21,13 @@ export async function POST(req: NextRequest) {
       : 'https://www.xqubestudio.com/admin'
 
     const firstName = name?.split(' ')[0] || 'there'
-    const roleLabel = role ? ` as <strong style="color:#fff;">${role}</strong>` : ''
+    const roleLabels: Record<string, string> = {
+      'super-admin':    'Super Admin',
+      'admin':          'Admin',
+      'content-editor': 'Content Editor',
+      'viewer':         'Viewer',
+    }
+    const roleLabel = role ? ` as <strong style="color:#fff;">${roleLabels[role] ?? role}</strong>` : ''
 
     await resend.emails.send({
       from:    'XQube Studio <noreply@xqubestudio.com>',
