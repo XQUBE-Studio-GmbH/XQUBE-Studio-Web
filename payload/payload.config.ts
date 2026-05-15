@@ -2,6 +2,7 @@ import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { resendAdapter } from '@payloadcms/email-resend'
+import { s3Storage } from '@payloadcms/storage-s3'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -110,7 +111,13 @@ export default buildConfig({
     // ─── Media Library ───────────────────────────────────────
     {
       slug: 'media',
-      upload: true,
+      upload: {
+        imageSizes: [
+          { name: 'thumbnail', width: 400,  height: 300,  position: 'centre' },
+          { name: 'card',      width: 800,  height: 600,  position: 'centre' },
+          { name: 'hero',      width: 1600, height: 900,  position: 'centre' },
+        ],
+      },
       labels: { singular: 'Media File', plural: 'Media Library' },
       admin: {
         group: 'Access',
@@ -774,4 +781,22 @@ export default buildConfig({
       fileSize: 10_000_000,
     },
   },
+
+  plugins: [
+    s3Storage({
+      collections: {
+        media: true,
+      },
+      bucket: process.env.DO_SPACES_BUCKET || 'xqube-web-media',
+      config: {
+        credentials: {
+          accessKeyId: process.env.DO_SPACES_KEY || '',
+          secretAccessKey: process.env.DO_SPACES_SECRET || '',
+        },
+        endpoint: `https://${process.env.DO_SPACES_REGION || 'fra1'}.digitaloceanspaces.com`,
+        region: process.env.DO_SPACES_REGION || 'fra1',
+        forcePathStyle: false,
+      },
+    }),
+  ],
 })
