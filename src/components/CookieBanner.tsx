@@ -75,45 +75,39 @@ export default function CookieBanner({ gaId }: { gaId?: string }) {
         aria-label="Cookie consent"
         aria-live="polite"
         className={`
-          fixed bottom-0 left-0 right-0 z-[60]
-          border-t border-xq-border bg-xq-card/98 backdrop-blur-md
-          transition-transform duration-500 ease-out
-          ${visible ? 'translate-y-0' : 'translate-y-full'}
+          fixed bottom-5 left-5 z-[60] w-[calc(100vw-2.5rem)] max-w-sm
+          rounded-xl border border-xq-border bg-xq-card/98 backdrop-blur-md shadow-xl
+          p-4 transition-all duration-500 ease-out
+          ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
         `}
       >
-        <div className="xq-container py-4 md:py-5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Message */}
+        <p className="text-xs text-xq-muted leading-relaxed mb-3">
+          We use analytics cookies to understand how visitors use our site.
+          No personal data is sold.{' '}
+          <Link href="/cookies" className="text-xq-accent hover:underline underline-offset-2">
+            Cookie Policy
+          </Link>
+          {' '}·{' '}
+          <Link href="/privacy" className="text-xq-accent hover:underline underline-offset-2">
+            Privacy Policy
+          </Link>
+        </p>
 
-            {/* Message */}
-            <p className="text-sm text-xq-muted leading-relaxed max-w-2xl">
-              We use analytics cookies to understand how visitors use our site and to improve it.
-              No personal data is sold.{' '}
-              <Link href="/cookies" className="text-xq-accent hover:underline underline-offset-2">
-                Cookie Policy
-              </Link>
-              {' '}·{' '}
-              <Link href="/privacy" className="text-xq-accent hover:underline underline-offset-2">
-                Privacy Policy
-              </Link>
-            </p>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={decline}
-                className="xq-btn-ghost text-sm px-5 py-2.5"
-              >
-                Decline
-              </button>
-              <button
-                onClick={accept}
-                className="xq-btn-primary text-sm px-5 py-2.5"
-              >
-                Accept Analytics
-              </button>
-            </div>
-
-          </div>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={accept}
+            className="xq-btn-primary text-xs px-4 py-2 flex-1"
+          >
+            Accept
+          </button>
+          <button
+            onClick={decline}
+            className="xq-btn-ghost text-xs px-4 py-2 flex-1"
+          >
+            Decline
+          </button>
         </div>
       </div>
     </>
