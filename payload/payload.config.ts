@@ -11,6 +11,7 @@ import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enh
 import * as pageGlobalsMigration from './migrations/20250515_page_globals.ts'
 import * as contactServicesGlobalsMigration from './migrations/20250515_contact_services_globals.ts'
 import * as imageFieldsMigration from './migrations/20250515_image_fields.ts'
+import * as mediaImageSizesMigration from './migrations/20250516_media_image_sizes.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -766,6 +767,11 @@ export default buildConfig({
         name: '20250515_image_fields',
         up: imageFieldsMigration.up,
         down: imageFieldsMigration.down,
+      },
+      {
+        name: '20250516_media_image_sizes',
+        up: mediaImageSizesMigration.up,
+        down: mediaImageSizesMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
