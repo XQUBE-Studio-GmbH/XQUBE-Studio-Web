@@ -12,6 +12,7 @@ import * as pageGlobalsMigration from './migrations/20250515_page_globals.ts'
 import * as contactServicesGlobalsMigration from './migrations/20250515_contact_services_globals.ts'
 import * as imageFieldsMigration from './migrations/20250515_image_fields.ts'
 import * as mediaImageSizesMigration from './migrations/20250516_media_image_sizes.ts'
+import * as globalVersionsMigration   from './migrations/20250517_global_versions.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -52,6 +53,32 @@ export default buildConfig({
         Logo: '@/components/admin/AdminLogo#default',
         Icon: '@/components/admin/AdminIcon#default',
       },
+    },
+    livePreview: {
+      // Opens an iframe inside the admin showing the live site.
+      // The iframe receives postMessage updates on every field change —
+      // the client component uses useLivePreview() to re-render in real-time.
+      url: ({ globalConfig }: { globalConfig?: { slug?: string } }) => {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+        const pathMap: Record<string, string> = {
+          'home-page':     '/',
+          'about-page':    '/about',
+          'contact-page':  '/contact',
+          'services-page': '/services',
+          // Navigation and Site Settings preview on the homepage
+          // (nav/footer are not yet wired to Payload — hardcoded in Navbar/Footer)
+          'navigation':    '/',
+          'site-settings': '/',
+        }
+        const slug = globalConfig?.slug ?? ''
+        return `${siteUrl}${pathMap[slug] ?? '/'}`
+      },
+      globals: ['home-page', 'about-page', 'contact-page', 'services-page', 'navigation', 'site-settings'],
+      breakpoints: [
+        { label: 'Mobile',  name: 'mobile',  width: 375,  height: 667  },
+        { label: 'Tablet',  name: 'tablet',  width: 768,  height: 1024 },
+        { label: 'Desktop', name: 'desktop', width: 1440, height: 900  },
+      ],
     },
   },
 
@@ -403,6 +430,7 @@ export default buildConfig({
     {
       slug: 'site-settings',
       label: 'Site Settings',
+      versions: { drafts: true },
       admin: {
         group: 'Settings',
         description: 'Global settings that apply across the entire website.',
@@ -473,6 +501,7 @@ export default buildConfig({
     {
       slug: 'home-page',
       label: 'Homepage',
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the homepage hero, stats, and bottom CTA.',
@@ -528,6 +557,7 @@ export default buildConfig({
     {
       slug: 'about-page',
       label: 'About Page',
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the About page intro, credentials, hubs, and Why XQube cards.',
@@ -598,6 +628,7 @@ export default buildConfig({
     {
       slug: 'contact-page',
       label: 'Contact Page',
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the Contact page headline, subtext, and Calendly button label.',
@@ -629,6 +660,7 @@ export default buildConfig({
     {
       slug: 'services-page',
       label: 'Services Page',
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the Services page hero text and bottom CTA.',
@@ -695,6 +727,7 @@ export default buildConfig({
     {
       slug: 'navigation',
       label: 'Navigation',
+      versions: { drafts: true },
       admin: {
         group: 'Settings',
         description: 'Manage the header menu links and call-to-action button.',
@@ -772,6 +805,11 @@ export default buildConfig({
         name: '20250516_media_image_sizes',
         up: mediaImageSizesMigration.up,
         down: mediaImageSizesMigration.down,
+      },
+      {
+        name: '20250517_global_versions',
+        up: globalVersionsMigration.up,
+        down: globalVersionsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
-import ContactForm from './ContactForm'
+import ContactPageClient from '@/components/live-preview/ContactPageClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,5 +108,26 @@ async function getData(): Promise<{ contactInfo: ContactInfo; pageCopy: ContactP
 
 export default async function ContactPage() {
   const { contactInfo, pageCopy } = await getData()
-  return <ContactForm contactInfo={contactInfo} pageCopy={pageCopy} />
+
+  const serverURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
+  // Pass the raw contact-page global as initialData for useLivePreview.
+  // contactInfo (from site-settings) stays static — only the hero copy updates live.
+  const initialData: ContactPageGlobal = {
+    hero: {
+      label:         pageCopy.label,
+      heading:       pageCopy.heading,
+      subtext:       pageCopy.subtext,
+      calendlyLabel: pageCopy.calendlyLabel,
+      image:         pageCopy.image ?? null,
+    },
+  }
+
+  return (
+    <ContactPageClient
+      initialData={initialData}
+      contactInfo={contactInfo}
+      serverURL={serverURL}
+    />
+  )
 }

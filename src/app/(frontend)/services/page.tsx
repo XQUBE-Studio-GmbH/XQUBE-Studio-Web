@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
-import Link from 'next/link'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
+import ServicesPageClient from '@/components/live-preview/ServicesPageClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -236,173 +235,15 @@ const FB_PIPELINES: Pipeline[] = [
 ]
 
 export default async function ServicesPage() {
-  const { services, pipelines: cmsPipelines, sp } = await getData()
-  const activePipelines = cmsPipelines ?? FB_PIPELINES
+  const { services, sp } = await getData()
 
-  const heroLabel    = sp.hero?.label    ?? FB_PAGE.heroLabel
-  const heroHeading  = sp.hero?.heading  ?? FB_PAGE.heroHeading
-  const heroSubtitle = sp.hero?.subtitle ?? FB_PAGE.heroSubtitle
-  const heroImage    = sp.hero?.image as MediaRef | null | undefined
-  const ctaHeading   = sp.cta?.heading     ?? FB_PAGE.ctaHeading
-  const ctaSubtitle  = sp.cta?.subtitle    ?? FB_PAGE.ctaSubtitle
-  const ctaBtnLabel  = sp.cta?.buttonLabel ?? FB_PAGE.ctaBtnLabel
-  const ctaBtnUrl    = sp.cta?.buttonUrl   ?? FB_PAGE.ctaBtnUrl
+  const serverURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   return (
-    <>
-      {/* Hero */}
-      <section className="xq-section">
-        <div className="xq-container">
-          {heroImage?.url ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="xq-label mb-4">{heroLabel}</div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
-                  {heroHeading}
-                </h1>
-                <p className="text-xq-muted text-lg leading-relaxed">{heroSubtitle}</p>
-              </div>
-              <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border hidden lg:block">
-                <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="xq-label mb-4">{heroLabel}</div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 max-w-2xl">
-                {heroHeading}
-              </h1>
-              <p className="text-xq-muted text-lg max-w-2xl leading-relaxed">{heroSubtitle}</p>
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* Services */}
-      <section className="border-t border-xq-border pb-24">
-        <div className="xq-container space-y-8 mt-12">
-          {services.map((service) => (
-            <div key={String(service.id)} className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : 'p-5 sm:p-6 md:p-8'}`}>
-              {service.image?.url && (
-                <div className="relative aspect-video">
-                  <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
-                </div>
-              )}
-              <div className={service.image?.url ? 'p-5 sm:p-6 md:p-8' : ''}>
-                <div className="flex items-start gap-3 mb-3">
-                  {service.icon && <span className="text-2xl shrink-0">{service.icon}</span>}
-                  <h2 className="text-2xl font-black text-white">{service.title}</h2>
-                </div>
-                {service.shortDescription && (
-                  <p className="text-xq-muted leading-relaxed mb-6 max-w-2xl">{service.shortDescription}</p>
-                )}
-                {service.features && service.features.length > 0 && (
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
-                    {service.features.map((f) => (
-                      <li key={f.id} className="flex items-start gap-2 text-sm text-xq-muted">
-                        <span className="text-xq-accent mt-0.5 shrink-0">→</span> {f.feature}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {service.platforms && (
-                  <div className="text-xs text-xq-muted border-t border-xq-border pt-4">
-                    <span className="text-xq-accent font-semibold">Platforms & Engines: </span>
-                    {service.platforms}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Tools */}
-      <section className="xq-section border-t border-xq-border bg-xq-surface">
-        <div className="xq-container">
-          <div className="xq-label mb-4">Our Stack</div>
-          <h2 className="text-3xl font-black text-white mb-12">Tools & Technology</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tools.map((tool) => (
-              <div key={tool.category} className="flex gap-4 p-4 border border-xq-border rounded-lg bg-xq-card">
-                <div className="w-1 bg-xq-accent rounded-full shrink-0" />
-                <div>
-                  <div className="text-white font-semibold text-sm mb-1">{tool.category}</div>
-                  <div className="text-xq-muted text-xs leading-relaxed">{tool.items}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Production Pipeline */}
-      <section className="xq-section border-t border-xq-border">
-        <div className="xq-container">
-          <div className="xq-label mb-4">How We Work</div>
-          <h2 className="text-3xl font-black text-white mb-4">Production Pipeline</h2>
-          <p className="text-xq-muted max-w-2xl mb-12 leading-relaxed">
-            Standardized workflows built for quality and consistency across every project.
-            Full pipeline documentation available on request.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {activePipelines.map((pipeline, pi) => (
-              <div key={pipeline.id ?? pi} className="xq-card p-0 overflow-hidden">
-                <div className="aspect-video bg-xq-surface border-b border-xq-border flex items-center justify-center relative">
-                  {pipeline.image?.url ? (
-                    <Image src={pipeline.image.url} alt={pipeline.image.alt || pipeline.title} fill className="object-cover" />
-                  ) : (
-                    <div className="text-center px-6">
-                      <div className="text-xq-accent text-xs font-semibold mb-1 tracking-widest uppercase">Portfolio Asset</div>
-                      <div className="text-xq-muted text-xs">{pipeline.imageLabel ?? 'Upload an image via the Services Page in the admin panel'}</div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <div className="mb-3">
-                    <h3 className="text-white font-black text-lg">{pipeline.title}</h3>
-                    {pipeline.subtitle && <div className="text-xq-accent text-xs font-semibold tracking-wide mt-0.5">{pipeline.subtitle}</div>}
-                  </div>
-                  {pipeline.description && <p className="text-xq-muted text-sm mb-4 leading-relaxed">{pipeline.description}</p>}
-
-                  {pipeline.steps && pipeline.steps.length > 0 && (
-                    <ol className="space-y-1.5 mb-5">
-                      {pipeline.steps.map((step, i) => (
-                        <li key={i} className="flex gap-3 text-sm text-xq-muted">
-                          <span className="text-xq-accent font-bold shrink-0 w-4">{i + 1}.</span>
-                          {typeof step === 'string' ? step : step.step}
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-
-                  {pipeline.toolsUsed && (
-                    <div className="text-xs text-xq-muted border-t border-xq-border pt-4">
-                      <span className="text-xq-accent font-semibold">Tools: </span>
-                      {pipeline.toolsUsed}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Engagement CTA */}
-      <section className="xq-section border-t border-xq-border bg-xq-surface">
-        <div className="xq-container">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">{ctaHeading}</h2>
-            <p className="text-xq-muted text-lg mb-10">{ctaSubtitle}</p>
-            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4">
-              {ctaBtnLabel}
-            </Link>
-          </div>
-        </div>
-      </section>
-    </>
+    <ServicesPageClient
+      initialData={sp}
+      services={services}
+      serverURL={serverURL}
+    />
   )
 }
