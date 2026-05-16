@@ -409,6 +409,83 @@ Precondition: `"noEmit": true` must already be set (it is, since Next.js handles
 
 ---
 
+---
+
+### ERROR 18 — `resendAdapter` crashes build when `RESEND_API_KEY` is empty
+**Error:** `Error: Missing API key. Pass it to the constructor 'new Resend("re_123")'`
+**Where:** Build logs — "Collecting page data" at `app/api/contact/route.js`
+**Root cause:** The Resend SDK throws immediately in the constructor when `apiKey` is `''`. During Next.js's build phase, even `force-dynamic` routes have their module imported (to read exports like `dynamic`, `revalidate`). This imports Payload config → initialises `resendAdapter({ apiKey: '' })` → throws → build exits with code 1.
+**Wrong fix:** Setting `apiKey: process.env.RESEND_API_KEY || ''` — the `|| ''` fallback feeds an empty string to Resend which is what causes the throw.
+**Fix:** Conditionally include the email adapter only when the key is present:
+```ts
+...(process.env.RESEND_API_KEY
+  ? {
+      email: resendAdapter({
+        defaultFromAddress: 'noreply@xqubestudio.com',
+        defaultFromName: 'XQube Studio',
+        apiKey: process.env.RESEND_API_KEY,
+      }),
+    }
+  : {}),
+```
+**Rule:** Never pass `|| ''` to an SDK constructor that validates its key. Always guard with a conditional so the adapter is only instantiated when the env var is actually set.
+
+---
+
+### ERROR 19 — `'baseURL' does not exist in type 'S3StorageOptions'`
+**Error:** `Type error: Object literal may only specify known properties, and 'baseURL' does not exist in type 'S3StorageOptions'.`
+**Where:** Build logs — TypeScript type-check at `payload/payload.config.ts:839`
+**Root cause:** `baseURL` is not a valid top-level option on `@payloadcms/storage-s3`. The correct way to set the public URL for uploaded files is `generateFileURL` inside `collections.media`.
+**Wrong fix:** `baseURL: 'https://...'` at the top level of `s3Storage({...})`.
+**Fix:** Move URL generation inside `collections.media.generateFileURL`:
+```ts
+s3Storage({
+  acl: 'public-read', // valid top-level option
+  collections: {
+    media: {
+      generateFileURL: ({ filename, prefix }) => {
+        const cdnBase = process.env.DO_SPACES_CDN_URL
+          || `https://${process.env.DO_SPACES_BUCKET || 'xqube-web-media'}.${process.env.DO_SPACES_REGION || 'fra1'}.cdn.digitaloceanspaces.com`
+        return `${cdnBase}${prefix ? `/${prefix}` : ''}/${filename}`
+      },
+    },
+  },
+  bucket: process.env.DO_SPACES_BUCKET || 'xqube-web-media',
+  config: { ... },
+})
+```
+**Rule:** Always check `node_modules/@payloadcms/storage-s3/dist/index.d.ts` for the actual `S3StorageOptions` type before adding new options. Valid top-level options: `acl`, `bucket`, `clientCacheKey`, `clientUploads`, `collections`, `config`, `disableLocalStorage`, `enabled`, `signedDownloads`, `useCompositePrefixes`.
+
+---
+
+### ERROR 20 — Admin globals return 404 after enabling `versions: { drafts: true }`
+**Error:** `GET /admin/globals/home-page 404` — Payload admin renders "This page could not be found"
+**Where:** Runtime — all `/admin/globals/*` routes after deploying `versions: { drafts: true }` on globals
+**Root cause:** `versions: { drafts: true }` requires `_<slug>_v` version tables in the DB (e.g. `_home_page_v`, `_about_page_v`). If the migration creating those tables fails or hasn't run, Payload cannot initialise the globals and returns 404 for every global admin route.
+**Important:** Live Preview (`useLivePreview` iframe in admin) works **without** `versions: { drafts: true }` — it is pure `postMessage` and does not touch version tables. Only the Save Draft → Publish workflow needs versions enabled.
+**Fix (immediate):** Comment out `versions: { drafts: true }` on all globals to restore the admin. Live Preview continues to work.
+**Fix (proper — future):** Before re-enabling versions, verify the version table schema against what Payload v3 actually generates by running with `push: true` in a local dev environment, dumping the auto-created schema, and using that as the migration template. The hand-written `20250517_global_versions.ts` migration may have schema mismatches.
+**Rule:** Never enable `versions: { drafts: true }` on globals in production without first verifying the version table schema in a local dev environment with `push: true`.
+
+---
+
+## DigitalOcean Spaces — Image Upload Rules
+
+### Public access setup
+- **File Listing** (Settings → File Listing): Controls directory listing ONLY. Does NOT make individual files public.
+- **Per-file ACL**: Must use `acl: 'public-read'` in `s3Storage()` so every uploaded file gets public read permissions.
+- **CDN**: When CDN is enabled on the bucket, use the CDN endpoint as the base URL: `https://{bucket}.{region}.cdn.digitaloceanspaces.com`
+- **`next.config.mjs` remotePatterns**: Must include both origin and CDN hostnames:
+  ```js
+  { protocol: 'https', hostname: '**.digitaloceanspaces.com' },     // origin
+  { protocol: 'https', hostname: '**.cdn.digitaloceanspaces.com' }, // CDN
+  ```
+
+### Why images broke after admin upload
+Without `generateFileURL`, Payload falls back to serving files through `/api/media/file/{filename}`. That route is gated by the media collection's `access.read` (set to `isLoggedIn`), so public visitors get 403. Setting `generateFileURL` returns a direct CDN URL bypassing Payload's access control entirely.
+
+---
+
 ## Git Rule
 **Never push to git unless the user explicitly asks.** Always commit locally first,
 show what was changed, then wait for "push" confirmation.
