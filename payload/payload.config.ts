@@ -82,11 +82,19 @@ export default buildConfig({
     },
   },
 
-  email: resendAdapter({
-    defaultFromAddress: 'noreply@xqubestudio.com',
-    defaultFromName: 'XQube Studio',
-    apiKey: process.env.RESEND_API_KEY || '',
-  }),
+  // Resend throws immediately if apiKey is empty — guard so builds don't crash
+  // when RESEND_API_KEY is not set (e.g. preview environments).
+  // The contact form API route checks for the key at request time and returns
+  // a graceful error if email cannot be sent.
+  ...(process.env.RESEND_API_KEY
+    ? {
+        email: resendAdapter({
+          defaultFromAddress: 'noreply@xqubestudio.com',
+          defaultFromName: 'XQube Studio',
+          apiKey: process.env.RESEND_API_KEY,
+        }),
+      }
+    : {}),
 
   editor: lexicalEditor(),
 
