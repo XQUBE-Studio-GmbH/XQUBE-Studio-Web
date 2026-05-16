@@ -835,20 +835,23 @@ export default buildConfig({
 
   plugins: [
     s3Storage({
+      // acl: public-read ensures every uploaded file is individually accessible.
+      // "Enable File Listing" in DO Spaces only controls directory listing, NOT per-file access.
+      acl: 'public-read',
       collections: {
-        media: true,
+        media: {
+          // generateFileURL: returns the public CDN URL stored in the `url` field.
+          // Without this, Payload serves files through /api/media (auth-gated → 403 for public visitors).
+          // CDN is enabled on this bucket — use CDN endpoint for performance.
+          // Set DO_SPACES_CDN_URL env var in Vercel to override (e.g. custom domain later).
+          generateFileURL: ({ filename, prefix }) => {
+            const cdnBase = process.env.DO_SPACES_CDN_URL
+              || `https://${process.env.DO_SPACES_BUCKET || 'xqube-web-media'}.${process.env.DO_SPACES_REGION || 'fra1'}.cdn.digitaloceanspaces.com`
+            return `${cdnBase}${prefix ? `/${prefix}` : ''}/${filename}`
+          },
+        },
       },
       bucket: process.env.DO_SPACES_BUCKET || 'xqube-web-media',
-      // baseURL: public URL prepended to every uploaded file's `url` field.
-      // Without this Payload tries to serve files through /api/media (auth-gated → 403 for public).
-      // CDN is enabled on this bucket — prefer the CDN endpoint for performance.
-      // CDN URL format: https://{bucket}.{region}.cdn.digitaloceanspaces.com
-      // Set DO_SPACES_CDN_URL in Vercel env vars to override (e.g. custom domain later).
-      baseURL: process.env.DO_SPACES_CDN_URL
-        || `https://${process.env.DO_SPACES_BUCKET || 'xqube-web-media'}.${process.env.DO_SPACES_REGION || 'fra1'}.cdn.digitaloceanspaces.com`,
-      // public-read ACL ensures every uploaded file is individually accessible.
-      // "Enable File Listing" in DO Spaces only controls directory listing, NOT file access.
-      acl: 'public-read',
       config: {
         credentials: {
           accessKeyId: process.env.DO_SPACES_KEY || '',
