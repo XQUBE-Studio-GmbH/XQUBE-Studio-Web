@@ -108,22 +108,12 @@ const FB_SERVICES: ServiceItem[] = [
   },
 ]
 
-// ─── Page copy types & fallbacks ─────────────────────────────────────────────
+// ─── Page copy types ─────────────────────────────────────────────────────────
 
 interface ServicesPageGlobal {
   hero?: { label?: string; heading?: string; subtitle?: string; image?: MediaRef | null }
   cta?:  { heading?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
   pipelines?: Pipeline[]
-}
-
-const FB_PAGE = {
-  heroLabel:   'What We Offer',
-  heroHeading: 'Production-grade services for serious studios',
-  heroSubtitle: 'From a single asset to a fully embedded team — we scale to your needs.',
-  ctaHeading:   'Looking for a long-term art partner?',
-  ctaSubtitle:  'We might be the right fit.',
-  ctaBtnLabel:  'Start a Conversation',
-  ctaBtnUrl:    '/contact',
 }
 
 // ─── Data fetcher ────────────────────────────────────────────────────────────
@@ -137,102 +127,13 @@ async function getData() {
     ])
     const docs = servicesRes.docs as unknown as ServiceItem[]
     return {
-      services:  docs.length > 0 ? docs : FB_SERVICES,
-      pipelines: (sp.pipelines && sp.pipelines.length > 0) ? sp.pipelines as Pipeline[] : null,
+      services: docs.length > 0 ? docs : FB_SERVICES,
       sp,
     }
   } catch {
-    return { services: FB_SERVICES, pipelines: null, sp: {} as ServicesPageGlobal }
+    return { services: FB_SERVICES, sp: {} as ServicesPageGlobal }
   }
 }
-
-// ─── Tools ───────────────────────────────────────────────────────────────────
-const tools = [
-  { category: '3D Modelling',         items: '3ds Max · Blender · Maya' },
-  { category: 'Sculpting',            items: 'ZBrush' },
-  { category: 'Retopology',           items: 'Blender · ZBrush · Topogun' },
-  { category: 'UV & Unwrapping',      items: 'RizomUV · Maya · Blender' },
-  { category: 'Texturing',            items: 'Substance 3D Painter · Marmoset Toolbag' },
-  { category: 'Photogrammetry',       items: 'RealityCapture · Agisoft Metashape' },
-  { category: 'Rigging & Animation',  items: 'Blender · Mixamo · Character Creator' },
-  { category: 'Game Engines',         items: 'Unreal Engine 5 · Unity · UEFN · Roblox Studio' },
-  { category: 'Rendering',            items: 'Marmoset Toolbag · Megascans' },
-  { category: 'Concepting',           items: 'PureRef · Midjourney · Gemini' },
-  { category: 'Generative 3D',        items: 'Meshy AI · Tripo 3D · ComfyUI' },
-  { category: 'Version Control',      items: 'Perforce · Git LFS' },
-  { category: 'Project Management',   items: 'Jira · Asana · Trello · Slack' },
-]
-
-// ─── Pipelines fallback (used until admin populates via CMS) ─────────────────
-const FB_PIPELINES: Pipeline[] = [
-  {
-    title: 'Hero Asset Production',
-    subtitle: 'High → Low Poly',
-    description: 'Ideal for hero characters, weapons, and realistic production assets.',
-    steps: [
-      'Concepting and blocking base forms',
-      'Refine structure with detail blocking',
-      'Create high poly (sculpt / hard surface)',
-      'Convert to optimized low poly',
-      'UV unwrap',
-      'Bake high → low maps (Normal, AO etc.)',
-      'Feedback resolution',
-    ],
-    toolsUsed: 'Blender · ZBrush · Maya · 3ds Max · Marmoset · Substance 3D Painter',
-    image: null,
-    imageLabel: 'Hero asset render — upload via Services Page in admin panel',
-  },
-  {
-    title: 'Texturing & Baking',
-    subtitle: 'PBR Workflow',
-    description: 'Three texturing approaches depending on asset type and production requirements.',
-    steps: [
-      'Gather reference and plan surface detail',
-      'Apply base PBR material details',
-      'Add large / medium / small surface details',
-      'Add weathering, usage, and damage details',
-      'Refine roughness and surface properties',
-      'Final color calibration',
-      'Export optimized PBR texture set',
-    ],
-    toolsUsed: 'Substance 3D Painter · Marmoset Toolbag · RizomUV',
-    image: null,
-    imageLabel: 'Texturing showcase — upload via Services Page in admin panel',
-  },
-  {
-    title: 'Retopology & Optimization',
-    subtitle: 'Clean Topology Pipeline',
-    description: 'Ensures clean, engine-ready topology for high-quality and performance-optimized assets.',
-    steps: [
-      'Perform auto / procedural remesh',
-      'Manual retopology for critical assets',
-      'Fix topology flow and shading issues',
-      'UV unwrap',
-      'Bake maps — Normal, AO etc.',
-      'Feedback resolution',
-    ],
-    toolsUsed: 'Blender · ZBrush · Maya · Topogun · Marmoset · Substance 3D Painter',
-    image: null,
-    imageLabel: 'Retopology showcase — upload via Services Page in admin panel',
-  },
-  {
-    title: 'Environment Design',
-    subtitle: 'Game Engine Workflow',
-    description: 'Full environment pipeline from blockout to optimized, lit, and polished game-ready scene.',
-    steps: [
-      'Define goals, constraints and gather references',
-      'Environment blocking and gameplay validation',
-      'Import final assets and textures',
-      'Set dressing and staging',
-      'Materials, lighting, probes and post-processing',
-      'Performance profiling and optimization',
-      'Iterate, polish, build and test',
-    ],
-    toolsUsed: 'Unreal Engine 5 · Unity · Megascans · Marmoset',
-    image: null,
-    imageLabel: 'Environment render — upload via Services Page in admin panel',
-  },
-]
 
 export default async function ServicesPage() {
   const { services, sp } = await getData()
