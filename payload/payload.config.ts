@@ -831,6 +831,12 @@ export default buildConfig({
         media: true,
       },
       bucket: process.env.DO_SPACES_BUCKET || 'xqube-web-media',
+      // baseURL is the public CDN/Spaces URL prepended to every uploaded file's `url` field.
+      // Without this, Payload serves files through its own /api/media route (auth-gated).
+      // With this, image URLs are direct DigitalOcean Spaces URLs — publicly accessible
+      // as long as the bucket has public read enabled (Objects → Permissions → Public).
+      baseURL: process.env.DO_SPACES_CDN_URL
+        || `https://${process.env.DO_SPACES_BUCKET || 'xqube-web-media'}.${process.env.DO_SPACES_REGION || 'fra1'}.digitaloceanspaces.com`,
       config: {
         credentials: {
           accessKeyId: process.env.DO_SPACES_KEY || '',
