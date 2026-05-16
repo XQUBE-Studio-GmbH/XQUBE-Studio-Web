@@ -438,7 +438,7 @@ export default buildConfig({
     {
       slug: 'site-settings',
       label: 'Site Settings',
-      versions: { drafts: true },
+      // versions: { drafts: true }, // disabled: version tables not yet in DB
       admin: {
         group: 'Settings',
         description: 'Global settings that apply across the entire website.',
@@ -509,7 +509,7 @@ export default buildConfig({
     {
       slug: 'home-page',
       label: 'Homepage',
-      versions: { drafts: true },
+      // versions: { drafts: true }, // disabled: version tables not yet in DB
       admin: {
         group: 'Page Content',
         description: 'Edit the homepage hero, stats, and bottom CTA.',
@@ -565,7 +565,7 @@ export default buildConfig({
     {
       slug: 'about-page',
       label: 'About Page',
-      versions: { drafts: true },
+      // versions: { drafts: true }, // disabled: version tables not yet in DB
       admin: {
         group: 'Page Content',
         description: 'Edit the About page intro, credentials, hubs, and Why XQube cards.',
@@ -636,7 +636,7 @@ export default buildConfig({
     {
       slug: 'contact-page',
       label: 'Contact Page',
-      versions: { drafts: true },
+      // versions: { drafts: true }, // disabled: version tables not yet in DB
       admin: {
         group: 'Page Content',
         description: 'Edit the Contact page headline, subtext, and Calendly button label.',
@@ -668,7 +668,7 @@ export default buildConfig({
     {
       slug: 'services-page',
       label: 'Services Page',
-      versions: { drafts: true },
+      // versions: { drafts: true }, // disabled: version tables not yet in DB
       admin: {
         group: 'Page Content',
         description: 'Edit the Services page hero text and bottom CTA.',
@@ -735,7 +735,7 @@ export default buildConfig({
     {
       slug: 'navigation',
       label: 'Navigation',
-      versions: { drafts: true },
+      // versions: { drafts: true }, // disabled: version tables not yet in DB
       admin: {
         group: 'Settings',
         description: 'Manage the header menu links and call-to-action button.',
