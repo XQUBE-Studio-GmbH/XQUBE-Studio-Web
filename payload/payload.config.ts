@@ -831,12 +831,16 @@ export default buildConfig({
         media: true,
       },
       bucket: process.env.DO_SPACES_BUCKET || 'xqube-web-media',
-      // baseURL is the public CDN/Spaces URL prepended to every uploaded file's `url` field.
-      // Without this, Payload serves files through its own /api/media route (auth-gated).
-      // With this, image URLs are direct DigitalOcean Spaces URLs — publicly accessible
-      // as long as the bucket has public read enabled (Objects → Permissions → Public).
+      // baseURL: public URL prepended to every uploaded file's `url` field.
+      // Without this Payload tries to serve files through /api/media (auth-gated → 403 for public).
+      // CDN is enabled on this bucket — prefer the CDN endpoint for performance.
+      // CDN URL format: https://{bucket}.{region}.cdn.digitaloceanspaces.com
+      // Set DO_SPACES_CDN_URL in Vercel env vars to override (e.g. custom domain later).
       baseURL: process.env.DO_SPACES_CDN_URL
-        || `https://${process.env.DO_SPACES_BUCKET || 'xqube-web-media'}.${process.env.DO_SPACES_REGION || 'fra1'}.digitaloceanspaces.com`,
+        || `https://${process.env.DO_SPACES_BUCKET || 'xqube-web-media'}.${process.env.DO_SPACES_REGION || 'fra1'}.cdn.digitaloceanspaces.com`,
+      // public-read ACL ensures every uploaded file is individually accessible.
+      // "Enable File Listing" in DO Spaces only controls directory listing, NOT file access.
+      acl: 'public-read',
       config: {
         credentials: {
           accessKeyId: process.env.DO_SPACES_KEY || '',
