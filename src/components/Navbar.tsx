@@ -4,16 +4,34 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
-const navLinks = [
-  { label: 'Home',      href: '/' },
-  { label: 'About',     href: '/about' },
-  { label: 'Services',  href: '/services' },
-  { label: 'Portfolio', href: '/portfolio' },
-  { label: 'Blog',      href: '/blog' },
-  { label: 'Contact',   href: '/contact' },
-]
+// ─── Types & defaults ─────────────────────────────────────────────────────────
 
-export default function Navbar() {
+export interface NavLink    { label: string; url: string }
+export interface CtaButton  { label?: string; url?: string }
+
+const DEFAULT_NAV_LINKS: NavLink[] = [
+  { label: 'Home',      url: '/' },
+  { label: 'About',     url: '/about' },
+  { label: 'Services',  url: '/services' },
+  { label: 'Portfolio', url: '/portfolio' },
+  { label: 'Blog',      url: '/blog' },
+  { label: 'Contact',   url: '/contact' },
+]
+const DEFAULT_CTA: CtaButton = {
+  label: 'Book a Call',
+  url:   'https://calendly.com/tanvirkhandlxqsmgs',
+}
+
+interface Props {
+  navLinks?:  NavLink[]
+  ctaButton?: CtaButton
+}
+
+export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Props) {
+  const navLinks = (propLinks && propLinks.length > 0) ? propLinks : DEFAULT_NAV_LINKS
+  const ctaLabel = propCta?.label ?? DEFAULT_CTA.label!
+  const ctaUrl   = propCta?.url   ?? DEFAULT_CTA.url!
+
   const [open, setOpen] = useState(false)
 
   // Lock body scroll when mobile menu is open
@@ -52,8 +70,8 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
-                  key={link.href}
-                  href={link.href}
+                  key={link.url}
+                  href={link.url}
                   className="text-sm text-xq-muted hover:text-white transition-colors duration-200"
                 >
                   {link.label}
@@ -63,12 +81,12 @@ export default function Navbar() {
 
             {/* Desktop CTA */}
             <Link
-              href="https://calendly.com/tanvirkhandlxqsmgs"
-              target="_blank"
+              href={ctaUrl}
+              target={ctaUrl.startsWith('http') ? '_blank' : undefined}
               rel="noopener noreferrer"
               className="xq-btn-primary text-sm hidden md:inline-flex"
             >
-              Book a Call
+              {ctaLabel}
             </Link>
 
             {/* Hamburger — mobile only */}
@@ -115,8 +133,8 @@ export default function Navbar() {
           {/* Nav links */}
           {navLinks.map((link) => (
             <Link
-              key={link.href}
-              href={link.href}
+              key={link.url}
+              href={link.url}
               onClick={() => setOpen(false)}
               className="text-2xl font-bold text-xq-muted hover:text-white active:text-xq-accent transition-colors py-4 border-b border-xq-border/40"
             >
@@ -127,13 +145,13 @@ export default function Navbar() {
           {/* CTAs */}
           <div className="mt-8 space-y-3">
             <Link
-              href="https://calendly.com/tanvirkhandlxqsmgs"
-              target="_blank"
+              href={ctaUrl}
+              target={ctaUrl.startsWith('http') ? '_blank' : undefined}
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
               className="xq-btn-primary w-full justify-center py-4 text-base"
             >
-              Book a Call
+              {ctaLabel}
             </Link>
             <Link
               href="/contact"

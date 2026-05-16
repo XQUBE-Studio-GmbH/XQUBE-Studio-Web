@@ -1,118 +1,50 @@
 import '../globals.css'
-import Link from 'next/link'
-import Image from 'next/image'
-import Navbar from '@/components/Navbar'
+import { getPayload } from 'payload'
+import config from '../../../payload/payload.config'
+import NavbarClient from '@/components/live-preview/NavbarClient'
+import FooterClient from '@/components/live-preview/FooterClient'
 import CookieBanner from '@/components/CookieBanner'
+import type { NavLink, CtaButton } from '@/components/Navbar'
+import type { SiteSettingsGlobal } from '@/components/Footer'
 
-function Footer() {
-  return (
-    <footer className="border-t border-xq-border bg-xq-bg">
-      <div className="xq-container py-12 md:py-16">
-        {/* Main grid: 2 cols on mobile, 4 cols on md+ */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+// force-dynamic required because this layout fetches from Payload on every request
+// to always reflect the latest published draft of navigation and site-settings.
+export const dynamic = 'force-dynamic'
 
-          {/* Brand block — full width on mobile, 2 cols on md+ */}
-          <div className="col-span-2">
-            <Link href="/" className="inline-block mb-4">
-              <Image
-                src="/logo.svg"
-                alt="XQube Studio"
-                width={120}
-                height={69}
-                className="h-14 w-auto"
-              />
-            </Link>
-            <p className="text-xq-muted text-sm leading-relaxed max-w-xs mt-4">
-              AAA game art and XR production studio. Vienna · Dubai · Dhaka.
-            </p>
-            <div className="flex gap-3 mt-6">
-              <a
-                href="https://www.linkedin.com/company/xqubestudio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors text-xs font-bold"
-              >
-                in
-              </a>
-              <a
-                href="https://www.artstation.com/xqubestudio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors text-xs font-bold"
-              >
-                AS
-              </a>
-            </div>
-          </div>
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-          {/* Navigation */}
-          <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Navigation</h4>
-            <ul className="space-y-3">
-              {[
-                { label: 'Home',      href: '/' },
-                { label: 'About',     href: '/about' },
-                { label: 'Services',  href: '/services' },
-                { label: 'Portfolio', href: '/portfolio' },
-                { label: 'Blog',      href: '/blog' },
-                { label: 'Contact',   href: '/contact' },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-xq-muted hover:text-white transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Get in Touch</h4>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href="mailto:info@xqubestudio.com"
-                  className="text-sm text-xq-muted hover:text-xq-accent transition-colors break-all"
-                >
-                  info@xqubestudio.com
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://calendly.com/tanvirkhandlxqsmgs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-xq-accent hover:opacity-80 transition-opacity"
-                >
-                  Book a Discovery Call →
-                </a>
-              </li>
-            </ul>
-            <div className="mt-6 pt-6 border-t border-xq-border">
-              <p className="text-xs text-xq-muted">GmbH registered in Vienna, Austria. GDPR compliant.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-xq-border flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-xq-muted text-center sm:text-left">
-            © {new Date().getFullYear()} XQube Studio GmbH. All rights reserved.
-          </p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="text-xs text-xq-muted hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/cookies" className="text-xs text-xq-muted hover:text-white transition-colors">Cookie Policy</Link>
-          </div>
-        </div>
-      </div>
-    </footer>
-  )
+interface NavigationGlobal {
+  mainNav?:   NavLink[]
+  ctaButton?: CtaButton
 }
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+// ─── Data fetchers ────────────────────────────────────────────────────────────
 
-export default function FrontendLayout({ children }: { children: React.ReactNode }) {
+async function getLayoutData(): Promise<{
+  nav:      NavigationGlobal
+  settings: SiteSettingsGlobal
+}> {
+  try {
+    const payload = await getPayload({ config })
+    const [nav, settings] = await Promise.all([
+      payload.findGlobal({ slug: 'navigation' })    as Promise<NavigationGlobal>,
+      payload.findGlobal({ slug: 'site-settings' }) as Promise<SiteSettingsGlobal>,
+    ])
+    return { nav, settings }
+  } catch {
+    // Graceful fallback — components have their own hardcoded defaults
+    return { nav: {}, settings: {} }
+  }
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+const GA_ID     = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+const serverURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
+export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
+  const { nav, settings } = await getLayoutData()
+
   return (
     <>
       {/* Organisation structured data — frontend only */}
@@ -131,11 +63,17 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
           }),
         }}
       />
-      <Navbar />
+
+      {/* NavbarClient uses useLivePreview — updates in real-time when editing
+          the navigation global in the Payload admin Live Preview panel */}
+      <NavbarClient initialData={nav} serverURL={serverURL} />
+
       <main className="pt-[72px] relative z-0">{children}</main>
-      <Footer />
-      {/* CookieBanner is intentionally NOT loaded here — it injects GA only after
-          explicit user consent (GDPR Article 7). Admin routes never get it. */}
+
+      {/* FooterClient uses useLivePreview — updates in real-time when editing
+          the site-settings global in the Payload admin Live Preview panel */}
+      <FooterClient initialData={settings} serverURL={serverURL} />
+
       <CookieBanner gaId={GA_ID} />
     </>
   )
