@@ -186,7 +186,7 @@ export default buildConfig({
       labels: { singular: 'Portfolio Item', plural: 'Portfolio Items' },
       admin: {
         useAsTitle: 'title',
-        group: 'Website Content',
+        group: 'Portfolio',
         description: 'Work samples shown in the Portfolio section.',
       },
       access: contentAccess,
@@ -266,7 +266,7 @@ export default buildConfig({
       slug: 'services',
       admin: {
         useAsTitle: 'title',
-        group: 'Website Content',
+        group: 'Services',
         description: 'Services listed on the Services page.',
       },
       access: contentAccess,
@@ -330,7 +330,7 @@ export default buildConfig({
       labels: { singular: 'Team Member', plural: 'Team Members' },
       admin: {
         useAsTitle: 'name',
-        group: 'Website Content',
+        group: 'Pages',
         description: 'Team profiles shown on the About page.',
       },
       access: contentAccess,
@@ -355,7 +355,7 @@ export default buildConfig({
       labels: { singular: 'Client Logo', plural: 'Client Logos' },
       admin: {
         useAsTitle: 'name',
-        group: 'Website Content',
+        group: 'Pages',
         description: 'Client logos shown in the homepage logo strip.',
       },
       access: contentAccess,
@@ -397,7 +397,7 @@ export default buildConfig({
       labels: { singular: 'Blog Post', plural: 'Blog Posts' },
       admin: {
         useAsTitle: 'title',
-        group: 'Website Content',
+        group: 'Blog',
         description: 'Articles published in the Blog section.',
       },
       access: contentAccess,
@@ -516,7 +516,7 @@ export default buildConfig({
       label: 'Homepage',
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
-        group: 'Page Content',
+        group: 'Pages',
         description: 'Edit the homepage hero, stats, and bottom CTA.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
@@ -572,7 +572,7 @@ export default buildConfig({
       label: 'About Page',
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
-        group: 'Page Content',
+        group: 'Pages',
         description: 'Edit the About page intro, credentials, hubs, and Why XQube cards.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
@@ -643,7 +643,7 @@ export default buildConfig({
       label: 'Contact Page',
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
-        group: 'Page Content',
+        group: 'Pages',
         description: 'Edit the Contact page headline, subtext, and Calendly button label.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
@@ -675,7 +675,7 @@ export default buildConfig({
       label: 'Services Page',
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
-        group: 'Page Content',
+        group: 'Services',
         description: 'Edit the Services page hero text and bottom CTA.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
@@ -742,7 +742,7 @@ export default buildConfig({
       label: 'Portfolio Page',
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
-        group: 'Page Content',
+        group: 'Portfolio',
         description: 'Edit the Portfolio listing page hero section.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
@@ -775,7 +775,7 @@ export default buildConfig({
       label: 'Blog Page',
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
-        group: 'Page Content',
+        group: 'Blog',
         description: 'Edit the Blog listing page hero section.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
