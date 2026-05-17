@@ -1,10 +1,23 @@
 'use client'
 
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useLivePreview } from '@payloadcms/live-preview-react'
 
-// ─── Types (mirrors page.tsx) ─────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface HeroSlide {
+  id?: string
+  eyebrow?:           string
+  title?:             string
+  subtitle?:          string
+  primaryCtaLabel?:   string
+  primaryCtaUrl?:     string
+  secondaryCtaLabel?: string
+  secondaryCtaUrl?:   string
+  image?: { url?: string; alt?: string } | null
+}
 
 interface Stat { id?: string; value: string; label: string }
 interface ServiceItem {
@@ -16,21 +29,30 @@ interface PortfolioItem {
   id: string; title: string; slug: string; category?: string
   shortDescription?: string; heroImage?: { url?: string; alt?: string }
 }
+
 interface HomepageGlobal {
   hero?: {
-    label?: string; headline?: string; subtitle?: string
-    primaryLabel?: string; primaryUrl?: string
-    secondaryLabel?: string; secondaryUrl?: string
-    showcaseImage?: { url?: string; alt?: string } | null
+    mode?:     'slideshow' | 'video'
+    videoUrl?: string
+    slides?:   HeroSlide[]
   }
   stats?: Stat[]
-  cta?: { headline?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
+  cta?:  { headline?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  characters: 'Characters', weapons: 'Weapons', vehicles: 'Vehicles',
-  environments: 'Environments', props: 'Props', 'vr-assets': 'VR Assets',
-}
+// ─── Fallbacks ────────────────────────────────────────────────────────────────
+
+const FB_SLIDES: HeroSlide[] = [
+  {
+    eyebrow:           'Vienna · Dubai · Dhaka',
+    title:             'Where Art Meets Precision',
+    subtitle:          'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
+    primaryCtaLabel:   'Book a Discovery Call',
+    primaryCtaUrl:     'https://calendly.com/tanvirkhandlxqsmgs',
+    secondaryCtaLabel: 'View Portfolio',
+    secondaryCtaUrl:   '/portfolio',
+  },
+]
 
 const FB_STATS: Stat[] = [
   { value: '15+', label: 'Years Experience' },
@@ -38,6 +60,11 @@ const FB_STATS: Stat[] = [
   { value: '20+', label: 'Core Team Members' },
   { value: '3',   label: 'Global Hubs' },
 ]
+
+const CATEGORY_LABELS: Record<string, string> = {
+  characters: 'Characters', weapons: 'Weapons', vehicles: 'Vehicles',
+  environments: 'Environments', props: 'Props', 'vr-assets': 'VR Assets',
+}
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -49,12 +76,205 @@ interface Props {
   serverURL:   string
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Slide text helper ────────────────────────────────────────────────────────
+
+function splitHeadline(title?: string) {
+  if (!title) return { rest: '', accent: '' }
+  const words = title.trim().split(' ')
+  const accent = words.pop() ?? ''
+  return { rest: words.join(' '), accent }
+}
+
+// ─── Cinematic Hero ───────────────────────────────────────────────────────────
+
+function CinematicHero({ mode, videoUrl, slides }: {
+  mode: 'slideshow' | 'video'
+  videoUrl: string
+  slides: HeroSlide[]
+}) {
+  const [activeIdx,  setActiveIdx]  = useState(0)
+  const [animSeed,   setAnimSeed]   = useState(0)   // increments to restart ken-burns
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const count = slides.length
+
+  const goTo = useCallback((next: number) => {
+    setActiveIdx(next)
+    setAnimSeed((s) => s + 1)
+  }, [])
+
+  const startTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      setActiveIdx((prev) => {
+        const next = (prev + 1) % count
+        setAnimSeed((s) => s + 1)
+        return next
+      })
+    }, 6000)
+  }, [count])
+
+  useEffect(() => {
+    startTimer()
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [startTimer])
+
+  const prev = () => { goTo((activeIdx - 1 + count) % count); startTimer() }
+  const next = () => { goTo((activeIdx + 1) % count);         startTimer() }
+  const dot  = (i: number) => { goTo(i); startTimer() }
+
+  const current = slides[activeIdx] ?? slides[0]
+  const { rest, accent } = splitHeadline(current?.title)
+
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+
+      {/* ── Backgrounds ─────────────────────────────────────────────────────── */}
+      {/* Base dark fallback (always visible) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
+      <div className="absolute inset-0 opacity-10"
+        style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+
+      {/* VIDEO MODE: single looping video */}
+      {mode === 'video' && videoUrl && (
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src={videoUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      )}
+
+      {/* SLIDESHOW MODE: stacked slides with Ken Burns */}
+      {mode === 'slideshow' && slides.map((slide, i) => (
+        <div
+          key={i}
+          className={`absolute inset-0 transition-opacity duration-1000 ${i === activeIdx ? 'opacity-100' : 'opacity-0'}`}
+        >
+          {slide.image?.url && (
+            // key changes on each activation → React remounts this div → animation restarts
+            <div
+              key={i === activeIdx ? `kb-${animSeed}` : `static-${i}`}
+              className={i === activeIdx ? 'absolute inset-0 animate-ken-burns' : 'absolute inset-0'}
+            >
+              <Image
+                src={slide.image.url}
+                alt={slide.image.alt || slide.title || 'XQube Studio'}
+                fill
+                className="object-cover"
+                priority={i === 0}
+              />
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Dark gradient overlay — always on top of background */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
+      {/* Left-side fade for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+
+      {/* ── Slide text ──────────────────────────────────────────────────────── */}
+      <div className="xq-container relative z-10 w-full">
+        <div className="max-w-3xl">
+          {current?.eyebrow && (
+            <div className="xq-label mb-6 animate-[fadeIn_0.5s_ease]" key={`eyebrow-${activeIdx}`}>
+              {current.eyebrow}
+            </div>
+          )}
+          <h1
+            key={`title-${activeIdx}`}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05] animate-[fadeUp_0.5s_ease]"
+          >
+            {rest} <span className="text-xq-accent">{accent}</span>
+          </h1>
+          {current?.subtitle && (
+            <p
+              key={`sub-${activeIdx}`}
+              className="text-base sm:text-lg md:text-xl text-xq-muted max-w-2xl mb-10 leading-relaxed animate-[fadeUp_0.6s_ease]"
+            >
+              {current.subtitle}
+            </p>
+          )}
+          <div
+            key={`cta-${activeIdx}`}
+            className="flex flex-wrap gap-4 animate-[fadeUp_0.7s_ease]"
+          >
+            {current?.primaryCtaLabel && current?.primaryCtaUrl && (
+              <Link
+                href={current.primaryCtaUrl}
+                target={current.primaryCtaUrl.startsWith('http') ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className="xq-btn-primary text-base px-8 py-4"
+              >
+                {current.primaryCtaLabel}
+              </Link>
+            )}
+            {current?.secondaryCtaLabel && current?.secondaryCtaUrl && (
+              <Link href={current.secondaryCtaUrl} className="xq-btn-ghost text-base px-8 py-4">
+                {current.secondaryCtaLabel}
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Navigation — only if more than 1 slide ──────────────────────────── */}
+      {count > 1 && (
+        <>
+          {/* Arrow buttons */}
+          <button
+            onClick={prev}
+            aria-label="Previous slide"
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/70 hover:border-xq-accent/60 transition-all backdrop-blur-sm"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={next}
+            aria-label="Next slide"
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/70 hover:border-xq-accent/60 transition-all backdrop-blur-sm"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {/* Dot indicators */}
+          <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => dot(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`rounded-full transition-all duration-300 ${
+                  i === activeIdx
+                    ? 'w-8 h-2 bg-xq-accent'
+                    : 'w-2 h-2 bg-white/40 hover:bg-white/70'
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Single-slide dot (just a visual indicator, not interactive) */}
+      {count === 1 && (
+        <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center">
+          <div className="w-8 h-2 rounded-full bg-xq-accent" />
+        </div>
+      )}
+    </section>
+  )
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function HomePageClient({ initialData, services, clients, featured, serverURL }: Props) {
-  // useLivePreview subscribes to postMessage from the Payload admin Live Preview
-  // panel. When inside the iframe, data updates on every field change.
-  // Outside the iframe (live site), it simply returns initialData unchanged.
   const { data: hp } = useLivePreview<HomepageGlobal>({
     initialData,
     serverURL: typeof window !== 'undefined'
@@ -65,27 +285,18 @@ export default function HomePageClient({ initialData, services, clients, feature
     depth: 2,
   })
 
-  const hero   = hp.hero  ?? {}
+  const heroMode  = (hp.hero?.mode ?? 'slideshow') as 'slideshow' | 'video'
+  const videoUrl  = hp.hero?.videoUrl ?? ''
+  const rawSlides = (hp.hero?.slides ?? []) as HeroSlide[]
+  const slides    = rawSlides.length > 0 ? rawSlides : FB_SLIDES
+
   const stats  = hp.stats && hp.stats.length > 0 ? hp.stats : FB_STATS
-  const cta    = hp.cta   ?? {}
+  const cta    = hp.cta ?? {}
 
-  const heroLabel      = hero.label          ?? 'Vienna · Dubai · Dhaka'
-  const heroHeadline   = hero.headline       ?? 'Where Art Meets Precision'
-  const heroSubtitle   = hero.subtitle       ?? 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.'
-  const primaryLabel   = hero.primaryLabel   ?? 'Book a Discovery Call'
-  const primaryUrl     = hero.primaryUrl     ?? 'https://calendly.com/tanvirkhandlxqsmgs'
-  const secondaryLabel = hero.secondaryLabel ?? 'View Portfolio'
-  const secondaryUrl   = hero.secondaryUrl   ?? '/portfolio'
-  const ctaHeadline    = cta.headline        ?? 'Looking for a long-term art partner?'
-  const ctaSubtitle    = cta.subtitle        ?? 'We might be the right fit.'
-  const ctaBtnLabel    = cta.buttonLabel     ?? 'Start a Conversation'
-  const ctaBtnUrl      = cta.buttonUrl       ?? '/contact'
-
-  const showcaseImage = hero.showcaseImage as { url?: string; alt?: string } | null | undefined
-
-  const words        = heroHeadline.trim().split(' ')
-  const accentWord   = words.pop() ?? ''
-  const headlineRest = words.join(' ')
+  const ctaHeadline = cta.headline    ?? 'Looking for a long-term art partner?'
+  const ctaSubtitle = cta.subtitle    ?? 'We might be the right fit.'
+  const ctaBtnLabel = cta.buttonLabel ?? 'Start a Conversation'
+  const ctaBtnUrl   = cta.buttonUrl   ?? '/contact'
 
   const clientNames = clients.length > 0
     ? clients.map((c) => c.name)
@@ -93,39 +304,8 @@ export default function HomePageClient({ initialData, services, clients, feature
 
   return (
     <>
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-black to-[#0a1f13]" />
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.05) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-xq-accent/5 rounded-full blur-3xl" />
-        <div className="xq-container relative z-10">
-          <div className={showcaseImage?.url ? 'grid grid-cols-1 lg:grid-cols-2 gap-12 items-center' : 'max-w-4xl'}>
-            <div>
-              <div className="xq-label mb-6">{heroLabel}</div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05]">
-                {headlineRest} <span className="text-xq-accent">{accentWord}</span>
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl text-xq-muted max-w-2xl mb-10 leading-relaxed">
-                {heroSubtitle}
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link href={primaryUrl} target={primaryUrl.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
-                  className="xq-btn-primary text-base px-8 py-4">
-                  {primaryLabel}
-                </Link>
-                <Link href={secondaryUrl} className="xq-btn-ghost text-base px-8 py-4">
-                  {secondaryLabel}
-                </Link>
-              </div>
-            </div>
-            {showcaseImage?.url && (
-              <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border hidden lg:block">
-                <Image src={showcaseImage.url} alt={showcaseImage.alt || 'XQube Studio'} fill className="object-cover" priority />
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+      {/* ── Cinematic Hero ───────────────────────────────────── */}
+      <CinematicHero mode={heroMode} videoUrl={videoUrl} slides={slides} />
 
       {/* ── Stats ────────────────────────────────────────────── */}
       <section className="border-y border-xq-border bg-xq-surface">

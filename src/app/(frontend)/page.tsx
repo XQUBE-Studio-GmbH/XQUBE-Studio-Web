@@ -36,12 +36,18 @@ interface PortfolioItem {
   id: string; title: string; slug: string; category?: string
   shortDescription?: string; heroImage?: { url?: string; alt?: string }
 }
+interface HeroSlide {
+  id?: string
+  eyebrow?: string; title?: string; subtitle?: string
+  primaryCtaLabel?: string; primaryCtaUrl?: string
+  secondaryCtaLabel?: string; secondaryCtaUrl?: string
+  image?: { url?: string; alt?: string } | null
+}
 interface HomepageGlobal {
   hero?: {
-    label?: string; headline?: string; subtitle?: string
-    primaryLabel?: string; primaryUrl?: string
-    secondaryLabel?: string; secondaryUrl?: string
-    showcaseImage?: { url?: string; alt?: string } | null
+    mode?:     'slideshow' | 'video'
+    videoUrl?: string
+    slides?:   HeroSlide[]
   }
   stats?: Stat[]
   cta?: { headline?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }

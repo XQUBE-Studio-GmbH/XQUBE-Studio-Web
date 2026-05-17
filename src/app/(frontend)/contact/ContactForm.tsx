@@ -89,11 +89,14 @@ export default function ContactForm({ contactInfo: ci, pageCopy: pc }: { contact
 
           {/* Left — Info */}
           <div>
-            <div className="xq-label mb-4">{pc.label}</div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
-              {pc.heading}
-            </h1>
-            <p className="text-xq-muted mb-10 leading-relaxed">{pc.subtext}</p>
+            {/* label/heading/subtext are suppressed when the page shows a banner hero above */}
+            {pc.label    && <div className="xq-label mb-4">{pc.label}</div>}
+            {pc.heading  && (
+              <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
+                {pc.heading}
+              </h1>
+            )}
+            {pc.subtext  && <p className="text-xq-muted mb-10 leading-relaxed">{pc.subtext}</p>}
 
             <Link
               href={ci.calendly}

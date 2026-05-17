@@ -13,6 +13,12 @@ interface WhyCard    { id?: string; title: string; body: string }
 interface ClientItem { id: string | number; name: string; sector?: string; note?: string }
 
 interface AboutGlobal {
+  hero?: {
+    label?:    string
+    heading?:  string
+    subtitle?: string
+    image?:    MediaRef | null
+  }
   intro?: { body1?: string; body2?: string; image?: MediaRef | null }
   credentials?: Credential[]
   hubs?: Hub[]
@@ -20,6 +26,12 @@ interface AboutGlobal {
 }
 
 // ─── Fallbacks ────────────────────────────────────────────────────────────────
+
+const FB_HERO = {
+  label:    'About Us',
+  heading:  'A studio built for precision',
+  subtitle: 'XQube Studio GmbH — Vienna · Dubai · Dhaka. 15+ years delivering AAA-quality game art and XR production for studios worldwide.',
+}
 
 const FB_CREDENTIALS: Credential[] = [
   { value: '15+', label: 'Years Experience', detail: 'XR · game art · AI simulation · delivered across 3 continents' },
@@ -71,6 +83,11 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
     depth: 2,
   })
 
+  const heroLabel    = ap.hero?.label    ?? FB_HERO.label
+  const heroHeading  = ap.hero?.heading  ?? FB_HERO.heading
+  const heroSubtitle = ap.hero?.subtitle ?? FB_HERO.subtitle
+  const heroImage    = ap.hero?.image as MediaRef | null | undefined
+
   const introBody1  = ap.intro?.body1 ?? 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.'
   const introBody2  = ap.intro?.body2 ?? 'Our three-hub model combines European business standards with world-class production capability — giving clients the reliability of a Vienna GmbH with the speed and depth of a Dhaka production team.'
   const introImage  = ap.intro?.image as MediaRef | null | undefined
@@ -81,29 +98,52 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
 
   return (
     <>
+      {/* ── Hero Banner ──────────────────────────────────────── */}
+      <section className="relative min-h-[55vh] flex items-center overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
+        <div className="absolute inset-0 opacity-10"
+          style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+        {heroImage?.url && (
+          <div className="absolute inset-0">
+            <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
+          </div>
+        )}
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+
+        {/* Text */}
+        <div className="xq-container relative z-10">
+          <div className="max-w-3xl">
+            <div className="xq-label mb-6">{heroLabel}</div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 leading-[1.05]">
+              {heroHeading}
+            </h1>
+            {heroSubtitle && (
+              <p className="text-base sm:text-lg text-xq-muted max-w-2xl leading-relaxed">
+                {heroSubtitle}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* ── Intro ────────────────────────────────────────────── */}
-      <section className="xq-section">
+      <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
           {introImage?.url ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div>
-                <div className="xq-label mb-4">About Us</div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
-                  A studio built for precision
-                </h1>
                 <p className="text-xq-muted text-lg leading-relaxed mb-6">{introBody1}</p>
                 <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
               </div>
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border">
-                <Image src={introImage.url} alt={introImage.alt || 'XQube Studio'} fill className="object-cover" priority />
+                <Image src={introImage.url} alt={introImage.alt || 'XQube Studio'} fill className="object-cover" />
               </div>
             </div>
           ) : (
             <div className="max-w-3xl">
-              <div className="xq-label mb-4">About Us</div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
-                A studio built for precision
-              </h1>
               <p className="text-xq-muted text-lg leading-relaxed mb-6">{introBody1}</p>
               <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
             </div>

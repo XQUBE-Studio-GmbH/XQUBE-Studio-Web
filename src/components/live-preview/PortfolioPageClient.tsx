@@ -81,33 +81,32 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
 
   return (
     <>
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="xq-section">
-        <div className="xq-container">
-          {heroImage?.url ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="xq-label mb-4">{heroLabel}</div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">{heroHeading}</h1>
-                <p className="text-xq-muted text-lg leading-relaxed mb-8">{heroSubtitle}</p>
-                <Link href={ctaUrl} className="xq-btn-primary text-base px-8 py-4">
-                  {ctaLabel}
-                </Link>
-              </div>
-              <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border hidden lg:block">
-                <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div className="xq-label mb-4">{heroLabel}</div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 max-w-2xl">{heroHeading}</h1>
-              <p className="text-xq-muted text-lg max-w-2xl leading-relaxed mb-8">{heroSubtitle}</p>
-              <Link href={ctaUrl} className="xq-btn-primary text-base px-8 py-4">
-                {ctaLabel}
-              </Link>
-            </div>
-          )}
+      {/* ── Hero Banner ───────────────────────────────────────────────────── */}
+      <section className="relative min-h-[50vh] flex items-center overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
+        <div className="absolute inset-0 opacity-10"
+          style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+        {heroImage?.url && (
+          <div className="absolute inset-0">
+            <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
+          </div>
+        )}
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+        {/* Text */}
+        <div className="xq-container relative z-10">
+          <div className="max-w-3xl">
+            <div className="xq-label mb-6">{heroLabel}</div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 leading-[1.05]">{heroHeading}</h1>
+            {heroSubtitle && (
+              <p className="text-base sm:text-lg text-xq-muted max-w-2xl leading-relaxed mb-8">{heroSubtitle}</p>
+            )}
+            <Link href={ctaUrl} className="xq-btn-primary text-base px-8 py-4">
+              {ctaLabel}
+            </Link>
+          </div>
         </div>
       </section>
 

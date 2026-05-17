@@ -24,6 +24,12 @@ export const metadata: Metadata = {
 
 interface ClientItem { id: string | number; name: string; sector?: string; note?: string }
 interface AboutGlobal {
+  hero?: {
+    label?:    string
+    heading?:  string
+    subtitle?: string
+    image?:    { url?: string; alt?: string } | null
+  }
   intro?: { body1?: string; body2?: string; image?: { url?: string; alt?: string } | null }
   credentials?: { id?: string; value: string; label: string; detail?: string }[]
   hubs?: { id?: string; flag?: string; city: string; country: string; role?: string; detail?: string; image?: { url?: string; alt?: string } | null }[]

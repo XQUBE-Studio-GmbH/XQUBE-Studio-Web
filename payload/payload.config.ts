@@ -18,6 +18,7 @@ import * as recreateGlobalVersionsMigration from './migrations/20250518_recreate
 import * as addVersionTimestampsMigration   from './migrations/20250519_add_version_timestamps.ts'
 import * as fixVersionChildTablesMigration  from './migrations/20250520_fix_version_child_tables.ts'
 import * as portfolioBlogPageGlobalsMigration from './migrations/20250521_portfolio_blog_page_globals.ts'
+import * as homepageHeroRedesignMigration     from './migrations/20250522_homepage_hero_redesign.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -66,10 +67,12 @@ export default buildConfig({
       url: ({ globalConfig }: { globalConfig?: { slug?: string } }) => {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
         const pathMap: Record<string, string> = {
-          'home-page':     '/',
-          'about-page':    '/about',
-          'contact-page':  '/contact',
-          'services-page': '/services',
+          'home-page':      '/',
+          'about-page':     '/about',
+          'contact-page':   '/contact',
+          'services-page':  '/services',
+          'portfolio-page': '/portfolio',
+          'blog-page':      '/blog',
           // Navigation and Site Settings preview on the homepage
           // (nav/footer are not yet wired to Payload — hardcoded in Navbar/Footer)
           'navigation':    '/',
@@ -152,10 +155,27 @@ export default buildConfig({
     {
       slug: 'media',
       upload: {
+        // Accept images and common video formats. Videos are stored as-is (no transcoding).
+        // Pre-optimise videos before uploading — max 100 MB after limit increase below.
+        mimeTypes: [
+          'image/*',
+          'video/mp4',
+          'video/webm',
+          'video/quicktime', // .mov
+        ],
         imageSizes: [
-          { name: 'thumbnail', width: 400,  height: 300,  position: 'centre' },
-          { name: 'card',      width: 800,  height: 600,  position: 'centre' },
-          { name: 'hero',      width: 1600, height: 900,  position: 'centre' },
+          {
+            name: 'thumbnail', width: 400,  height: 300,  position: 'centre',
+            formatOptions: { format: 'webp', options: { quality: 85 } },
+          },
+          {
+            name: 'card',      width: 800,  height: 600,  position: 'centre',
+            formatOptions: { format: 'webp', options: { quality: 85 } },
+          },
+          {
+            name: 'hero',      width: 1600, height: 900,  position: 'centre',
+            formatOptions: { format: 'webp', options: { quality: 85 } },
+          },
         ],
       },
       labels: { singular: 'Media File', plural: 'Media Library' },
@@ -517,7 +537,7 @@ export default buildConfig({
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Pages',
-        description: 'Edit the homepage hero, stats, and bottom CTA.',
+        description: 'Edit the homepage cinematic hero (slideshow or video), stats, and bottom CTA.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
       fields: [
@@ -525,20 +545,51 @@ export default buildConfig({
           name: 'hero',
           label: 'Hero Section',
           type: 'group',
+          admin: { description: 'Cinematic full-width hero. Choose Slideshow (multiple images with Ken Burns zoom) or Video (looping mp4 background). In both modes, Slides define the text that appears.' },
           fields: [
-            { name: 'label',          label: 'Eyebrow Label',    type: 'text',     defaultValue: 'Vienna · Dubai · Dhaka' },
-            { name: 'headline',       label: 'Headline',         type: 'text',     defaultValue: 'Where Art Meets Precision', admin: { description: 'The last word will be highlighted in green.' } },
-            { name: 'subtitle',       label: 'Subtitle',         type: 'textarea', defaultValue: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.' },
-            { name: 'primaryLabel',   label: 'Primary CTA Text', type: 'text',     defaultValue: 'Book a Discovery Call' },
-            { name: 'primaryUrl',     label: 'Primary CTA URL',  type: 'text',     defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
-            { name: 'secondaryLabel', label: 'Secondary CTA Text', type: 'text',   defaultValue: 'View Portfolio' },
-            { name: 'secondaryUrl',   label: 'Secondary CTA URL',  type: 'text',   defaultValue: '/portfolio' },
             {
-              name: 'showcaseImage',
-              label: 'Hero Showcase Image',
-              type: 'upload',
-              relationTo: 'media',
-              admin: { description: 'Optional. A portfolio image shown to the right of the hero text on large screens.' },
+              name: 'mode',
+              label: 'Hero Type',
+              type: 'select',
+              defaultValue: 'slideshow',
+              options: [
+                { label: 'Slideshow — multiple images with Ken Burns zoom', value: 'slideshow' },
+                { label: 'Video — looping video background with text slides', value: 'video' },
+              ],
+            },
+            {
+              name: 'videoUrl',
+              label: 'Video URL',
+              type: 'text',
+              admin: {
+                description: 'Upload an mp4 or webm to the Media Library, then paste the CDN URL here. Only used when Hero Type = Video. Pre-optimise video before upload (720p–1080p, H.264).',
+                condition: (data) => data?.hero?.mode === 'video',
+              },
+            },
+            {
+              name: 'slides',
+              label: 'Slides',
+              type: 'array',
+              minRows: 1,
+              admin: {
+                description: 'Each slide defines the text overlay. In Slideshow mode, each slide also has its own background image. In Video mode, the image is ignored and all slides cycle over the video.',
+              },
+              fields: [
+                { name: 'eyebrow',           label: 'Eyebrow Label',       type: 'text',     admin: { description: 'Small uppercase label above the heading, e.g. Vienna · Dubai · Dhaka' } },
+                { name: 'title',             label: 'Heading',              type: 'text',     required: true, admin: { description: 'Main hero headline. Last word highlights in green automatically.' } },
+                { name: 'subtitle',          label: 'Subtitle',             type: 'textarea', admin: { description: 'Short supporting text below the heading.' } },
+                { name: 'primaryCtaLabel',   label: 'Primary CTA Text',     type: 'text',     required: true, defaultValue: 'Book a Discovery Call' },
+                { name: 'primaryCtaUrl',     label: 'Primary CTA URL',      type: 'text',     required: true, defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
+                { name: 'secondaryCtaLabel', label: 'Secondary CTA Text',   type: 'text',     admin: { description: 'Optional. Leave blank to hide the secondary button.' } },
+                { name: 'secondaryCtaUrl',   label: 'Secondary CTA URL',    type: 'text',     admin: { description: 'Required if Secondary CTA Text is filled.' } },
+                {
+                  name: 'image',
+                  label: 'Slide Background Image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: { description: 'Background image for this slide. Used in Slideshow mode — ignored in Video mode.' },
+                },
+              ],
             },
           ],
         },
@@ -573,10 +624,28 @@ export default buildConfig({
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Pages',
-        description: 'Edit the About page intro, credentials, hubs, and Why XQube cards.',
+        description: 'Edit the About page hero banner, intro, credentials, hubs, and Why XQube cards.',
       },
       access: { read: isLoggedIn, update: isAdminOrAbove },
       fields: [
+        {
+          name: 'hero',
+          label: 'Hero Banner',
+          type: 'group',
+          admin: { description: 'Full-width banner shown at the top of the About page.' },
+          fields: [
+            { name: 'label',    label: 'Eyebrow Label', type: 'text',     defaultValue: 'About Us' },
+            { name: 'heading',  label: 'Heading',        type: 'text',     defaultValue: 'A studio built for precision' },
+            { name: 'subtitle', label: 'Subtitle',       type: 'textarea', defaultValue: 'XQube Studio GmbH — Vienna · Dubai · Dhaka. 15+ years delivering AAA-quality game art and XR production for studios worldwide.' },
+            {
+              name: 'image',
+              label: 'Banner Background Image',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. Dark overlay is applied automatically. Landscape/cinematic images work best.' },
+            },
+          ],
+        },
         {
           name: 'intro',
           label: 'Intro Text',
@@ -913,6 +982,11 @@ export default buildConfig({
         up: portfolioBlogPageGlobalsMigration.up,
         down: portfolioBlogPageGlobalsMigration.down,
       },
+      {
+        name: '20250522_homepage_hero_redesign',
+        up: homepageHeroRedesignMigration.up,
+        down: homepageHeroRedesignMigration.down,
+      },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
   }),
@@ -923,7 +997,8 @@ export default buildConfig({
 
   upload: {
     limits: {
-      fileSize: 10_000_000,
+      // 100 MB — increased from 10 MB to support video uploads (pre-optimised mp4/webm).
+      fileSize: 100_000_000,
     },
   },
 
