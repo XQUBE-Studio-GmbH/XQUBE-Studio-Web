@@ -75,7 +75,11 @@ interface Props {
 export default function ServicesPageClient({ initialData, services, serverURL }: Props) {
   const { data: sp } = useLivePreview<ServicesPageGlobal>({
     initialData,
-    serverURL: typeof window !== 'undefined' ? window.location.origin : serverURL,
+    serverURL: typeof window !== 'undefined'
+      ? (window !== window.parent && document.referrer
+        ? new URL(document.referrer).origin
+        : window.location.origin)
+      : serverURL,
     depth: 2,
   })
 
