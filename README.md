@@ -80,19 +80,19 @@ xqube-web/
 
 ---
 
-## Pages (Phase 1 — Marketing Site)
+## Pages
 
-| Route | Page | Status |
-|---|---|---|
-| `/` | Home | ✅ Live |
-| `/about` | About | ✅ Live |
-| `/services` | Services | ✅ Live |
-| `/portfolio` | Portfolio | ⚠️ Placeholder (awaiting CMS content) |
-| `/blog` | Blog | ⚠️ Placeholder (awaiting CMS content) |
-| `/contact` | Contact | ✅ Live — form sends via Resend |
-| `/privacy` | Privacy Policy | ✅ Live |
-| `/cookies` | Cookie Policy | ✅ Live |
-| `/admin` | Payload CMS | ✅ Live |
+| Route | Page |
+|---|---|
+| `/` | Home |
+| `/about` | About |
+| `/services` | Services |
+| `/portfolio` | Portfolio |
+| `/blog` | Blog |
+| `/contact` | Contact — form sends via Resend |
+| `/privacy` | Privacy Policy |
+| `/cookies` | Cookie Policy |
+| `/admin` | Payload CMS |
 
 ---
 
@@ -180,33 +180,6 @@ DNS switch from Wix to Vercel will happen after full local QA is complete. No pu
 
 ---
 
-## Roadmap
-
-### Phase 1 — Marketing Site *(current)*
-- [x] All core pages built and responsive
-- [x] Contact form → Resend email delivery
-- [x] Payload CMS admin panel with full collections
-- [x] SEO: metadata, sitemap, robots.txt, OG tags, JSON-LD
-- [x] Mobile-responsive navbar with hamburger menu
-- [ ] Cookie consent banner (GDPR)
-- [ ] Dynamic portfolio (connect Payload collection to frontend)
-- [ ] Dynamic blog (connect Payload collection + `/blog/[slug]` routes)
-- [ ] Per-page OG images
-
-### Phase 2 — Growth *(next)*
-- [ ] Real-time Quote Builder → Calendly booking
-- [ ] Blog + Case Studies (Pritom AI content engine)
-- [ ] Multilingual: English · German · Arabic
-- [ ] Business ops admin panel (leads, inquiries, pipeline)
-- [ ] Lightweight CRM inside admin
-
-### Phase 3 — Marketplace *(future)*
-- [ ] 3D Asset Marketplace
-- [ ] Third-party seller accounts
-- [ ] In-browser 3D preview
-- [ ] Payment processing + asset licensing tiers
-
----
 
 ## Contact
 
