@@ -17,6 +17,7 @@ import * as globalStatusColumnMigration  from './migrations/20250517_global_stat
 import * as recreateGlobalVersionsMigration from './migrations/20250518_recreate_global_versions.ts'
 import * as addVersionTimestampsMigration   from './migrations/20250519_add_version_timestamps.ts'
 import * as fixVersionChildTablesMigration  from './migrations/20250520_fix_version_child_tables.ts'
+import * as portfolioBlogPageGlobalsMigration from './migrations/20250521_portfolio_blog_page_globals.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -77,7 +78,7 @@ export default buildConfig({
         const slug = globalConfig?.slug ?? ''
         return `${siteUrl}${pathMap[slug] ?? '/'}`
       },
-      globals: ['home-page', 'about-page', 'contact-page', 'services-page', 'navigation', 'site-settings'],
+      globals: ['home-page', 'about-page', 'contact-page', 'services-page', 'portfolio-page', 'blog-page', 'navigation', 'site-settings'],
       breakpoints: [
         { label: 'Mobile',  name: 'mobile',  width: 375,  height: 667  },
         { label: 'Tablet',  name: 'tablet',  width: 768,  height: 1024 },
@@ -735,6 +736,70 @@ export default buildConfig({
       ],
     },
 
+    // ─── Portfolio Page ──────────────────────────────────────
+    {
+      slug: 'portfolio-page',
+      label: 'Portfolio Page',
+      versions: { drafts: { autosave: { interval: 800 } } },
+      admin: {
+        group: 'Page Content',
+        description: 'Edit the Portfolio listing page hero section.',
+      },
+      access: { read: isLoggedIn, update: isAdminOrAbove },
+      fields: [
+        {
+          name: 'hero',
+          label: 'Hero Section',
+          type: 'group',
+          fields: [
+            { name: 'label',    label: 'Eyebrow Label', type: 'text',     defaultValue: 'Our Work' },
+            { name: 'heading',  label: 'Heading',        type: 'text',     defaultValue: 'AAA Game Art. Delivered.' },
+            { name: 'subtitle', label: 'Subtitle',       type: 'textarea', defaultValue: 'Browse our portfolio of AAA-quality game art produced for studios worldwide — characters, weapons, environments, and XR assets.' },
+            {
+              name: 'image',
+              label: 'Hero Image',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. Displayed beside the hero text on large screens.' },
+            },
+            { name: 'ctaLabel', label: 'CTA Button Text', type: 'text', defaultValue: 'Start a Project' },
+            { name: 'ctaUrl',   label: 'CTA Button URL',  type: 'text', defaultValue: '/contact' },
+          ],
+        },
+      ],
+    },
+
+    // ─── Blog Page ───────────────────────────────────────────
+    {
+      slug: 'blog-page',
+      label: 'Blog Page',
+      versions: { drafts: { autosave: { interval: 800 } } },
+      admin: {
+        group: 'Page Content',
+        description: 'Edit the Blog listing page hero section.',
+      },
+      access: { read: isLoggedIn, update: isAdminOrAbove },
+      fields: [
+        {
+          name: 'hero',
+          label: 'Hero Section',
+          type: 'group',
+          fields: [
+            { name: 'label',    label: 'Eyebrow Label', type: 'text',     defaultValue: 'Insights' },
+            { name: 'heading',  label: 'Heading',        type: 'text',     defaultValue: 'Behind the Studio' },
+            { name: 'subtitle', label: 'Subtitle',       type: 'textarea', defaultValue: 'Thoughts on game art production, XR development, and studio operations from the XQube team.' },
+            {
+              name: 'image',
+              label: 'Hero Image',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Optional. Displayed beside the hero text on large screens.' },
+            },
+          ],
+        },
+      ],
+    },
+
     // ─── Navigation ──────────────────────────────────────────
     {
       slug: 'navigation',
@@ -842,6 +907,11 @@ export default buildConfig({
         name: '20250520_fix_version_child_tables',
         up: fixVersionChildTablesMigration.up,
         down: fixVersionChildTablesMigration.down,
+      },
+      {
+        name: '20250521_portfolio_blog_page_globals',
+        up: portfolioBlogPageGlobalsMigration.up,
+        down: portfolioBlogPageGlobalsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

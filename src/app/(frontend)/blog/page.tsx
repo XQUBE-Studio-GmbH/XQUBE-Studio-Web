@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
-import Link from 'next/link'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
+import BlogPageClient from '@/components/live-preview/BlogPageClient'
 
 export const metadata: Metadata = {
   title: 'Blog & Insights',
@@ -20,94 +19,57 @@ export const metadata: Metadata = {
 }
 
 // force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
-// Pages are server-rendered at request time; DB is always reachable then.
 export const dynamic = 'force-dynamic'
 
 interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  excerpt?: string
-  createdAt?: string
-  updatedAt?: string
+  id:          string
+  title:       string
+  slug:        string
+  excerpt?:    string
+  createdAt?:  string
   coverImage?: { url?: string; alt?: string } | null
 }
 
-async function getPosts(): Promise<BlogPost[]> {
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'blog-posts',
-      where: { status: { equals: 'published' } },
-      sort: '-createdAt',
-      limit: 100,
-      depth: 1,
-    })
-    return res.docs as unknown as BlogPost[]
-  } catch {
-    return []
+interface BlogPageGlobal {
+  hero?: {
+    label?:    string
+    heading?:  string
+    subtitle?: string
+    image?:    { url?: string; alt?: string } | null
   }
 }
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return ''
-  return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+async function getData() {
+  try {
+    const payload = await getPayload({ config })
+    const [postsRes, bp] = await Promise.all([
+      payload.find({
+        collection: 'blog-posts',
+        where: { status: { equals: 'published' } },
+        sort: '-createdAt',
+        limit: 100,
+        depth: 1,
+      }),
+      payload.findGlobal({ slug: 'blog-page', depth: 1 }) as Promise<BlogPageGlobal>,
+    ])
+    return {
+      posts: postsRes.docs as unknown as BlogPost[],
+      bp,
+    }
+  } catch {
+    return { posts: [] as BlogPost[], bp: {} as BlogPageGlobal }
+  }
 }
 
 export default async function BlogPage() {
-  const posts = await getPosts()
-  const hasPosts = posts.length > 0
+  const { posts, bp } = await getData()
+  const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   return (
-    <section className="xq-section">
-      <div className="xq-container">
-        <div className="xq-label mb-4">Insights</div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">Blog</h1>
-        <p className="text-xq-muted text-lg max-w-xl mb-16">
-          Insights on game art production, XR development, and studio operations.
-        </p>
-
-        {hasPosts ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className={`group xq-card flex flex-col hover:border-xq-accent/60 transition-colors ${post.coverImage?.url ? 'p-0 overflow-hidden' : ''}`}
-              >
-                {post.coverImage?.url && (
-                  <div className="relative aspect-video overflow-hidden">
-                    <Image
-                      src={post.coverImage.url}
-                      alt={post.coverImage.alt || post.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-                <div className={post.coverImage?.url ? 'p-6 flex flex-col flex-1' : 'flex flex-col flex-1'}>
-                  <div className="text-xq-muted text-xs mb-3">{formatDate(post.createdAt)}</div>
-                  <h2 className="text-white font-bold leading-snug mb-3 group-hover:text-xq-accent transition-colors">
-                    {post.title}
-                  </h2>
-                  {post.excerpt && (
-                    <p className="text-xq-muted text-sm leading-relaxed line-clamp-3 flex-1">{post.excerpt}</p>
-                  )}
-                  <div className="mt-4 text-xq-accent text-xs font-semibold">Read article →</div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="xq-card py-16 text-center">
-            <div className="text-xq-accent text-xs font-semibold tracking-widest uppercase mb-3">Coming Soon</div>
-            <h2 className="text-white font-black text-xl mb-2">Articles on the way</h2>
-            <p className="text-xq-muted text-sm max-w-sm mx-auto">
-              Articles will appear here once published via the admin panel.
-            </p>
-          </div>
-        )}
-      </div>
-    </section>
+    <BlogPageClient
+      initialData={bp}
+      posts={posts}
+      serverURL={serverURL}
+    />
   )
 }
