@@ -21,7 +21,7 @@ interface Props {
 export default function NavbarClient({ initialData, serverURL }: Props) {
   const { data: nav } = useLivePreview<NavigationGlobal>({
     initialData,
-    serverURL,
+    serverURL: typeof window !== 'undefined' ? window.location.origin : serverURL,
     depth: 0,
   })
 

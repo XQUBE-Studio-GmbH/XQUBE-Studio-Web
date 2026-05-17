@@ -57,7 +57,7 @@ export default function HomePageClient({ initialData, services, clients, feature
   // Outside the iframe (live site), it simply returns initialData unchanged.
   const { data: hp } = useLivePreview<HomepageGlobal>({
     initialData,
-    serverURL,
+    serverURL: typeof window !== 'undefined' ? window.location.origin : serverURL,
     depth: 2,
   })
 

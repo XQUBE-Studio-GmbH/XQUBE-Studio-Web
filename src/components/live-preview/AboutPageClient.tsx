@@ -63,7 +63,7 @@ interface Props {
 export default function AboutPageClient({ initialData, clients, serverURL }: Props) {
   const { data: ap } = useLivePreview<AboutGlobal>({
     initialData,
-    serverURL,
+    serverURL: typeof window !== 'undefined' ? window.location.origin : serverURL,
     depth: 2,
   })
 

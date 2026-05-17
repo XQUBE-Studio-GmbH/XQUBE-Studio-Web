@@ -29,7 +29,7 @@ interface Props {
 export default function ContactPageClient({ initialData, contactInfo, serverURL }: Props) {
   const { data: cp } = useLivePreview<ContactPageGlobal>({
     initialData,
-    serverURL,
+    serverURL: typeof window !== 'undefined' ? window.location.origin : serverURL,
     depth: 2,
   })
 

@@ -16,7 +16,7 @@ interface Props {
 export default function FooterClient({ initialData, serverURL }: Props) {
   const { data: settings } = useLivePreview<SiteSettingsGlobal>({
     initialData,
-    serverURL,
+    serverURL: typeof window !== 'undefined' ? window.location.origin : serverURL,
     depth: 0,
   })
 
