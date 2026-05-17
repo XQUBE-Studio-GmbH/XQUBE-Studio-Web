@@ -12,7 +12,8 @@ import * as pageGlobalsMigration from './migrations/20250515_page_globals.ts'
 import * as contactServicesGlobalsMigration from './migrations/20250515_contact_services_globals.ts'
 import * as imageFieldsMigration from './migrations/20250515_image_fields.ts'
 import * as mediaImageSizesMigration from './migrations/20250516_media_image_sizes.ts'
-import * as globalVersionsMigration   from './migrations/20250517_global_versions.ts'
+import * as globalVersionsMigration      from './migrations/20250517_global_versions.ts'
+import * as globalStatusColumnMigration  from './migrations/20250517_global_status_column.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -782,7 +783,7 @@ export default buildConfig({
       max: 5,
       connectionTimeoutMillis: 10000,
     },
-    push: true, // TEMP: force schema push to create version tables — revert after one deploy
+    push: process.env.NODE_ENV !== 'production',
     prodMigrations: [
       {
         name: '20250513_initial',
@@ -818,6 +819,11 @@ export default buildConfig({
         name: '20250517_global_versions',
         up: globalVersionsMigration.up,
         down: globalVersionsMigration.down,
+      },
+      {
+        name: '20250517_global_status_column',
+        up: globalStatusColumnMigration.up,
+        down: globalStatusColumnMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
