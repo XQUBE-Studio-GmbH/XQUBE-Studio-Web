@@ -291,7 +291,9 @@ export default function HomePageClient({ initialData, services, clients, feature
   const heroMode  = (hp.hero?.mode ?? 'slideshow') as 'slideshow' | 'video'
   const videoUrl  = hp.hero?.videoUrl ?? ''
   const rawSlides = (hp.hero?.slides ?? []) as HeroSlide[]
-  const slides    = rawSlides.length > 0 ? rawSlides : FB_SLIDES
+  // Filter out placeholder slides that have no heading (e.g. auto-created empty rows)
+  const validSlides = rawSlides.filter((s) => s.title && s.title.trim() !== '')
+  const slides      = validSlides.length > 0 ? validSlides : FB_SLIDES
 
   const stats  = hp.stats && hp.stats.length > 0 ? hp.stats : FB_STATS
   const cta    = hp.cta ?? {}
