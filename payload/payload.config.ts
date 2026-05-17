@@ -219,7 +219,23 @@ export default buildConfig({
           required: true,
           unique: true,
           index: true,
-          admin: { description: 'Slug only — no slashes. e.g. unreal-engine-lighting-showcase. Lowercase, hyphens only.' },
+          admin: { description: 'Auto-generated from the title on creation. Lowercase, hyphens only — e.g. unreal-engine-lighting-showcase.' },
+          hooks: {
+            beforeValidate: [
+              ({ value, data, operation }) => {
+                // Auto-generate slug from title on creation only
+                if (operation === 'create' && !value && data?.title) {
+                  return (data.title as string)
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                }
+                return value
+              },
+            ],
+          },
         },
         {
           name: 'category',
