@@ -527,6 +527,48 @@ Without `generateFileURL`, Payload falls back to serving files through `/api/med
 
 ---
 
+### ERROR 23 — Payload live preview iframe shows "refused to connect"
+**Error:** `[host] refused to connect.` broken-document icon inside the live preview iframe panel
+**Where:** Payload admin → any global edit page with live preview enabled
+**Root cause:** `vercel.json` had `{ "key": "X-Frame-Options", "value": "DENY" }` applied to ALL routes (`/(.*)`). `X-Frame-Options: DENY` instructs the browser to never allow the page to be embedded in any iframe, regardless of origin. Chrome renders this as the "refused to connect" broken-document error page inside the iframe — it is NOT a TCP connection error despite the wording.
+**Wrong fixes tried:**
+1. Using `window.location.origin` as `serverURL` in `useLivePreview` — gives the iframe's own origin, not the admin's origin; doesn't affect the frame-blocking issue at all
+2. Adding `Content-Security-Policy: frame-ancestors` in `next.config.mjs` without removing the `X-Frame-Options: DENY` from `vercel.json` — `vercel.json` headers are applied at Vercel's edge and can override Next.js response headers
+**Correct fix (three parts):**
+1. **`vercel.json`** — Remove `X-Frame-Options: DENY` from the global `/(.*)`  rule; add it back scoped to `/admin(.*)` only (admin still protected from clickjacking):
+```json
+{ "source": "/(.*)",     "headers": [/* nosniff, xss-protection, referrer — no X-Frame-Options */] },
+{ "source": "/admin(.*)", "headers": [{ "key": "X-Frame-Options", "value": "DENY" }] }
+```
+2. **`next.config.mjs`** — Add `Content-Security-Policy: frame-ancestors` on frontend routes to explicitly allow both admin origins:
+```js
+async headers() {
+  return [{
+    source: '/((?!admin).*)',
+    headers: [{
+      key: 'Content-Security-Policy',
+      value: [
+        "frame-ancestors 'self'",
+        'https://xqube-studio-web.vercel.app',
+        process.env.NEXT_PUBLIC_SITE_URL,
+      ].filter(Boolean).join(' '),
+    }],
+  }]
+},
+```
+3. **`useLivePreview` serverURL** — Use `document.referrer` to dynamically get the admin's actual origin for `ready()` postMessage (the targetOrigin must match whatever URL the admin is accessed from):
+```ts
+serverURL: typeof window !== 'undefined'
+  ? (window !== window.parent && document.referrer
+    ? new URL(document.referrer).origin
+    : window.location.origin)
+  : serverURL,
+```
+**Why `document.referrer`:** When the frontend page is loaded inside the admin's iframe, `document.referrer` is set to the parent admin page URL. Extracting `.origin` from it gives the exact admin origin at runtime — works regardless of whether admin is accessed via the Vercel URL or the custom domain.
+**Rule:** Never apply `X-Frame-Options: DENY` globally in `vercel.json` on a project that uses Payload live preview. Always scope it to `/admin(.*)` only, and control frontend framing policy via CSP `frame-ancestors` in `next.config.mjs`.
+
+---
+
 ## Git Rule
 **Never push to git unless the user explicitly asks.** Always commit locally first,
 show what was changed, then wait for "push" confirmation.
