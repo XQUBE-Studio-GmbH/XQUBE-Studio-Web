@@ -40,7 +40,7 @@ async function getLayoutData(): Promise<{
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 const GA_ID     = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
-const serverURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   const { nav, settings } = await getLayoutData()

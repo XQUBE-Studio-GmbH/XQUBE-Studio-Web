@@ -53,7 +53,7 @@ async function getData() {
 export default async function AboutPage() {
   const { ap, clients } = await getData()
 
-  const serverURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   return (
     <AboutPageClient

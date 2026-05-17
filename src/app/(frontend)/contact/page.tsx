@@ -109,7 +109,7 @@ async function getData(): Promise<{ contactInfo: ContactInfo; pageCopy: ContactP
 export default async function ContactPage() {
   const { contactInfo, pageCopy } = await getData()
 
-  const serverURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   // Pass the raw contact-page global as initialData for useLivePreview.
   // contactInfo (from site-settings) stays static — only the hero copy updates live.
