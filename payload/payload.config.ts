@@ -16,6 +16,7 @@ import * as globalVersionsMigration      from './migrations/20250517_global_vers
 import * as globalStatusColumnMigration  from './migrations/20250517_global_status_column.ts'
 import * as recreateGlobalVersionsMigration from './migrations/20250518_recreate_global_versions.ts'
 import * as addVersionTimestampsMigration   from './migrations/20250519_add_version_timestamps.ts'
+import * as fixVersionChildTablesMigration  from './migrations/20250520_fix_version_child_tables.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -836,6 +837,11 @@ export default buildConfig({
         name: '20250519_add_version_timestamps',
         up: addVersionTimestampsMigration.up,
         down: addVersionTimestampsMigration.down,
+      },
+      {
+        name: '20250520_fix_version_child_tables',
+        up: fixVersionChildTablesMigration.up,
+        down: fixVersionChildTablesMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

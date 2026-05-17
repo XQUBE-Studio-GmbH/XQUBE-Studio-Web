@@ -458,6 +458,31 @@ s3Storage({
 
 ---
 
+### ERROR 22 — Version child (array) tables: wrong `id` type and missing `_uuid` column
+**Error:** `Failed query: select ... "_about_page_v_version_credentials"."_uuid" ...` → `err: {}`
+**Where:** Runtime — Vercel logs when querying any global that has array fields and `versions: { drafts: true }`
+**Root cause:** Payload passes array child fields through `idToUUID()` before building version child tables. This renames the `id` field to `_uuid`. Then `setColumnID()` finds no `id` field and generates a fresh `serial` primary key. Hand-written migrations used `"id" varchar PRIMARY KEY` (wrong type, wrong for version tables) and omitted the `_uuid varchar` column entirely.
+**Correct schema for every version child table:**
+```sql
+CREATE TABLE "_home_page_v_version_stats" (
+  "_order"     integer NOT NULL,
+  "_parent_id" integer NOT NULL,
+  "id"         serial PRIMARY KEY NOT NULL,  -- serial, NOT varchar
+  "_uuid"      varchar,                      -- required: holds original UUID
+  "value"      varchar,
+  "label"      varchar
+);
+```
+**Wrong schema (do not use):**
+```sql
+"id"  varchar PRIMARY KEY NOT NULL,  -- ← wrong type for version child tables
+-- missing: "_uuid" varchar           -- ← required column
+```
+**Also:** For nested array tables (e.g. `_services_page_v_version_pipelines_steps`), `_parent_id` references the parent child table's `id` which is now `serial` (integer) — so `_parent_id` must be `integer`, not `varchar`.
+**Rule:** Version child tables always use `id serial PRIMARY KEY` + `_uuid varchar`. Regular (non-version) child tables use `id varchar PRIMARY KEY` (UUID string). Never mix the two patterns.
+
+---
+
 ### ERROR 21 — Global version tables missing `version_updated_at` / `version_created_at`
 **Error:** `Failed query: select "_about_page_v"."id", ... "_about_page_v"."version_updated_at", "_about_page_v"."version_created_at" ...` → admin globals 404
 **Where:** Runtime — Vercel logs when `versions: { drafts: true }` is enabled on any global
@@ -470,7 +495,7 @@ s3Storage({
 "updated_at"         timestamp(3) with time zone DEFAULT now() NOT NULL,  -- from timestamps:true
 "created_at"         timestamp(3) with time zone DEFAULT now() NOT NULL,  -- from timestamps:true
 ```
-**Rule:** When writing version table migrations for Payload globals, ALWAYS include `version_updated_at` and `version_created_at` columns. These are invisible in the global config (they're Payload base fields, not user-defined), but they ARE in the version table because the entire global field set — including base fields — is wrapped inside the `version` group.
+**Rule:** When writing version table migrations for Payload globals, ALWAYS include `version_updated_at` and `version_created_at` columns. Also see ERROR 22 for child table schema rules. These are invisible in the global config (they're Payload base fields, not user-defined), but they ARE in the version table because the entire global field set — including base fields — is wrapped inside the `version` group.
 
 ---
 
