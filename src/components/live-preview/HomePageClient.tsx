@@ -186,14 +186,14 @@ function CinematicHero({ mode, videoUrl, slides }: {
           )}
           <h1
             key={`title-${activeIdx}`}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05] animate-[fadeUp_0.5s_ease]"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05] animate-[fadeUp_0.5s_ease] drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]"
           >
             {rest} <span className="text-xq-accent">{accent}</span>
           </h1>
           {current?.subtitle && (
             <p
               key={`sub-${activeIdx}`}
-              className="text-base sm:text-lg md:text-xl text-xq-muted max-w-2xl mb-10 leading-relaxed animate-[fadeUp_0.6s_ease]"
+              className="text-base sm:text-lg md:text-xl text-white/75 max-w-2xl mb-10 leading-relaxed animate-[fadeUp_0.6s_ease] drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]"
             >
               {current.subtitle}
             </p>
@@ -213,7 +213,10 @@ function CinematicHero({ mode, videoUrl, slides }: {
               </Link>
             )}
             {current?.secondaryCtaLabel && current?.secondaryCtaUrl && (
-              <Link href={current.secondaryCtaUrl} className="xq-btn-ghost text-base px-8 py-4">
+              <Link
+                href={current.secondaryCtaUrl}
+                className="inline-flex items-center gap-2 px-8 py-4 border border-white/40 text-white font-semibold text-base rounded transition-all hover:border-xq-accent hover:text-xq-accent backdrop-blur-sm"
+              >
                 {current.secondaryCtaLabel}
               </Link>
             )}

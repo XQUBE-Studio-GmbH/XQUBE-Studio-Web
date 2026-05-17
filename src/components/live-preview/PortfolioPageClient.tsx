@@ -99,9 +99,9 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
         <div className="xq-container relative z-10">
           <div className="max-w-3xl">
             <div className="xq-label mb-6">{heroLabel}</div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 leading-[1.05]">{heroHeading}</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 leading-[1.05] drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">{heroHeading}</h1>
             {heroSubtitle && (
-              <p className="text-base sm:text-lg text-xq-muted max-w-2xl leading-relaxed mb-8">{heroSubtitle}</p>
+              <p className="text-base sm:text-lg text-white/75 max-w-2xl leading-relaxed mb-8 drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">{heroSubtitle}</p>
             )}
             <Link href={ctaUrl} className="xq-btn-primary text-base px-8 py-4">
               {ctaLabel}
