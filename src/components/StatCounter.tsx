@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useMemo } from 'react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Split "80+" → { num: 80, suffix: "+" }. Non-numeric values are returned as-is. */
+/** Split "80+" → { num: 80, suffix: "+" }. Returns null for non-numeric strings. */
 function parse(value: string): { num: number; suffix: string } | null {
   const m = value.match(/^(\d+)(.*)$/)
   if (!m) return null
@@ -19,23 +19,24 @@ function easeOut(t: number): number {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface Props {
-  value:    string   // e.g. "80+", "15+", "3"
-  label:    string
-  duration?: number  // animation duration in ms (default 1500)
+  value:     string   // e.g. "80+", "15+", "3"
+  label:     string
+  duration?: number   // animation duration ms (default 1500)
 }
 
 /**
- * Animated stat counter — counts from 0 to the target number using
- * IntersectionObserver to trigger on scroll, easeOutQuart for natural motion.
- * Falls back to displaying the raw value string for non-numeric values.
+ * Animated stat counter — counts from 0 to target on scroll.
+ * Uses useMemo so parsed never changes between parent re-renders,
+ * preventing the animation from restarting on every useLivePreview tick.
  */
 export default function StatCounter({ value, label, duration = 1500 }: Props) {
-  const parsed  = parse(value)
+  // useMemo ensures parsed is stable across re-renders unless `value` changes
+  const parsed  = useMemo(() => parse(value), [value])
   const ref     = useRef<HTMLDivElement>(null)
   const [count,   setCount]   = useState(0)
   const [started, setStarted] = useState(false)
 
-  // Trigger when the stat scrolls into view
+  // Trigger once when the stat scrolls into view
   useEffect(() => {
     if (!parsed) return
     const el = ref.current
@@ -48,26 +49,30 @@ export default function StatCounter({ value, label, duration = 1500 }: Props) {
           observer.disconnect()
         }
       },
-      { threshold: 0.5 },
+      { threshold: 0.3 },
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [parsed, started])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parsed])  // `started` intentionally omitted — we only want to register once
 
-  // Run the count-up animation
+  // Run the count-up animation — cancelAnimationFrame on cleanup prevents
+  // multiple concurrent animations if the effect somehow re-fires
   useEffect(() => {
     if (!started || !parsed) return
-    const target = parsed.num
+    const target    = parsed.num
     const startTime = performance.now()
+    let rafId: number
 
     const tick = (now: number) => {
       const elapsed  = now - startTime
       const progress = Math.min(elapsed / duration, 1)
       setCount(Math.round(easeOut(progress) * target))
-      if (progress < 1) requestAnimationFrame(tick)
+      if (progress < 1) rafId = requestAnimationFrame(tick)
     }
 
-    requestAnimationFrame(tick)
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
   }, [started, parsed, duration])
 
   return (

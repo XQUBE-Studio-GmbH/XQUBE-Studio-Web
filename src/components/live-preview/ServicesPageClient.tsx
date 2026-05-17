@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useLivePreview } from '@payloadcms/live-preview-react'
+import ScrollReveal from '@/components/ScrollReveal'
 
 // ─── Types (mirrors services/page.tsx) ───────────────────────────────────────
 
@@ -124,8 +125,9 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
       {/* Services */}
       <section className="border-t border-xq-border pb-24">
         <div className="xq-container space-y-8 mt-12">
-          {services.map((service) => (
-            <div key={String(service.id)} className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : 'p-5 sm:p-6 md:p-8'}`}>
+          {services.map((service, i) => (
+            <ScrollReveal key={String(service.id)} delay={i * 80}>
+            <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : 'p-5 sm:p-6 md:p-8'}`}>
               {service.image?.url && (
                 <div className="relative aspect-video">
                   <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
@@ -156,6 +158,7 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
                 )}
               </div>
             </div>
+            </ScrollReveal>
           ))}
         </div>
       </section>
@@ -163,17 +166,21 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
       {/* Tools */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
-          <div className="xq-label mb-4">Our Stack</div>
-          <h2 className="text-3xl font-black text-white mb-12">Tools & Technology</h2>
+          <ScrollReveal className="mb-12">
+            <div className="xq-label mb-4">Our Stack</div>
+            <h2 className="text-3xl font-black text-white">Tools & Technology</h2>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tools.map((tool) => (
-              <div key={tool.category} className="flex gap-4 p-4 border border-xq-border rounded-lg bg-xq-card">
+            {tools.map((tool, i) => (
+              <ScrollReveal key={tool.category} delay={i * 40}>
+              <div className="flex gap-4 p-4 border border-xq-border rounded-lg bg-xq-card">
                 <div className="w-1 bg-xq-accent rounded-full shrink-0" />
                 <div>
                   <div className="text-white font-semibold text-sm mb-1">{tool.category}</div>
                   <div className="text-xq-muted text-xs leading-relaxed">{tool.items}</div>
                 </div>
               </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -182,15 +189,18 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
       {/* Production Pipeline */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
-          <div className="xq-label mb-4">How We Work</div>
-          <h2 className="text-3xl font-black text-white mb-4">Production Pipeline</h2>
-          <p className="text-xq-muted max-w-2xl mb-12 leading-relaxed">
-            Standardized workflows built for quality and consistency across every project.
-            Full pipeline documentation available on request.
-          </p>
+          <ScrollReveal className="mb-12">
+            <div className="xq-label mb-4">How We Work</div>
+            <h2 className="text-3xl font-black text-white mb-4">Production Pipeline</h2>
+            <p className="text-xq-muted max-w-2xl leading-relaxed">
+              Standardized workflows built for quality and consistency across every project.
+              Full pipeline documentation available on request.
+            </p>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {activePipelines.map((pipeline, pi) => (
-              <div key={pipeline.id ?? pi} className="xq-card p-0 overflow-hidden">
+              <ScrollReveal key={pipeline.id ?? pi} delay={pi * 100}>
+              <div className="xq-card p-0 overflow-hidden">
                 <div className="aspect-video bg-xq-surface border-b border-xq-border flex items-center justify-center relative">
                   {pipeline.image?.url ? (
                     <Image src={pipeline.image.url} alt={pipeline.image.alt || pipeline.title} fill className="object-cover" />
@@ -225,6 +235,7 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
                   )}
                 </div>
               </div>
+            </ScrollReveal>
             ))}
           </div>
         </div>
@@ -233,11 +244,11 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
       {/* Engagement CTA */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
-          <div className="max-w-2xl mx-auto text-center">
+          <ScrollReveal className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-black text-white mb-4">{ctaHeading}</h2>
             <p className="text-xq-muted text-lg mb-10">{ctaSubtitle}</p>
-            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4">{ctaBtnLabel}</Link>
-          </div>
+            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4 animate-cta-pulse">{ctaBtnLabel}</Link>
+          </ScrollReveal>
         </div>
       </section>
     </>
