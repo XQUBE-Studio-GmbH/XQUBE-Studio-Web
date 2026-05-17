@@ -782,7 +782,7 @@ export default buildConfig({
       max: 5,
       connectionTimeoutMillis: 10000,
     },
-    push: process.env.NODE_ENV !== 'production',
+    push: true, // TEMP: force schema push to create version tables — revert after one deploy
     prodMigrations: [
       {
         name: '20250513_initial',
