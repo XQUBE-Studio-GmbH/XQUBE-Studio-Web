@@ -14,6 +14,7 @@ import * as imageFieldsMigration from './migrations/20250515_image_fields.ts'
 import * as mediaImageSizesMigration from './migrations/20250516_media_image_sizes.ts'
 import * as globalVersionsMigration      from './migrations/20250517_global_versions.ts'
 import * as globalStatusColumnMigration  from './migrations/20250517_global_status_column.ts'
+import * as recreateGlobalVersionsMigration from './migrations/20250518_recreate_global_versions.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -439,7 +440,7 @@ export default buildConfig({
     {
       slug: 'site-settings',
       label: 'Site Settings',
-      // versions: { drafts: true },
+      versions: { drafts: true },
       admin: {
         group: 'Settings',
         description: 'Global settings that apply across the entire website.',
@@ -510,7 +511,7 @@ export default buildConfig({
     {
       slug: 'home-page',
       label: 'Homepage',
-      // versions: { drafts: true },
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the homepage hero, stats, and bottom CTA.',
@@ -566,7 +567,7 @@ export default buildConfig({
     {
       slug: 'about-page',
       label: 'About Page',
-      // versions: { drafts: true },
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the About page intro, credentials, hubs, and Why XQube cards.',
@@ -637,7 +638,7 @@ export default buildConfig({
     {
       slug: 'contact-page',
       label: 'Contact Page',
-      // versions: { drafts: true },
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the Contact page headline, subtext, and Calendly button label.',
@@ -669,7 +670,7 @@ export default buildConfig({
     {
       slug: 'services-page',
       label: 'Services Page',
-      // versions: { drafts: true },
+      versions: { drafts: true },
       admin: {
         group: 'Page Content',
         description: 'Edit the Services page hero text and bottom CTA.',
@@ -736,7 +737,7 @@ export default buildConfig({
     {
       slug: 'navigation',
       label: 'Navigation',
-      // versions: { drafts: true },
+      versions: { drafts: true },
       admin: {
         group: 'Settings',
         description: 'Manage the header menu links and call-to-action button.',
@@ -824,6 +825,11 @@ export default buildConfig({
         name: '20250517_global_status_column',
         up: globalStatusColumnMigration.up,
         down: globalStatusColumnMigration.down,
+      },
+      {
+        name: '20250518_recreate_global_versions',
+        up: recreateGlobalVersionsMigration.up,
+        down: recreateGlobalVersionsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
