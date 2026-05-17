@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useLivePreview } from '@payloadcms/live-preview-react'
+import StatCounter from '@/components/StatCounter'
+import ScrollReveal from '@/components/ScrollReveal'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -316,11 +318,10 @@ export default function HomePageClient({ initialData, services, clients, feature
       <section className="border-y border-xq-border bg-xq-surface">
         <div className="xq-container py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-4xl font-black text-xq-accent mb-1">{stat.value}</div>
-                <div className="text-sm text-xq-muted">{stat.label}</div>
-              </div>
+            {stats.map((stat, i) => (
+              <ScrollReveal key={stat.label} delay={i * 100}>
+                <StatCounter value={stat.value} label={stat.label} />
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -329,16 +330,18 @@ export default function HomePageClient({ initialData, services, clients, feature
       {/* ── Client strip ─────────────────────────────────────── */}
       <section className="border-b border-xq-border bg-xq-bg">
         <div className="xq-container py-10">
-          <p className="text-center text-xs text-xq-muted tracking-widest uppercase mb-8">
-            Trusted by studios worldwide
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-            {clientNames.map((name) => (
-              <div key={name} className="text-xq-muted font-semibold text-sm tracking-wide opacity-60 hover:opacity-100 transition-opacity">
-                {name}
-              </div>
-            ))}
-          </div>
+          <ScrollReveal>
+            <p className="text-center text-xs text-xq-muted tracking-widest uppercase mb-8">
+              Trusted by studios worldwide
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+              {clientNames.map((name) => (
+                <div key={name} className="text-xq-muted font-semibold text-sm tracking-wide opacity-60 hover:opacity-100 transition-opacity">
+                  {name}
+                </div>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -346,7 +349,7 @@ export default function HomePageClient({ initialData, services, clients, feature
       {featured.length > 0 && (
         <section className="xq-section border-b border-xq-border">
           <div className="xq-container">
-            <div className="flex items-end justify-between mb-12">
+            <ScrollReveal className="flex items-end justify-between mb-12">
               <div>
                 <div className="xq-label mb-4">Featured Work</div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
@@ -356,7 +359,7 @@ export default function HomePageClient({ initialData, services, clients, feature
               <Link href="/portfolio" className="xq-btn-ghost text-sm hidden md:flex shrink-0 ml-8">
                 View All Work →
               </Link>
-            </div>
+            </ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {featured.map((item, i) => (
                 <Link key={item.id} href={`/portfolio/${item.slug}`}
@@ -401,15 +404,16 @@ export default function HomePageClient({ initialData, services, clients, feature
       {services.length > 0 && (
         <section className="xq-section border-b border-xq-border">
           <div className="xq-container">
-            <div className="mb-16">
+            <ScrollReveal className="mb-16">
               <div className="xq-label mb-4">What We Do</div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
                 Production-grade art at scale
               </h2>
-            </div>
+            </ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {services.map((service) => (
-                <div key={String(service.id)} className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : ''}`}>
+              {services.map((service, i) => (
+                <ScrollReveal key={String(service.id)} delay={i * 100}>
+                <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : ''}`}>
                   {service.image?.url && (
                     <div className="relative aspect-video">
                       <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
@@ -423,6 +427,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                     )}
                   </div>
                 </div>
+                </ScrollReveal>
               ))}
             </div>
             <div className="mt-10 text-center">
@@ -435,7 +440,7 @@ export default function HomePageClient({ initialData, services, clients, feature
       {/* ── CTA ───────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
-          <div className="max-w-2xl mx-auto text-center">
+          <ScrollReveal className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6">
               {ctaHeadline}
             </h2>
@@ -443,7 +448,7 @@ export default function HomePageClient({ initialData, services, clients, feature
             <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4">
               {ctaBtnLabel}
             </Link>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
     </>

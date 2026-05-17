@@ -147,7 +147,8 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
                     href={`/portfolio/${item.slug}`}
                     className="group xq-card p-0 overflow-hidden block hover:border-xq-accent/60 transition-colors"
                   >
-                    <div className="aspect-[4/3] bg-xq-surface overflow-hidden">
+                    {/* Image with hover overlay */}
+                    <div className="relative aspect-[4/3] bg-xq-surface overflow-hidden">
                       {item.heroImage?.url ? (
                         <Image
                           src={item.heroImage.url}
@@ -161,13 +162,19 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
                           <span className="text-xq-muted text-xs">No image</span>
                         </div>
                       )}
+                      {/* Slide-up overlay on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-3 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        {item.category && (
+                          <div className="text-xq-accent text-xs font-semibold tracking-widest uppercase mb-1">
+                            {CATEGORY_LABELS[item.category] ?? item.category}
+                          </div>
+                        )}
+                        <div className="text-white text-xs font-semibold">View Project →</div>
+                      </div>
                     </div>
+                    {/* Card text below image */}
                     <div className="p-4">
-                      {item.category && (
-                        <div className="text-xq-accent text-xs font-semibold tracking-wide uppercase mb-1">
-                          {CATEGORY_LABELS[item.category] ?? item.category}
-                        </div>
-                      )}
                       <h2 className="text-white font-bold text-sm leading-snug group-hover:text-xq-accent transition-colors">
                         {item.title}
                       </h2>
