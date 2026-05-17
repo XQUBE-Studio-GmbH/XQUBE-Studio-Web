@@ -570,9 +570,8 @@ export default buildConfig({
               name: 'slides',
               label: 'Slides',
               type: 'array',
-              minRows: 1,
               admin: {
-                description: 'Each slide defines the text overlay. In Slideshow mode, each slide also has its own background image. In Video mode, the image is ignored and all slides cycle over the video.',
+                description: 'Each slide defines the text overlay. In Slideshow mode, each slide also has its own background image. In Video mode, the image is ignored and all slides cycle over the video. Leave empty to use the built-in default slide.',
               },
               fields: [
                 { name: 'eyebrow',           label: 'Eyebrow Label',       type: 'text',     admin: { description: 'Small uppercase label above the heading, e.g. Vienna · Dubai · Dhaka' } },
