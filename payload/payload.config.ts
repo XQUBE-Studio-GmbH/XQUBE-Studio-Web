@@ -219,7 +219,7 @@ export default buildConfig({
           required: true,
           unique: true,
           index: true,
-          admin: { description: 'Used in the page URL — e.g. /portfolio/my-item. Lowercase, hyphens only.' },
+          admin: { description: 'Slug only — no slashes. e.g. unreal-engine-lighting-showcase. Lowercase, hyphens only.' },
         },
         {
           name: 'category',
