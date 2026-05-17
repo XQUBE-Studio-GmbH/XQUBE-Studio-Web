@@ -458,6 +458,22 @@ s3Storage({
 
 ---
 
+### ERROR 21 — Global version tables missing `version_updated_at` / `version_created_at`
+**Error:** `Failed query: select "_about_page_v"."id", ... "_about_page_v"."version_updated_at", "_about_page_v"."version_created_at" ...` → admin globals 404
+**Where:** Runtime — Vercel logs when `versions: { drafts: true }` is enabled on any global
+**Root cause:** Payload automatically adds `updatedAt` and `createdAt` as **base fields** to every global. When a global has `versions: { drafts: true }`, Payload wraps ALL global fields (including those base fields) inside a `version` group. The result is that the version table gets `version_updated_at` and `version_created_at` columns in addition to the top-level `created_at`/`updated_at` from `timestamps: true`. Hand-written migrations that only model user-defined fields miss these base-field columns entirely.
+**Wrong:** Only including `created_at`/`updated_at` in the `_*_v` table schema.
+**Fix:** Every global version table (`_home_page_v`, `_about_page_v`, etc.) must have ALL of these timestamp columns:
+```sql
+"version_updated_at" timestamp(3) with time zone,   -- from global's base updatedAt inside version group
+"version_created_at" timestamp(3) with time zone,   -- from global's base createdAt inside version group
+"updated_at"         timestamp(3) with time zone DEFAULT now() NOT NULL,  -- from timestamps:true
+"created_at"         timestamp(3) with time zone DEFAULT now() NOT NULL,  -- from timestamps:true
+```
+**Rule:** When writing version table migrations for Payload globals, ALWAYS include `version_updated_at` and `version_created_at` columns. These are invisible in the global config (they're Payload base fields, not user-defined), but they ARE in the version table because the entire global field set — including base fields — is wrapped inside the `version` group.
+
+---
+
 ### ERROR 20 — Admin globals return 404 after enabling `versions: { drafts: true }`
 **Error:** `GET /admin/globals/home-page 404` — Payload admin renders "This page could not be found"
 **Where:** Runtime — all `/admin/globals/*` routes after deploying `versions: { drafts: true }` on globals
