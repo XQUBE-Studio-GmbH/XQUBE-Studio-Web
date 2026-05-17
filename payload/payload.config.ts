@@ -314,7 +314,22 @@ export default buildConfig({
           type: 'text',
           required: true,
           unique: true,
-          admin: { description: 'Used in the page URL. Lowercase, hyphens only.' },
+          admin: { description: 'Auto-generated from the title on creation. Lowercase, hyphens only — e.g. game-art-production.' },
+          hooks: {
+            beforeValidate: [
+              ({ value, data, operation }) => {
+                if (operation === 'create' && !value && data?.title) {
+                  return (data.title as string)
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                }
+                return value
+              },
+            ],
+          },
         },
         {
           name: 'icon',
@@ -445,7 +460,22 @@ export default buildConfig({
           type: 'text',
           required: true,
           unique: true,
-          admin: { description: 'Used in the page URL — e.g. /blog/my-post. Lowercase, hyphens only.' },
+          admin: { description: 'Auto-generated from the title on creation. Lowercase, hyphens only — e.g. ue5-lighting-breakdown.' },
+          hooks: {
+            beforeValidate: [
+              ({ value, data, operation }) => {
+                if (operation === 'create' && !value && data?.title) {
+                  return (data.title as string)
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                }
+                return value
+              },
+            ],
+          },
         },
         {
           name: 'coverImage',
