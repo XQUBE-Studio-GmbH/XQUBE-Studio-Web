@@ -16,9 +16,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "frame-ancestors 'self'",
+              // Allow the Vercel deployment URL (stable production alias)
               'https://xqube-studio-web.vercel.app',
-              'https://www.xqubestudio.com',
-            ].join(' '),
+              // Allow the custom domain once it goes live
+              process.env.NEXT_PUBLIC_SITE_URL,
+            ].filter(Boolean).join(' '),
           },
         ],
       },
