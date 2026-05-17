@@ -7,6 +7,41 @@ import Script from 'next/script'
 const COOKIE_NAME = 'xq-cookie-consent'
 const COOKIE_DAYS = 365
 
+// ─── Consent Mode v2 signal helpers ──────────────────────────────────────────
+// Only analytics signals are toggled. Ad signals are always denied — no ad
+// platform is connected.
+
+declare global {
+  interface Window {
+    gtag:      (...args: unknown[]) => void
+    dataLayer: unknown[]
+  }
+}
+
+function grantAnalytics() {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('consent', 'update', {
+      analytics_storage:  'granted',
+      ad_storage:         'denied',
+      ad_user_data:       'denied',
+      ad_personalization: 'denied',
+    })
+  }
+}
+
+function denyAnalytics() {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('consent', 'update', {
+      analytics_storage:  'denied',
+      ad_storage:         'denied',
+      ad_user_data:       'denied',
+      ad_personalization: 'denied',
+    })
+  }
+}
+
+// ─── Cookie helpers ───────────────────────────────────────────────────────────
+
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
@@ -18,30 +53,39 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = `${name}=${value};expires=${expires};path=/;SameSite=Lax`
 }
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function CookieBanner({ gaId }: { gaId?: string }) {
-  const [visible, setVisible]   = useState(false)
-  const [accepted, setAccepted] = useState(false)
-  const [mounted, setMounted]   = useState(false)
+  const [visible, setVisible] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
     const consent = getCookie(COOKIE_NAME)
+
     if (consent === 'accepted') {
-      setAccepted(true)
+      // Return visit — restore granted state within the wait_for_update window
+      // set in the layout inline script (500 ms), so GA receives the update
+      // before sending its first hit.
+      grantAnalytics()
     } else if (!consent) {
+      // First visit — show the banner after a brief delay
       const t = setTimeout(() => setVisible(true), 800)
       return () => clearTimeout(t)
     }
+    // 'declined' — default denied state from the layout inline script stands;
+    // no update needed.
   }, [])
 
   const accept = () => {
     setCookie(COOKIE_NAME, 'accepted', COOKIE_DAYS)
-    setAccepted(true)
+    grantAnalytics()
     setVisible(false)
   }
 
   const decline = () => {
     setCookie(COOKIE_NAME, 'declined', COOKIE_DAYS)
+    denyAnalytics()
     setVisible(false)
   }
 
@@ -49,8 +93,12 @@ export default function CookieBanner({ gaId }: { gaId?: string }) {
 
   return (
     <>
-      {/* Google Analytics — only after explicit consent */}
-      {accepted && gaId && (
+      {/* GA4 — always loaded so Consent Mode v2 modeling works even pre-consent.
+          The inline consent default in layout.tsx (analytics_storage: denied)
+          prevents any cookies or PII collection until the user explicitly
+          accepts. Once accepted, grantAnalytics() updates the signal and GA
+          begins full measurement. */}
+      {gaId && (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}

@@ -47,6 +47,28 @@ export default async function FrontendLayout({ children }: { children: React.Rea
 
   return (
     <>
+      {/* Consent Mode v2 — default state MUST be set before gtag.js loads.
+          Inline script runs synchronously during SSR/hydration, before any
+          afterInteractive Script tags fire. All signals denied until the user
+          explicitly accepts in the CookieBanner. */}
+      {GA_ID && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: [
+              'window.dataLayer=window.dataLayer||[];',
+              'function gtag(){dataLayer.push(arguments);}',
+              "gtag('consent','default',{",
+              "  analytics_storage:'denied',",
+              "  ad_storage:'denied',",
+              "  ad_user_data:'denied',",
+              "  ad_personalization:'denied',",
+              '  wait_for_update:500',
+              '});',
+            ].join(''),
+          }}
+        />
+      )}
+
       {/* Organisation structured data — frontend only */}
       <script
         type="application/ld+json"
