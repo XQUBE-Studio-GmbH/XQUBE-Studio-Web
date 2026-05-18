@@ -2,7 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRef } from 'react'
 import { useLivePreview } from '@payloadcms/live-preview-react'
+import { useParallaxOffset } from '@/lib/useParallaxOffset'
+import ScrollReveal from '@/components/ScrollReveal'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,6 +55,9 @@ function formatDate(dateStr?: string) {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function BlogPageClient({ initialData, posts, serverURL }: Props) {
+  const heroRef        = useRef<HTMLElement>(null)
+  const parallaxOffset = useParallaxOffset(heroRef)
+
   const { data: bp } = useLivePreview<BlogPageGlobal>({
     initialData,
     serverURL: typeof window !== 'undefined'
@@ -72,13 +78,13 @@ export default function BlogPageClient({ initialData, posts, serverURL }: Props)
   return (
     <>
       {/* ── Hero Banner ───────────────────────────────────────────────────── */}
-      <section className="relative min-h-[50vh] flex items-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-[50vh] flex items-center overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         {heroImage?.url && (
-          <div className="absolute inset-0">
+          <div className="absolute inset-0" style={{ transform: `scale(1.12) translateY(${parallaxOffset}px)`, willChange: 'transform' }}>
             <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
           </div>
         )}
@@ -102,9 +108,9 @@ export default function BlogPageClient({ initialData, posts, serverURL }: Props)
         <div className="xq-container mt-12">
           {hasPosts ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map((post) => (
+              {posts.map((post, i) => (
+                <ScrollReveal key={post.id} delay={i * 80}>
                 <Link
-                  key={post.id}
                   href={`/blog/${post.slug}`}
                   className={`group xq-card flex flex-col hover:border-xq-accent/60 transition-colors ${post.coverImage?.url ? 'p-0 overflow-hidden' : ''}`}
                 >
@@ -129,6 +135,7 @@ export default function BlogPageClient({ initialData, posts, serverURL }: Props)
                     <div className="mt-4 text-xq-accent text-xs font-semibold">Read article →</div>
                   </div>
                 </Link>
+                </ScrollReveal>
               ))}
             </div>
           ) : (

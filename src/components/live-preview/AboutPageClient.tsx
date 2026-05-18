@@ -2,7 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRef } from 'react'
 import { useLivePreview } from '@payloadcms/live-preview-react'
+import { useParallaxOffset } from '@/lib/useParallaxOffset'
+import ScrollReveal from '@/components/ScrollReveal'
 
 // ─── Types (mirrors about/page.tsx) ──────────────────────────────────────────
 
@@ -73,6 +76,9 @@ interface Props {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function AboutPageClient({ initialData, clients, serverURL }: Props) {
+  const heroRef      = useRef<HTMLElement>(null)
+  const parallaxOffset = useParallaxOffset(heroRef)
+
   const { data: ap } = useLivePreview<AboutGlobal>({
     initialData,
     serverURL: typeof window !== 'undefined'
@@ -99,13 +105,13 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
   return (
     <>
       {/* ── Hero Banner ──────────────────────────────────────── */}
-      <section className="relative min-h-[55vh] flex items-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-[55vh] flex items-center overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         {heroImage?.url && (
-          <div className="absolute inset-0">
+          <div className="absolute inset-0" style={{ transform: `scale(1.12) translateY(${parallaxOffset}px)`, willChange: 'transform' }}>
             <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
           </div>
         )}
@@ -132,6 +138,7 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
       {/* ── Intro ────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
+          <ScrollReveal>
           {introImage?.url ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div>
@@ -148,6 +155,7 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
               <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
             </div>
           )}
+          </ScrollReveal>
         </div>
       </section>
 
@@ -156,11 +164,11 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
         <div className="xq-container py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {credentials.map((c, i) => (
-              <div key={c.id ?? i} className="text-center">
+              <ScrollReveal key={c.id ?? i} delay={i * 100} className="text-center">
                 <div className="text-4xl font-black text-xq-accent mb-1">{c.value}</div>
                 <div className="text-white font-semibold text-sm mb-1">{c.label}</div>
                 {c.detail && <div className="text-xq-muted text-xs">{c.detail}</div>}
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -169,11 +177,14 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
       {/* ── Hubs ─────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
-          <div className="xq-label mb-4">Our Hubs</div>
-          <h2 className="text-3xl font-black text-white mb-12">Global presence, unified delivery</h2>
+          <ScrollReveal className="mb-12">
+            <div className="xq-label mb-4">Our Hubs</div>
+            <h2 className="text-3xl font-black text-white">Global presence, unified delivery</h2>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {hubs.map((hub, i) => (
-              <div key={hub.id ?? i} className="xq-card overflow-hidden">
+              <ScrollReveal key={hub.id ?? i} delay={i * 100}>
+              <div className="xq-card overflow-hidden">
                 {hub.image?.url && (
                   <div className="relative aspect-video -mx-6 -mt-6 mb-6">
                     <Image src={hub.image.url} alt={hub.image.alt || hub.city} fill className="object-cover" />
@@ -185,6 +196,7 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
                 {hub.role   && <p className="text-xq-muted text-sm mb-2">{hub.role}</p>}
                 {hub.detail && <p className="text-xq-muted text-xs opacity-70">{hub.detail}</p>}
               </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -193,13 +205,16 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
       {/* ── Clients ──────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
-          <div className="xq-label mb-4">Clients & Partners</div>
-          <h2 className="text-3xl font-black text-white mb-12">
-            Trusted by leading brands across gaming, automotive, simulation, and entertainment
-          </h2>
+          <ScrollReveal className="mb-12">
+            <div className="xq-label mb-4">Clients & Partners</div>
+            <h2 className="text-3xl font-black text-white">
+              Trusted by leading brands across gaming, automotive, simulation, and entertainment
+            </h2>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {clientList.map((client) => (
-              <div key={String(client.id)} className="xq-card py-4">
+            {clientList.map((client, i) => (
+              <ScrollReveal key={String(client.id)} delay={i * 60}>
+              <div className="xq-card py-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-white font-bold">{client.name}</h3>
                   {client.sector && (
@@ -208,6 +223,7 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
                 </div>
                 {client.note && <p className="text-xq-muted text-sm">{client.note}</p>}
               </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -216,14 +232,18 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
       {/* ── Why XQube ────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
-          <div className="xq-label mb-4">Why XQube</div>
-          <h2 className="text-3xl font-black text-white mb-10">Built for serious studios</h2>
+          <ScrollReveal className="mb-10">
+            <div className="xq-label mb-4">Why XQube</div>
+            <h2 className="text-3xl font-black text-white">Built for serious studios</h2>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {whyCards.map((item, i) => (
-              <div key={item.id ?? i} className="xq-card">
+              <ScrollReveal key={item.id ?? i} delay={i * 80}>
+              <div className="xq-card">
                 <h3 className="text-white font-bold mb-2">{item.title}</h3>
                 <p className="text-xq-muted text-sm leading-relaxed">{item.body}</p>
               </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -231,13 +251,13 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
-        <div className="xq-container text-center">
+        <ScrollReveal className="xq-container text-center">
           <h2 className="text-3xl font-black text-white mb-6">Ready to work together?</h2>
           <Link href="https://calendly.com/tanvirkhandlxqsmgs" target="_blank" rel="noopener noreferrer"
             className="xq-btn-primary text-base px-8 py-4">
             Book a Discovery Call
           </Link>
-        </div>
+        </ScrollReveal>
       </section>
     </>
   )

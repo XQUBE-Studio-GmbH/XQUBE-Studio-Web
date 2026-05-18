@@ -2,7 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRef } from 'react'
 import { useLivePreview } from '@payloadcms/live-preview-react'
+import { useParallaxOffset } from '@/lib/useParallaxOffset'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,6 +62,9 @@ interface Props {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function PortfolioPageClient({ initialData, items, serverURL }: Props) {
+  const heroRef        = useRef<HTMLElement>(null)
+  const parallaxOffset = useParallaxOffset(heroRef)
+
   const { data: pp } = useLivePreview<PortfolioPageGlobal>({
     initialData,
     serverURL: typeof window !== 'undefined'
@@ -82,13 +87,13 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
   return (
     <>
       {/* ── Hero Banner ───────────────────────────────────────────────────── */}
-      <section className="relative min-h-[50vh] flex items-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-[50vh] flex items-center overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         {heroImage?.url && (
-          <div className="absolute inset-0">
+          <div className="absolute inset-0" style={{ transform: `scale(1.12) translateY(${parallaxOffset}px)`, willChange: 'transform' }}>
             <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
           </div>
         )}

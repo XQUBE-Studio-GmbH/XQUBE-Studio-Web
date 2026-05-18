@@ -32,7 +32,16 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
   const ctaLabel = propCta?.label ?? DEFAULT_CTA.label!
   const ctaUrl   = propCta?.url   ?? DEFAULT_CTA.url!
 
-  const [open, setOpen] = useState(false)
+  const [open,     setOpen]     = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  // Shrink navbar after 80px scroll
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -50,9 +59,15 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
   return (
     <>
       {/* ── Top bar ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-xq-bg/80 backdrop-blur-md border-b border-xq-border">
+      <header className={`fixed top-0 left-0 right-0 z-50 border-b border-xq-border transition-all duration-300 ease-in-out ${
+        scrolled
+          ? 'bg-xq-bg/95 backdrop-blur-lg shadow-[0_4px_24px_rgba(0,0,0,0.4)]'
+          : 'bg-xq-bg/80 backdrop-blur-md'
+      }`}>
         <div className="xq-container">
-          <nav className="flex items-center justify-between h-[72px]">
+          <nav className={`flex items-center justify-between transition-all duration-300 ease-in-out ${
+            scrolled ? 'h-[56px]' : 'h-[72px]'
+          }`}>
 
             {/* Logo */}
             <Link href="/" className="flex items-center shrink-0" onClick={() => setOpen(false)}>
@@ -62,7 +77,7 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
                 width={120}
                 height={69}
                 priority
-                className="h-[60px] w-auto"
+                className={`w-auto transition-all duration-300 ease-in-out ${scrolled ? 'h-[44px]' : 'h-[60px]'}`}
               />
             </Link>
 
@@ -125,7 +140,10 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
           md:hidden fixed left-0 right-0 bottom-0 z-40
           bg-black flex flex-col
           transition-all duration-300 ease-in-out
-          ${open ? 'opacity-100 pointer-events-auto top-[72px]' : 'opacity-0 pointer-events-none top-[72px] -translate-y-full'}
+          ${open
+            ? `opacity-100 pointer-events-auto ${scrolled ? 'top-[56px]' : 'top-[72px]'}`
+            : `opacity-0 pointer-events-none ${scrolled ? 'top-[56px]' : 'top-[72px]'} -translate-y-full`
+          }
         `}
       >
         <div className="xq-container flex flex-col py-8 gap-1 h-full overflow-y-auto">
