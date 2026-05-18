@@ -22,7 +22,8 @@ export const metadata: Metadata = {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-interface ClientItem { id: string | number; name: string; sector?: string; note?: string }
+interface ClientItem  { id: string | number; name: string; sector?: string; note?: string }
+interface TeamMember  { id: string | number; name: string; role: string; bio?: string; photo?: { url?: string; alt?: string } | null; order?: number }
 interface AboutGlobal {
   hero?: {
     label?:    string
@@ -41,23 +42,25 @@ interface AboutGlobal {
 async function getData() {
   try {
     const payload = await getPayload({ config })
-    const [ap, clientsRes] = await Promise.all([
+    const [ap, clientsRes, teamRes] = await Promise.all([
       payload.findGlobal({ slug: 'about-page' }) as Promise<AboutGlobal>,
-      payload.find({ collection: 'clients', sort: 'order', limit: 20, depth: 0 }),
+      payload.find({ collection: 'clients',      sort: 'order', limit: 20, depth: 0 }),
+      payload.find({ collection: 'team-members', sort: 'order', limit: 50, depth: 1 }),
     ])
     return {
-      ap:      ap as AboutGlobal,
-      clients: clientsRes.docs as unknown as ClientItem[],
+      ap:          ap as AboutGlobal,
+      clients:     clientsRes.docs as unknown as ClientItem[],
+      teamMembers: teamRes.docs    as unknown as TeamMember[],
     }
   } catch {
-    return { ap: {} as AboutGlobal, clients: [] }
+    return { ap: {} as AboutGlobal, clients: [], teamMembers: [] }
   }
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function AboutPage() {
-  const { ap, clients } = await getData()
+  const { ap, clients, teamMembers } = await getData()
 
   const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
@@ -65,6 +68,7 @@ export default async function AboutPage() {
     <AboutPageClient
       initialData={ap}
       clients={clients}
+      teamMembers={teamMembers}
       serverURL={serverURL}
     />
   )

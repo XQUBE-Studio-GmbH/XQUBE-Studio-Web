@@ -13,7 +13,8 @@ interface MediaRef    { url?: string; alt?: string }
 interface Credential { id?: string; value: string; label: string; detail?: string }
 interface Hub        { id?: string; flag?: string; city: string; country: string; role?: string; detail?: string; image?: MediaRef | null }
 interface WhyCard    { id?: string; title: string; body: string }
-interface ClientItem { id: string | number; name: string; sector?: string; note?: string }
+interface ClientItem  { id: string | number; name: string; sector?: string; note?: string }
+interface TeamMember  { id: string | number; name: string; role: string; bio?: string; photo?: { url?: string; alt?: string } | null }
 
 interface AboutGlobal {
   hero?: {
@@ -70,12 +71,13 @@ const FB_CLIENTS = [
 interface Props {
   initialData: AboutGlobal
   clients:     ClientItem[]
+  teamMembers: TeamMember[]
   serverURL:   string
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function AboutPageClient({ initialData, clients, serverURL }: Props) {
+export default function AboutPageClient({ initialData, clients, teamMembers, serverURL }: Props) {
   const heroRef      = useRef<HTMLElement>(null)
   const parallaxOffset = useParallaxOffset(heroRef)
 
@@ -228,6 +230,38 @@ export default function AboutPageClient({ initialData, clients, serverURL }: Pro
           </div>
         </div>
       </section>
+
+      {/* ── Team ─────────────────────────────────────────────── */}
+      {teamMembers.length > 0 && (
+        <section className="xq-section border-t border-xq-border">
+          <div className="xq-container">
+            <ScrollReveal className="mb-12">
+              <div className="xq-label mb-4">The Team</div>
+              <h2 className="text-3xl font-black text-white">People behind the work</h2>
+            </ScrollReveal>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {teamMembers.map((member, i) => (
+                <ScrollReveal key={String(member.id)} delay={i * 80}>
+                <div className="xq-card text-center">
+                  <div className="relative w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-xq-border bg-xq-surface">
+                    {member.photo?.url ? (
+                      <Image src={member.photo.url} alt={member.photo.alt || member.name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xq-accent font-black text-2xl">
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-white font-bold text-sm mb-1">{member.name}</h3>
+                  <p className="text-xq-accent text-xs font-semibold mb-3">{member.role}</p>
+                  {member.bio && <p className="text-xq-muted text-xs leading-relaxed">{member.bio}</p>}
+                </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Why XQube ────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
