@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import PortfolioPageClient from '@/components/live-preview/PortfolioPageClient'
+import type { PortfolioPageGlobal, PortfolioItem } from '@/types/cms'
 
 export const metadata: Metadata = {
   title: 'Portfolio',
@@ -20,26 +21,6 @@ export const metadata: Metadata = {
 
 // force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
 export const dynamic = 'force-dynamic'
-
-interface PortfolioItem {
-  id:               string
-  title:            string
-  slug:             string
-  category?:        string
-  shortDescription?: string
-  heroImage?:       { url?: string; alt?: string; width?: number; height?: number }
-}
-
-interface PortfolioPageGlobal {
-  hero?: {
-    label?:    string
-    heading?:  string
-    subtitle?: string
-    image?:    { url?: string; alt?: string } | null
-    ctaLabel?: string
-    ctaUrl?:   string
-  }
-}
 
 async function getData() {
   try {

@@ -2,32 +2,12 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRef } from 'react'
 import { useLivePreview } from '@payloadcms/live-preview-react'
-import { useParallaxOffset } from '@/lib/useParallaxOffset'
 import ScrollReveal from '@/components/ScrollReveal'
-
-// ─── Types (mirrors about/page.tsx) ──────────────────────────────────────────
-
-interface MediaRef    { url?: string; alt?: string }
-interface Credential { id?: string; value: string; label: string; detail?: string }
-interface Hub        { id?: string; flag?: string; city: string; country: string; role?: string; detail?: string; image?: MediaRef | null }
-interface WhyCard    { id?: string; title: string; body: string }
-interface ClientItem  { id: string | number; name: string; sector?: string; note?: string }
-interface TeamMember  { id: string | number; name: string; role: string; bio?: string; photo?: { url?: string; alt?: string } | null }
-
-interface AboutGlobal {
-  hero?: {
-    label?:    string
-    heading?:  string
-    subtitle?: string
-    image?:    MediaRef | null
-  }
-  intro?: { body1?: string; body2?: string; image?: MediaRef | null }
-  credentials?: Credential[]
-  hubs?: Hub[]
-  whyXqube?: WhyCard[]
-}
+import PageHero from '@/components/PageHero'
+import SectionHeader from '@/components/SectionHeader'
+import { getLivePreviewServerURL } from '@/lib/livePreview'
+import type { AboutGlobal, ClientItem, TeamMember, MediaRef, Credential, Hub, WhyCard } from '@/types/cms'
 
 // ─── Fallbacks ────────────────────────────────────────────────────────────────
 
@@ -78,16 +58,9 @@ interface Props {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function AboutPageClient({ initialData, clients, teamMembers, serverURL }: Props) {
-  const heroRef      = useRef<HTMLElement>(null)
-  const parallaxOffset = useParallaxOffset(heroRef)
-
   const { data: ap } = useLivePreview<AboutGlobal>({
     initialData,
-    serverURL: typeof window !== 'undefined'
-      ? (window !== window.parent && document.referrer
-        ? new URL(document.referrer).origin
-        : window.location.origin)
-      : serverURL,
+    serverURL: getLivePreviewServerURL(serverURL),
     depth: 2,
   })
 
@@ -107,35 +80,13 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
   return (
     <>
       {/* ── Hero Banner ──────────────────────────────────────── */}
-      <section ref={heroRef} className="relative min-h-[55vh] flex items-center overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-        {heroImage?.url && (
-          <div className="absolute inset-0" style={{ transform: `scale(1.12) translateY(${parallaxOffset}px)`, willChange: 'transform' }}>
-            <Image src={heroImage.url} alt={heroImage.alt || heroHeading} fill className="object-cover" priority />
-          </div>
-        )}
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
-
-        {/* Text */}
-        <div className="xq-container relative z-10">
-          <div className="max-w-3xl">
-            <div className="xq-label mb-6">{heroLabel}</div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 leading-[1.05] drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
-              {heroHeading}
-            </h1>
-            {heroSubtitle && (
-              <p className="text-base sm:text-lg text-white/75 max-w-2xl leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
-                {heroSubtitle}
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
+      <PageHero
+        label={heroLabel}
+        heading={heroHeading}
+        subtitle={heroSubtitle}
+        image={heroImage}
+        minHeight="min-h-[55vh]"
+      />
 
       {/* ── Intro ────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
@@ -179,10 +130,7 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
       {/* ── Hubs ─────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
-          <ScrollReveal className="mb-12">
-            <div className="xq-label mb-4">Our Hubs</div>
-            <h2 className="text-3xl font-black text-white">Global presence, unified delivery</h2>
-          </ScrollReveal>
+          <SectionHeader label="Our Hubs" heading="Global presence, unified delivery" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {hubs.map((hub, i) => (
               <ScrollReveal key={hub.id ?? i} delay={i * 100}>
@@ -207,12 +155,10 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
       {/* ── Clients ──────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
-          <ScrollReveal className="mb-12">
-            <div className="xq-label mb-4">Clients & Partners</div>
-            <h2 className="text-3xl font-black text-white">
-              Trusted by leading brands across gaming, automotive, simulation, and entertainment
-            </h2>
-          </ScrollReveal>
+          <SectionHeader
+            label="Clients & Partners"
+            heading="Trusted by leading brands across gaming, automotive, simulation, and entertainment"
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {clientList.map((client, i) => (
               <ScrollReveal key={String(client.id)} delay={i * 60}>
@@ -235,10 +181,7 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
       {teamMembers.length > 0 && (
         <section className="xq-section border-t border-xq-border">
           <div className="xq-container">
-            <ScrollReveal className="mb-12">
-              <div className="xq-label mb-4">The Team</div>
-              <h2 className="text-3xl font-black text-white">People behind the work</h2>
-            </ScrollReveal>
+            <SectionHeader label="The Team" heading="People behind the work" />
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {teamMembers.map((member, i) => (
                 <ScrollReveal key={String(member.id)} delay={i * 80}>
@@ -266,10 +209,7 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
       {/* ── Why XQube ────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border">
         <div className="xq-container">
-          <ScrollReveal className="mb-10">
-            <div className="xq-label mb-4">Why XQube</div>
-            <h2 className="text-3xl font-black text-white">Built for serious studios</h2>
-          </ScrollReveal>
+          <SectionHeader label="Why XQube" heading="Built for serious studios" className="mb-10" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {whyCards.map((item, i) => (
               <ScrollReveal key={item.id ?? i} delay={i * 80}>

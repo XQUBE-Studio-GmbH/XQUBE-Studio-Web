@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import BlogPageClient from '@/components/live-preview/BlogPageClient'
+import type { BlogPageGlobal, BlogPost } from '@/types/cms'
 
 export const metadata: Metadata = {
   title: 'Blog & Insights',
@@ -20,24 +21,6 @@ export const metadata: Metadata = {
 
 // force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
 export const dynamic = 'force-dynamic'
-
-interface BlogPost {
-  id:          string
-  title:       string
-  slug:        string
-  excerpt?:    string
-  createdAt?:  string
-  coverImage?: { url?: string; alt?: string } | null
-}
-
-interface BlogPageGlobal {
-  hero?: {
-    label?:    string
-    heading?:  string
-    subtitle?: string
-    image?:    { url?: string; alt?: string } | null
-  }
-}
 
 async function getData() {
   try {

@@ -6,6 +6,7 @@ import { s3Storage } from '@payloadcms/storage-s3'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { ROLES } from './constants.ts'
 import * as initialMigration from './migrations/20250513_initial.ts'
 import * as portfolioEnhancedMigration from './migrations/20250515_portfolio_enhanced.ts'
 import * as pageGlobalsMigration from './migrations/20250515_page_globals.ts'
@@ -25,15 +26,15 @@ const dirname = path.dirname(filename)
 
 // ─── Access helpers ───────────────────────────────────────────────────────────
 
-const isSuperAdmin    = ({ req }: { req: any }) => req.user?.role === 'super-admin'
-const isAdminOrAbove  = ({ req }: { req: any }) => !!req.user && ['super-admin', 'admin'].includes(req.user.role)
-const isEditorOrAbove = ({ req }: { req: any }) => !!req.user && ['super-admin', 'admin', 'content-editor'].includes(req.user.role)
+const isSuperAdmin    = ({ req }: { req: any }) => req.user?.role === ROLES.SUPER_ADMIN
+const isAdminOrAbove  = ({ req }: { req: any }) => !!req.user && [ROLES.SUPER_ADMIN, ROLES.ADMIN].includes(req.user.role)
+const isEditorOrAbove = ({ req }: { req: any }) => !!req.user && [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.CONTENT_EDITOR].includes(req.user.role)
 const isLoggedIn      = ({ req }: { req: any }) => !!req.user
 
 // Content editors and viewers can only edit their own user record
 const canUpdateUser = ({ req }: { req: any }) => {
   if (!req.user) return false
-  if (['super-admin', 'admin'].includes(req.user.role)) return true
+  if ([ROLES.SUPER_ADMIN, ROLES.ADMIN].includes(req.user.role)) return true
   return { id: { equals: req.user.id } }
 }
 
@@ -142,9 +143,9 @@ export default buildConfig({
           defaultValue: 'viewer',
           admin: { description: 'Controls what this user can see and edit.' },
           options: [
-            { label: 'Super Admin',    value: 'super-admin' },
-            { label: 'Admin',          value: 'admin' },
-            { label: 'Content Editor', value: 'content-editor' },
+            { label: 'Super Admin',    value: ROLES.SUPER_ADMIN },
+            { label: 'Admin',          value: ROLES.ADMIN },
+            { label: 'Content Editor', value: ROLES.CONTENT_EDITOR },
             { label: 'Viewer',         value: 'viewer' },
           ],
         },

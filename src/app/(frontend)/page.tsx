@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../payload/payload.config'
 import HomePageClient from '@/components/live-preview/HomePageClient'
+import type { HomepageGlobal, ServiceItem, ClientItem, PortfolioItem } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,39 +19,6 @@ export const metadata: Metadata = {
     title: 'XQube Studio | AAA Game Art & XR Production',
     description: 'AAA-quality game art and XR production. Vienna · Dubai · Dhaka.',
   },
-}
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface Stat      { id?: string; value: string; label: string }
-interface ServiceItem {
-  id: string | number
-  title: string
-  shortDescription?: string
-  icon?: string
-  order?: number
-  image?: { url?: string; alt?: string } | null
-}
-interface ClientItem  { id: string | number; name: string; logo?: { url?: string; alt?: string } | null }
-interface PortfolioItem {
-  id: string; title: string; slug: string; category?: string
-  shortDescription?: string; heroImage?: { url?: string; alt?: string }
-}
-interface HeroSlide {
-  id?: string
-  eyebrow?: string; title?: string; subtitle?: string
-  primaryCtaLabel?: string; primaryCtaUrl?: string
-  secondaryCtaLabel?: string; secondaryCtaUrl?: string
-  image?: { url?: string; alt?: string } | null
-}
-interface HomepageGlobal {
-  hero?: {
-    mode?:     'slideshow' | 'video'
-    videoUrl?: string
-    slides?:   HeroSlide[]
-  }
-  stats?: Stat[]
-  cta?: { headline?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
 }
 
 // ─── Data fetchers ────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import ContactPageClient from '@/components/live-preview/ContactPageClient'
+import type { ContactPageGlobal } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,16 +29,6 @@ interface SiteSettings {
     calendly?: string
     linkedin?: string
     artstation?: string
-  }
-}
-
-interface ContactPageGlobal {
-  hero?: {
-    label?: string
-    heading?: string
-    subtext?: string
-    calendlyLabel?: string
-    image?: { url?: string; alt?: string } | null
   }
 }
 

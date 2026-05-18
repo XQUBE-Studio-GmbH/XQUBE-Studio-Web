@@ -6,41 +6,8 @@ import Image from 'next/image'
 import { useLivePreview } from '@payloadcms/live-preview-react'
 import StatCounter from '@/components/StatCounter'
 import ScrollReveal from '@/components/ScrollReveal'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface HeroSlide {
-  id?: string
-  eyebrow?:           string
-  title?:             string
-  subtitle?:          string
-  primaryCtaLabel?:   string
-  primaryCtaUrl?:     string
-  secondaryCtaLabel?: string
-  secondaryCtaUrl?:   string
-  image?: { url?: string; alt?: string } | null
-}
-
-interface Stat { id?: string; value: string; label: string }
-interface ServiceItem {
-  id: string | number; title: string; shortDescription?: string
-  icon?: string; order?: number; image?: { url?: string; alt?: string } | null
-}
-interface ClientItem  { id: string | number; name: string; logo?: { url?: string; alt?: string } | null }
-interface PortfolioItem {
-  id: string; title: string; slug: string; category?: string
-  shortDescription?: string; heroImage?: { url?: string; alt?: string }
-}
-
-interface HomepageGlobal {
-  hero?: {
-    mode?:     'slideshow' | 'video'
-    videoUrl?: string
-    slides?:   HeroSlide[]
-  }
-  stats?: Stat[]
-  cta?:  { headline?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
-}
+import { getLivePreviewServerURL } from '@/lib/livePreview'
+import type { HeroSlide, Stat, ServiceItem, ClientItem, PortfolioItem, HomepageGlobal } from '@/types/cms'
 
 // ─── Fallbacks ────────────────────────────────────────────────────────────────
 
@@ -282,11 +249,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
 export default function HomePageClient({ initialData, services, clients, featured, serverURL }: Props) {
   const { data: hp } = useLivePreview<HomepageGlobal>({
     initialData,
-    serverURL: typeof window !== 'undefined'
-      ? (window !== window.parent && document.referrer
-        ? new URL(document.referrer).origin
-        : window.location.origin)
-      : serverURL,
+    serverURL: getLivePreviewServerURL(serverURL),
     depth: 2,
   })
 

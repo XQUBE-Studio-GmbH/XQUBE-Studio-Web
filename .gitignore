@@ -39,3 +39,7 @@ next-env.d.ts
 # payload
 /media
 /payload-types.ts
+
+# claude dev helpers
+.claude/start-dev.sh
+.claude/start-dev.py

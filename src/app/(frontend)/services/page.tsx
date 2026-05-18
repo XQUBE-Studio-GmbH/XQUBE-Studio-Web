@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import ServicesPageClient from '@/components/live-preview/ServicesPageClient'
+import type { ServicesPageGlobal, ServiceItem } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,33 +19,6 @@ export const metadata: Metadata = {
     title: 'Services | XQube Studio',
     description: 'Game Art · VR Assets · Interactive Dev · Staff Augmentation.',
   },
-}
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface MediaRef { url?: string; alt?: string }
-
-interface ServiceItem {
-  id: string | number
-  title: string
-  shortDescription?: string
-  icon?: string
-  features?: { id: string; feature: string }[]
-  platforms?: string
-  image?: MediaRef | null
-}
-
-interface PipelineStep { id?: string; step: string }
-
-interface Pipeline {
-  id?: string
-  title: string
-  subtitle?: string
-  description?: string
-  steps?: (PipelineStep | string)[]
-  toolsUsed?: string
-  image?: MediaRef | null
-  imageLabel?: string
 }
 
 // ─── Services fallback ───────────────────────────────────────────────────────
@@ -107,14 +81,6 @@ const FB_SERVICES: ServiceItem[] = [
     platforms: 'Any engine · Any platform · Any pipeline',
   },
 ]
-
-// ─── Page copy types ─────────────────────────────────────────────────────────
-
-interface ServicesPageGlobal {
-  hero?: { label?: string; heading?: string; subtitle?: string; image?: MediaRef | null }
-  cta?:  { heading?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
-  pipelines?: Pipeline[]
-}
 
 // ─── Data fetcher ────────────────────────────────────────────────────────────
 

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import AboutPageClient from '@/components/live-preview/AboutPageClient'
+import type { AboutGlobal, ClientItem, TeamMember } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,23 +19,6 @@ export const metadata: Metadata = {
     title: 'About XQube Studio',
     description: 'GmbH registered in Vienna. 15+ years. 80+ clients. Three global hubs.',
   },
-}
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface ClientItem  { id: string | number; name: string; sector?: string; note?: string }
-interface TeamMember  { id: string | number; name: string; role: string; bio?: string; photo?: { url?: string; alt?: string } | null; order?: number }
-interface AboutGlobal {
-  hero?: {
-    label?:    string
-    heading?:  string
-    subtitle?: string
-    image?:    { url?: string; alt?: string } | null
-  }
-  intro?: { body1?: string; body2?: string; image?: { url?: string; alt?: string } | null }
-  credentials?: { id?: string; value: string; label: string; detail?: string }[]
-  hubs?: { id?: string; flag?: string; city: string; country: string; role?: string; detail?: string; image?: { url?: string; alt?: string } | null }[]
-  whyXqube?: { id?: string; title: string; body: string }[]
 }
 
 // ─── Data fetcher ─────────────────────────────────────────────────────────────
