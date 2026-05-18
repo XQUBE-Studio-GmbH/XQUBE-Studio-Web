@@ -585,7 +585,7 @@ export default buildConfig({
         group: 'Pages',
         description: 'Edit the homepage cinematic hero (slideshow or video), stats, and bottom CTA.',
       },
-      access: { read: isLoggedIn, update: isAdminOrAbove },
+      access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
         {
           name: 'hero',
@@ -671,7 +671,7 @@ export default buildConfig({
         group: 'Pages',
         description: 'Edit the About page hero banner, intro, credentials, hubs, and Why XQube cards.',
       },
-      access: { read: isLoggedIn, update: isAdminOrAbove },
+      access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
         {
           name: 'hero',
@@ -760,7 +760,7 @@ export default buildConfig({
         group: 'Pages',
         description: 'Edit the Contact page headline, subtext, and Calendly button label.',
       },
-      access: { read: isLoggedIn, update: isAdminOrAbove },
+      access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
         {
           name: 'hero',
@@ -792,7 +792,7 @@ export default buildConfig({
         group: 'Services',
         description: 'Edit the Services page hero text and bottom CTA.',
       },
-      access: { read: isLoggedIn, update: isAdminOrAbove },
+      access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
         {
           name: 'hero',
@@ -859,7 +859,7 @@ export default buildConfig({
         group: 'Portfolio',
         description: 'Edit the Portfolio listing page hero section.',
       },
-      access: { read: isLoggedIn, update: isAdminOrAbove },
+      access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
         {
           name: 'hero',
@@ -892,7 +892,7 @@ export default buildConfig({
         group: 'Blog',
         description: 'Edit the Blog listing page hero section.',
       },
-      access: { read: isLoggedIn, update: isAdminOrAbove },
+      access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
         {
           name: 'hero',
