@@ -445,7 +445,7 @@ export default function HomePageClient({ initialData, services, clients, feature
               {ctaHeadline}
             </h2>
             <p className="text-xq-muted text-lg mb-10">{ctaSubtitle}</p>
-            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4 animate-cta-pulse">
+            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4">
               {ctaBtnLabel}
             </Link>
           </ScrollReveal>

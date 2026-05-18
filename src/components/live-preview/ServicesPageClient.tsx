@@ -247,7 +247,7 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
           <ScrollReveal className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-black text-white mb-4">{ctaHeading}</h2>
             <p className="text-xq-muted text-lg mb-10">{ctaSubtitle}</p>
-            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4 animate-cta-pulse">{ctaBtnLabel}</Link>
+            <Link href={ctaBtnUrl} className="xq-btn-primary text-base px-8 py-4">{ctaBtnLabel}</Link>
           </ScrollReveal>
         </div>
       </section>

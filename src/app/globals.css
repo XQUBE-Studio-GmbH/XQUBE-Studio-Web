@@ -55,6 +55,7 @@ a { color: inherit; text-decoration: none; }
   .xq-btn-primary {
     @apply inline-flex items-center gap-2 px-6 py-3 bg-xq-accent text-black font-semibold text-sm rounded;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    animation: ctaPulse 2.4s ease-in-out infinite;
   }
   .xq-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 
