@@ -31,7 +31,7 @@ interface ServiceItem {
   order?: number
   image?: { url?: string; alt?: string } | null
 }
-interface ClientItem  { id: string | number; name: string }
+interface ClientItem  { id: string | number; name: string; logo?: { url?: string; alt?: string } | null }
 interface PortfolioItem {
   id: string; title: string; slug: string; category?: string
   shortDescription?: string; heroImage?: { url?: string; alt?: string }
@@ -61,7 +61,7 @@ async function getData() {
     const [hp, servicesRes, clientsRes, featuredRes] = await Promise.all([
       payload.findGlobal({ slug: 'home-page' }) as Promise<HomepageGlobal>,
       payload.find({ collection: 'services', where: { featured: { equals: true } }, sort: 'order', limit: 4, depth: 1 }),
-      payload.find({ collection: 'clients',  where: { featured: { equals: true } }, sort: 'order', limit: 20, depth: 0 }),
+      payload.find({ collection: 'clients',  where: { featured: { equals: true } }, sort: 'order', limit: 20, depth: 1 }),
       payload.find({ collection: 'portfolio', where: { featured: { equals: true }, status: { equals: 'published' } }, limit: 6, depth: 1 }),
     ])
     return {

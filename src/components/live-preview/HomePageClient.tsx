@@ -26,7 +26,7 @@ interface ServiceItem {
   id: string | number; title: string; shortDescription?: string
   icon?: string; order?: number; image?: { url?: string; alt?: string } | null
 }
-interface ClientItem  { id: string | number; name: string }
+interface ClientItem  { id: string | number; name: string; logo?: { url?: string; alt?: string } | null }
 interface PortfolioItem {
   id: string; title: string; slug: string; category?: string
   shortDescription?: string; heroImage?: { url?: string; alt?: string }
@@ -305,9 +305,17 @@ export default function HomePageClient({ initialData, services, clients, feature
   const ctaBtnLabel = cta.buttonLabel ?? 'Start a Conversation'
   const ctaBtnUrl   = cta.buttonUrl   ?? '/contact'
 
-  const clientNames = clients.length > 0
-    ? clients.map((c) => c.name)
-    : ['BMW', 'INDG', 'FlightSim Studio', 'Fresh TV', 'Cyberfox', 'C3D', 'Barney Studio']
+  const clientList: ClientItem[] = clients.length > 0
+    ? clients
+    : [
+        { id: 'bmw',       name: 'BMW' },
+        { id: 'indg',      name: 'INDG' },
+        { id: 'flightsim', name: 'FlightSim Studio' },
+        { id: 'fresh-tv',  name: 'Fresh TV' },
+        { id: 'cyberfox',  name: 'Cyberfox' },
+        { id: 'c3d',       name: 'C3D' },
+        { id: 'barney',    name: 'Barney Studio' },
+      ]
 
   return (
     <>
@@ -334,10 +342,20 @@ export default function HomePageClient({ initialData, services, clients, feature
             <p className="text-center text-xs text-xq-muted tracking-widest uppercase mb-8">
               Trusted by studios worldwide
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-              {clientNames.map((name) => (
-                <div key={name} className="text-xq-muted font-semibold text-sm tracking-wide opacity-60 hover:opacity-100 transition-opacity">
-                  {name}
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-14">
+              {clientList.map((client) => (
+                <div key={String(client.id)} className="opacity-50 hover:opacity-90 transition-opacity duration-200 grayscale hover:grayscale-0">
+                  {client.logo?.url ? (
+                    <Image
+                      src={client.logo.url}
+                      alt={client.logo.alt || client.name}
+                      width={120}
+                      height={48}
+                      className="h-8 w-auto object-contain"
+                    />
+                  ) : (
+                    <span className="text-xq-muted font-semibold text-sm tracking-wide">{client.name}</span>
+                  )}
                 </div>
               ))}
             </div>
