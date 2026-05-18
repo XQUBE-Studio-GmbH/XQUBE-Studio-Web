@@ -349,9 +349,9 @@ export default function HomePageClient({ initialData, services, clients, feature
                     <Image
                       src={client.logo.url}
                       alt={client.logo.alt || client.name}
-                      width={120}
-                      height={48}
-                      className="h-8 w-auto object-contain"
+                      width={180}
+                      height={72}
+                      className="h-14 w-auto object-contain"
                     />
                   ) : (
                     <span className="text-xq-muted font-semibold text-sm tracking-wide">{client.name}</span>

@@ -243,11 +243,11 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
               {teamMembers.map((member, i) => (
                 <ScrollReveal key={String(member.id)} delay={i * 80}>
                 <div className="xq-card text-center">
-                  <div className="relative w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-xq-border bg-xq-surface">
+                  <div className="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-2 border-xq-border bg-xq-surface">
                     {member.photo?.url ? (
                       <Image src={member.photo.url} alt={member.photo.alt || member.name} fill className="object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xq-accent font-black text-2xl">
+                      <div className="w-full h-full flex items-center justify-center text-xq-accent font-black text-3xl">
                         {member.name.charAt(0).toUpperCase()}
                       </div>
                     )}
