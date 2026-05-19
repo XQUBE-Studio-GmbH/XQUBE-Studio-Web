@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
           <h2 style="color:#fff;margin:0 0 16px;">We received your brief.</h2>
           <p style="color:#8d95a8;line-height:1.6;">Hi ${name.split(' ')[0]}, thanks for getting in touch. Our team reviews every inquiry and typically responds within 24–48 hours.</p>
           <p style="color:#8d95a8;line-height:1.6;margin-top:16px;">Want to speak sooner? Book a discovery call directly:</p>
-          <a href="https://calendly.com/tanvirkhandlxqsmgs" style="display:inline-block;margin-top:16px;background:#14CB72;color:#000;padding:10px 20px;border-radius:4px;font-weight:600;font-size:14px;text-decoration:none;">Book a Discovery Call</a>
+          <a href="https://calendly.com/tanvirkhandlxqsmgs" style="display:inline-block;margin-top:16px;background:#14CB72;color:#000;padding:10px 20px;border-radius:4px;font-weight:600;font-size:14px;text-decoration:none;">Book a Call</a>
           <p style="color:#8d95a8;font-size:13px;margin-top:32px;padding-top:24px;border-top:1px solid #1a1a1a;">XQube Studio GmbH · Vienna, Austria · info@xqubestudio.com</p>
         </div>
       `,

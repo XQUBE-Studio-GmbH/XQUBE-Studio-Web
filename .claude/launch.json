@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "xqube-web",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["/Users/tanvirhossainkhan/Documents/_Dreamerz Lab/Proposals & Projects/XQube Studio/Github/XQUBE Web/xqube-web/.claude/start-dev.py"],
+      "port": 3000,
+      "autoPort": false
+    }
+  ]
+}

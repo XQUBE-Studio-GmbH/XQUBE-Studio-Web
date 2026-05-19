@@ -229,7 +229,7 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
           <h2 className="text-3xl font-black text-white mb-6">Ready to work together?</h2>
           <Link href="https://calendly.com/tanvirkhandlxqsmgs" target="_blank" rel="noopener noreferrer"
             className="xq-btn-primary text-base px-8 py-4">
-            Book a Discovery Call
+            Book a Call
           </Link>
         </ScrollReveal>
       </section>

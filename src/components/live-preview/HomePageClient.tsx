@@ -16,7 +16,7 @@ const FB_SLIDES: HeroSlide[] = [
     eyebrow:           'Vienna · Dubai · Dhaka',
     title:             'Where Art Meets Precision',
     subtitle:          'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
-    primaryCtaLabel:   'Book a Discovery Call',
+    primaryCtaLabel:   'Book a Call',
     primaryCtaUrl:     'https://calendly.com/tanvirkhandlxqsmgs',
     secondaryCtaLabel: 'View Portfolio',
     secondaryCtaUrl:   '/portfolio',

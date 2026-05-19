@@ -13,7 +13,7 @@ const FB_HERO = {
   label:         'Get in Touch',
   heading:       "Let's talk about your project",
   subtext:       "Book a discovery call for a scoped conversation, or fill out the brief and we'll respond within 24–48 hours.",
-  calendlyLabel: 'Book a Discovery Call',
+  calendlyLabel: 'Book a Call',
 }
 
 // ─── Props ────────────────────────────────────────────────────────────────────

@@ -314,7 +314,7 @@ export default async function PortfolioItemPage({ params }: Props) {
                   rel="noopener noreferrer"
                   className="xq-btn-primary w-full justify-center text-sm py-3"
                 >
-                  Book a Discovery Call
+                  Book a Call
                 </Link>
                 <Link href="/contact" className="xq-btn-ghost w-full justify-center text-sm py-3">
                   Send a Brief →

@@ -83,7 +83,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsGlobal }) 
               <li>
                 <a href={calendly} target="_blank" rel="noopener noreferrer"
                   className="text-sm text-xq-accent hover:opacity-80 transition-opacity">
-                  Book a Discovery Call →
+                  Book a Call →
                 </a>
               </li>
             </ul>
