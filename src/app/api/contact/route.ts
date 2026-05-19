@@ -3,18 +3,86 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY ?? 'placeholder')
 
+// ─── Rate limiting (in-memory, per warm serverless instance) ──────────────────
+// Limits to 5 submissions per IP per 10 minutes.
+// Not perfect across multiple Vercel instances but stops the vast majority of abuse.
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT   = 5
+const WINDOW_MS    = 10 * 60 * 1000 // 10 minutes
+
+function checkRateLimit(ip: string): boolean {
+  const now   = Date.now()
+  const entry = rateLimitMap.get(ip)
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + WINDOW_MS })
+    return true
+  }
+  if (entry.count >= RATE_LIMIT) return false
+  entry.count++
+  return true
+}
+
+// ─── Input length caps ────────────────────────────────────────────────────────
+
+const MAX = {
+  name:        100,
+  email:       254,
+  company:     100,
+  projectType: 100,
+  engine:      100,
+  budget:      100,
+  timeline:    100,
+  message:     5000,
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function row(label: string, value: string) {
   if (!value?.trim()) return ''
   return `<p><strong style="color:#8d95a8;">${label}:</strong> <span style="color:#fff;">${value}</span></p>`
 }
 
+function truncate(value: unknown, max: number): string {
+  const str = typeof value === 'string' ? value : ''
+  return str.slice(0, max)
+}
+
+// ─── Route handler ────────────────────────────────────────────────────────────
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { name, email, company, projectType, engine, budget, timeline, message } = body
+    // ── Rate limit check ──────────────────────────────────────────────────────
+    const ip =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      'unknown'
 
-    if (!name?.trim() || !email?.trim() || !message?.trim()) {
-      return NextResponse.json({ error: 'Name, email, and message are required.' }, { status: 400 })
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: 'Too many submissions. Please wait a few minutes before trying again.' },
+        { status: 429 },
+      )
+    }
+
+    // ── Parse & sanitise inputs ───────────────────────────────────────────────
+    const body = await req.json()
+
+    const name        = truncate(body.name,        MAX.name)
+    const email       = truncate(body.email,       MAX.email)
+    const company     = truncate(body.company,     MAX.company)
+    const projectType = truncate(body.projectType, MAX.projectType)
+    const engine      = truncate(body.engine,      MAX.engine)
+    const budget      = truncate(body.budget,      MAX.budget)
+    const timeline    = truncate(body.timeline,    MAX.timeline)
+    const message     = truncate(body.message,     MAX.message)
+
+    // ── Required field validation ─────────────────────────────────────────────
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      return NextResponse.json(
+        { error: 'Name, email, and message are required.' },
+        { status: 400 },
+      )
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -22,6 +90,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
     }
 
+    // ── Send emails ───────────────────────────────────────────────────────────
     const contactEmail = process.env.CONTACT_EMAIL || 'info@xqubestudio.com'
     const siteUrl      = process.env.NEXT_PUBLIC_SITE_URL || 'https://xqube-studio-web.vercel.app'
     const logoUrl      = `${siteUrl}/logo.svg`
@@ -68,7 +137,7 @@ export async function POST(req: NextRequest) {
           <img src="${logoUrl}" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
           <h2 style="color:#fff;margin:0 0 16px;">We received your brief.</h2>
           <p style="color:#8d95a8;line-height:1.6;">Hi ${name.split(' ')[0]}, thanks for getting in touch. Our team reviews every inquiry and typically responds within 24–48 hours.</p>
-          <p style="color:#8d95a8;line-height:1.6;margin-top:16px;">Want to speak sooner? Book a discovery call directly:</p>
+          <p style="color:#8d95a8;line-height:1.6;margin-top:16px;">Want to speak sooner? Book a call directly:</p>
           <a href="https://calendly.com/tanvirkhandlxqsmgs" style="display:inline-block;margin-top:16px;background:#14CB72;color:#000;padding:10px 20px;border-radius:4px;font-weight:600;font-size:14px;text-decoration:none;">Book a Call</a>
           <p style="color:#8d95a8;font-size:13px;margin-top:32px;padding-top:24px;border-top:1px solid #1a1a1a;">XQube Studio GmbH · Vienna, Austria · info@xqubestudio.com</p>
         </div>
@@ -78,6 +147,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[contact]', error)
-    return NextResponse.json({ error: 'Something went wrong. Please email info@xqubestudio.com directly.' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Something went wrong. Please email info@xqubestudio.com directly.' },
+      { status: 500 },
+    )
   }
 }
