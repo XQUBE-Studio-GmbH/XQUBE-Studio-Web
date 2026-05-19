@@ -233,6 +233,10 @@ export default buildConfig({
                     .replace(/\s+/g, '-')
                     .replace(/-+/g, '-')
                 }
+                // Always strip leading/trailing slashes and spaces from manually typed slugs
+                if (typeof value === 'string') {
+                  return value.trim().replace(/^\/+|\/+$/g, '')
+                }
                 return value
               },
             ],
@@ -472,6 +476,10 @@ export default buildConfig({
                     .replace(/[^a-z0-9\s-]/g, '')
                     .replace(/\s+/g, '-')
                     .replace(/-+/g, '-')
+                }
+                // Always strip leading/trailing slashes and spaces from manually typed slugs
+                if (typeof value === 'string') {
+                  return value.trim().replace(/^\/+|\/+$/g, '')
                 }
                 return value
               },
