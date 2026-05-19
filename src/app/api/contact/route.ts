@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY ?? 'placeholder')
 // Not perfect across multiple Vercel instances but stops the vast majority of abuse.
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT   = 5
+const RATE_LIMIT   = 2
 const WINDOW_MS    = 10 * 60 * 1000 // 10 minutes
 
 function checkRateLimit(ip: string): boolean {
