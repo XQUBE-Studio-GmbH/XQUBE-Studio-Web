@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 
 // ─── Types & defaults ─────────────────────────────────────────────────────────
 
@@ -31,6 +32,12 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
   const navLinks = (propLinks && propLinks.length > 0) ? propLinks : DEFAULT_NAV_LINKS
   const ctaLabel = propCta?.label ?? DEFAULT_CTA.label!
   const ctaUrl   = propCta?.url   ?? DEFAULT_CTA.url!
+
+  const pathname = usePathname()
+
+  // A link is active if it matches the current path exactly (for '/') or starts with it
+  const isActive = (url: string) =>
+    url === '/' ? pathname === '/' : pathname.startsWith(url)
 
   const [open,     setOpen]     = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -87,7 +94,11 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
                 <Link
                   key={link.url}
                   href={link.url}
-                  className="text-sm text-xq-muted hover:text-white transition-colors duration-200"
+                  className={`relative text-sm transition-colors duration-200 after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:rounded-full after:bg-xq-accent after:transition-all after:duration-200 ${
+                    isActive(link.url)
+                      ? 'text-white after:w-full'
+                      : 'text-xq-muted hover:text-white after:w-0 hover:after:w-full'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -154,7 +165,11 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
               key={link.url}
               href={link.url}
               onClick={() => setOpen(false)}
-              className="text-2xl font-bold text-xq-muted hover:text-white active:text-xq-accent transition-colors py-4 border-b border-xq-border/40"
+              className={`text-2xl font-bold transition-colors py-4 border-b border-xq-border/40 ${
+                isActive(link.url)
+                  ? 'text-xq-accent'
+                  : 'text-xq-muted hover:text-white'
+              }`}
             >
               {link.label}
             </Link>
