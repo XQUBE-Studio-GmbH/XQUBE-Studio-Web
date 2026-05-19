@@ -117,6 +117,7 @@ export default buildConfig({
         useAsTitle: 'email',
         group: 'Access',
         description: 'People who can log into this admin panel.',
+        hideAPIURL: true,
       },
       access: {
         read:   isAdminOrAbove,
@@ -183,6 +184,7 @@ export default buildConfig({
       admin: {
         group: 'Access',
         description: 'Images and files used across the website.',
+        hideAPIURL: true,
       },
       access: {
         read:   isLoggedIn,
@@ -209,6 +211,7 @@ export default buildConfig({
         useAsTitle: 'title',
         group: 'Portfolio',
         description: 'Work samples shown in the Portfolio section.',
+        hideAPIURL: true,
       },
       access: contentAccess,
       fields: [
@@ -309,6 +312,7 @@ export default buildConfig({
         useAsTitle: 'title',
         group: 'Services',
         description: 'Services listed on the Services page.',
+        hideAPIURL: true,
       },
       access: contentAccess,
       fields: [
@@ -388,6 +392,7 @@ export default buildConfig({
         useAsTitle: 'name',
         group: 'Pages',
         description: 'Team profiles shown on the About page.',
+        hideAPIURL: true,
       },
       access: contentAccess,
       fields: [
@@ -413,6 +418,7 @@ export default buildConfig({
         useAsTitle: 'name',
         group: 'Pages',
         description: 'Client logos shown in the homepage logo strip.',
+        hideAPIURL: true,
       },
       access: contentAccess,
       fields: [
@@ -455,6 +461,7 @@ export default buildConfig({
         useAsTitle: 'title',
         group: 'Blog',
         description: 'Articles published in the Blog section.',
+        hideAPIURL: true,
       },
       access: contentAccess,
       fields: [
@@ -522,6 +529,7 @@ export default buildConfig({
       admin: {
         group: 'Settings',
         description: 'Global settings that apply across the entire website.',
+        hideAPIURL: true,
       },
       access: {
         read:   isLoggedIn,
@@ -593,6 +601,7 @@ export default buildConfig({
       admin: {
         group: 'Pages',
         description: 'Edit the homepage cinematic hero (slideshow or video), stats, and bottom CTA.',
+        hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
@@ -679,6 +688,7 @@ export default buildConfig({
       admin: {
         group: 'Pages',
         description: 'Edit the About page hero banner, intro, credentials, hubs, and Why XQube cards.',
+        hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
@@ -768,6 +778,7 @@ export default buildConfig({
       admin: {
         group: 'Pages',
         description: 'Edit the Contact page headline, subtext, and Calendly button label.',
+        hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
@@ -800,6 +811,7 @@ export default buildConfig({
       admin: {
         group: 'Services',
         description: 'Edit the Services page hero text and bottom CTA.',
+        hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
@@ -867,6 +879,7 @@ export default buildConfig({
       admin: {
         group: 'Portfolio',
         description: 'Edit the Portfolio listing page hero section.',
+        hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
@@ -900,6 +913,7 @@ export default buildConfig({
       admin: {
         group: 'Blog',
         description: 'Edit the Blog listing page hero section.',
+        hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
@@ -931,6 +945,7 @@ export default buildConfig({
       admin: {
         group: 'Settings',
         description: 'Manage the header menu links and call-to-action button.',
+        hideAPIURL: true,
       },
       access: {
         read:   isLoggedIn,
