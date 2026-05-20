@@ -45,7 +45,21 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
   // the public page. Inside the admin iframe we switch to livePreviewData
   // so text fields AND the ordering update in real time as the editor drags.
   const [isInIframe, setIsInIframe] = useState(false)
+  const [activeCategory, setActiveCategory] = useState('All')
+
   useEffect(() => { setIsInIframe(window !== window.parent) }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const cat = params.get('category')
+    if (cat && ALL_CATEGORIES.includes(cat)) setActiveCategory(cat)
+  }, [])
+
+  const handleCategoryClick = (cat: string) => {
+    setActiveCategory(cat)
+    const url = cat === 'All' ? '/portfolio' : `/portfolio?category=${cat}`
+    window.history.replaceState(null, '', url)
+  }
 
   const { data: livePreviewData } = useLivePreview<PortfolioPageGlobal>({
     initialData,
@@ -82,6 +96,10 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
     })
   }, [items, pp.portfolioOrder])
 
+  const filteredItems = activeCategory === 'All'
+    ? displayItems
+    : displayItems.filter((i) => i.category === activeCategory)
+
   const hasItems = displayItems.length > 0
 
   return (
@@ -111,25 +129,28 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
                     ? displayItems.length
                     : displayItems.filter((i) => i.category === cat).length
                   if (cat !== 'All' && count === 0) return null
+                  const isActive = activeCategory === cat
                   return (
-                    <div
+                    <button
                       key={cat}
-                      className={`px-4 py-2 rounded text-sm font-semibold border transition-colors ${
-                        cat === 'All'
+                      type="button"
+                      onClick={() => handleCategoryClick(cat)}
+                      className={`px-4 py-2 rounded text-sm font-semibold border transition-colors cursor-pointer ${
+                        isActive
                           ? 'bg-xq-accent text-black border-xq-accent'
                           : 'border-xq-border text-xq-muted hover:border-xq-accent hover:text-xq-accent'
                       }`}
                     >
                       {cat === 'All' ? cat : CATEGORY_LABELS[value] ?? cat}
                       <span className="ml-1.5 opacity-60 text-xs">({count})</span>
-                    </div>
+                    </button>
                   )
                 })}
               </div>
 
               {/* Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                {displayItems.map((item) => (
+                {filteredItems.map((item) => (
                   <Link
                     key={item.id}
                     href={`/portfolio/${item.slug}`}

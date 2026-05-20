@@ -143,7 +143,9 @@ export default async function PortfolioItemPage({ params }: Props) {
               <span>/</span>
               {item.category && (
                 <>
-                  <span>{CATEGORY_LABELS[item.category] ?? item.category}</span>
+                  <Link href={`/portfolio?category=${item.category}`} className="hover:text-xq-accent transition-colors">
+                    {CATEGORY_LABELS[item.category] ?? item.category}
+                  </Link>
                   <span>/</span>
                 </>
               )}
