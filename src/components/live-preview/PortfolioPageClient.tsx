@@ -1,11 +1,12 @@
 'use client'
 
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useLivePreview } from '@payloadcms/live-preview-react'
 import PageHero from '@/components/PageHero'
 import { getLivePreviewServerURL } from '@/lib/livePreview'
-import type { PortfolioPageGlobal, PortfolioItem, MediaRef } from '@/types/cms'
+import type { PortfolioPageGlobal, PortfolioItem, PortfolioOrderRow, MediaRef } from '@/types/cms'
 
 // ─── Fallbacks ────────────────────────────────────────────────────────────────
 
@@ -39,11 +40,20 @@ interface Props {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function PortfolioPageClient({ initialData, items, serverURL }: Props) {
-  const { data: pp } = useLivePreview<PortfolioPageGlobal>({
+  // Same iframe guard as HomePageClient — prevents live-preview postMessages
+  // from the admin (which carry unpopulated relationship IDs) from breaking
+  // the public page. Inside the admin iframe we switch to livePreviewData
+  // so text fields AND the ordering update in real time as the editor drags.
+  const [isInIframe, setIsInIframe] = useState(false)
+  useEffect(() => { setIsInIframe(window !== window.parent) }, [])
+
+  const { data: livePreviewData } = useLivePreview<PortfolioPageGlobal>({
     initialData,
     serverURL: getLivePreviewServerURL(serverURL),
     depth: 2,
   })
+
+  const pp = isInIframe ? livePreviewData : initialData
 
   const heroLabel    = pp.hero?.label    ?? FB.label
   const heroHeading  = pp.hero?.heading  ?? FB.heading
@@ -52,7 +62,27 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
   const ctaLabel     = pp.hero?.ctaLabel ?? FB.ctaLabel
   const ctaUrl       = pp.hero?.ctaUrl   ?? FB.ctaUrl
 
-  const hasItems = items.length > 0
+  // Re-sort items whenever the live-preview order changes (iframe only).
+  // On the public page, items arrive pre-sorted from the server so this
+  // useMemo is a no-op (pp.portfolioOrder never changes after mount).
+  const displayItems = useMemo(() => {
+    const orderRows = (pp.portfolioOrder ?? []) as PortfolioOrderRow[]
+    if (orderRows.length === 0) return items
+    const idToPos = new Map(
+      orderRows.map((row, i) => {
+        // row.item may be a populated object or a bare ID number in live preview
+        const id = typeof row.item === 'object' ? row.item?.id : row.item
+        return [String(id ?? ''), i]
+      })
+    )
+    return [...items].sort((a, b) => {
+      const ia = idToPos.get(String(a.id)) ?? Infinity
+      const ib = idToPos.get(String(b.id)) ?? Infinity
+      return ia - ib
+    })
+  }, [items, pp.portfolioOrder])
+
+  const hasItems = displayItems.length > 0
 
   return (
     <>
@@ -78,8 +108,8 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
                 {ALL_CATEGORIES.map((cat) => {
                   const value = cat === 'All' ? 'all' : cat
                   const count = cat === 'All'
-                    ? items.length
-                    : items.filter((i) => i.category === cat).length
+                    ? displayItems.length
+                    : displayItems.filter((i) => i.category === cat).length
                   if (cat !== 'All' && count === 0) return null
                   return (
                     <div
@@ -99,7 +129,7 @@ export default function PortfolioPageClient({ initialData, items, serverURL }: P
 
               {/* Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                {items.map((item) => (
+                {displayItems.map((item) => (
                   <Link
                     key={item.id}
                     href={`/portfolio/${item.slug}`}
