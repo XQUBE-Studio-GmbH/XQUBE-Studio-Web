@@ -226,7 +226,10 @@ export default buildConfig({
           required: true,
           unique: true,
           index: true,
-          admin: { description: 'Auto-generated from the title on creation. Lowercase, hyphens only — e.g. unreal-engine-lighting-showcase.' },
+          admin: {
+            description: 'Auto-generated from the title as you type. Lowercase, hyphens only — e.g. unreal-engine-lighting-showcase.',
+            components: { Field: '@/components/admin/SlugField#SlugField' },
+          },
           hooks: {
             beforeValidate: [
               ({ value, data, operation }) => {
@@ -326,7 +329,10 @@ export default buildConfig({
           type: 'text',
           required: true,
           unique: true,
-          admin: { description: 'Auto-generated from the title on creation. Lowercase, hyphens only — e.g. game-art-production.' },
+          admin: {
+            description: 'Auto-generated from the title as you type. Lowercase, hyphens only — e.g. game-art-production.',
+            components: { Field: '@/components/admin/SlugField#SlugField' },
+          },
           hooks: {
             beforeValidate: [
               ({ value, data, operation }) => {
@@ -475,7 +481,10 @@ export default buildConfig({
           type: 'text',
           required: true,
           unique: true,
-          admin: { description: 'Auto-generated from the title on creation. Lowercase, hyphens only — e.g. ue5-lighting-breakdown.' },
+          admin: {
+            description: 'Auto-generated from the title as you type. Lowercase, hyphens only — e.g. ue5-lighting-breakdown.',
+            components: { Field: '@/components/admin/SlugField#SlugField' },
+          },
           hooks: {
             beforeValidate: [
               ({ value, data, operation }) => {
