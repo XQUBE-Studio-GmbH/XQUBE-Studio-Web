@@ -187,6 +187,11 @@ export interface ServicesPageGlobal {
 
 // ─── Page Global: Portfolio ───────────────────────────────────────────────────
 
+export interface PortfolioOrderRow {
+  id?:   string
+  item?: { id?: string | number; title?: string; slug?: string } | null
+}
+
 export interface PortfolioPageGlobal {
   hero?: {
     label?:    string
@@ -196,6 +201,7 @@ export interface PortfolioPageGlobal {
     ctaLabel?: string
     ctaUrl?:   string
   }
+  portfolioOrder?: PortfolioOrderRow[]
 }
 
 // ─── Page Global: Blog ────────────────────────────────────────────────────────

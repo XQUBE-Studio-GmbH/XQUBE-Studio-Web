@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../payload/payload.config'
 import HomePageClient from '@/components/live-preview/HomePageClient'
-import type { HomepageGlobal, ServiceItem, ClientItem, PortfolioItem, BlogPost } from '@/types/cms'
+import type { HomepageGlobal, ServiceItem, ClientItem, PortfolioItem, BlogPost, PortfolioPageGlobal, PortfolioOrderRow } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,18 +26,37 @@ export const metadata: Metadata = {
 async function getData() {
   try {
     const payload = await getPayload({ config })
-    const [hp, servicesRes, clientsRes, featuredRes, blogRes] = await Promise.all([
+    const [hp, servicesRes, clientsRes, featuredRes, blogRes, ppGlobal] = await Promise.all([
       payload.findGlobal({ slug: 'home-page' }) as Promise<HomepageGlobal>,
       payload.find({ collection: 'services',  where: { featured: { equals: true } }, sort: 'order', limit: 4, depth: 1 }),
       payload.find({ collection: 'clients',   where: { featured: { equals: true } }, sort: 'order', limit: 20, depth: 1 }),
       payload.find({ collection: 'portfolio', where: { featured: { equals: true }, status: { equals: 'published' } }, limit: 6, depth: 1 }),
       payload.find({ collection: 'blog-posts', where: { status: { equals: 'published' } }, sort: '-createdAt', limit: 3, depth: 1 }),
+      payload.findGlobal({ slug: 'portfolio-page', depth: 1 }) as Promise<PortfolioPageGlobal>,
     ])
+
+    // Apply manual display order to the homepage featured items.
+    // The order array is shared with the portfolio page — featured items appear
+    // in the same sequence the editor has dragged them in the admin.
+    const orderRows  = (ppGlobal.portfolioOrder ?? []) as PortfolioOrderRow[]
+    const rawFeatured = featuredRes.docs as unknown as PortfolioItem[]
+    let featured: PortfolioItem[]
+    if (orderRows.length > 0) {
+      const idToPos = new Map(orderRows.map((row, i) => [String(row.item?.id ?? ''), i]))
+      featured = [...rawFeatured].sort((a, b) => {
+        const ia = idToPos.get(String(a.id)) ?? Infinity
+        const ib = idToPos.get(String(b.id)) ?? Infinity
+        return ia - ib
+      })
+    } else {
+      featured = rawFeatured
+    }
+
     return {
       hp:        hp as HomepageGlobal,
       services:  servicesRes.docs  as unknown as ServiceItem[],
       clients:   clientsRes.docs   as unknown as ClientItem[],
-      featured:  featuredRes.docs  as unknown as PortfolioItem[],
+      featured,
       blogPosts: blogRes.docs      as unknown as BlogPost[],
     }
   } catch {

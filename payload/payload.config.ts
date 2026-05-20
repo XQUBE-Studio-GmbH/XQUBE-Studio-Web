@@ -21,6 +21,7 @@ import * as fixVersionChildTablesMigration  from './migrations/20250520_fix_vers
 import * as portfolioBlogPageGlobalsMigration from './migrations/20250521_portfolio_blog_page_globals.ts'
 import * as homepageHeroRedesignMigration     from './migrations/20250522_homepage_hero_redesign.ts'
 import * as homepageSectionsMigration         from './migrations/20260520_homepage_sections.ts'
+import * as portfolioOrderMigration           from './migrations/20260520_portfolio_order.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1014,7 +1015,7 @@ export default buildConfig({
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Portfolio',
-        description: 'Edit the Portfolio listing page hero section.',
+        description: 'Edit the Portfolio listing page hero section and control the display order of portfolio items.',
         hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
@@ -1036,6 +1037,24 @@ export default buildConfig({
             },
             { name: 'ctaLabel', label: 'CTA Button Text', type: 'text', defaultValue: 'Start a Project' },
             { name: 'ctaUrl',   label: 'CTA Button URL',  type: 'text', defaultValue: '/contact' },
+          ],
+        },
+        {
+          name: 'portfolioOrder',
+          label: 'Portfolio Display Order',
+          type: 'array',
+          admin: {
+            description: 'Drag the ⠿ handle on each row to set the display order on the Portfolio page and homepage. After publishing a new item, add it here. Items not listed appear at the end sorted by newest first.',
+            initCollapsed: false,
+          },
+          fields: [
+            {
+              name: 'item',
+              label: 'Portfolio Item',
+              type: 'relationship',
+              relationTo: 'portfolio',
+              required: true,
+            },
           ],
         },
       ],
@@ -1196,6 +1215,11 @@ export default buildConfig({
         name: '20260520_homepage_sections',
         up: homepageSectionsMigration.up,
         down: homepageSectionsMigration.down,
+      },
+      {
+        name: '20260520_portfolio_order',
+        up: portfolioOrderMigration.up,
+        down: portfolioOrderMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
