@@ -458,9 +458,11 @@ export default function HomePageClient({ initialData, services, clients, feature
           <div className="xq-container">
             <ScrollReveal className="flex items-end justify-between mb-12">
               <div>
-                <div className="xq-label mb-4">Featured Work</div>
+                <div className="xq-label mb-4">
+                  {hp.featuredWork?.label ?? 'Featured Work'}
+                </div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
-                  Built for production pipelines
+                  {hp.featuredWork?.heading ?? 'Built for production pipelines'}
                 </h2>
               </div>
               <Link href="/portfolio" className="xq-btn-ghost text-sm hidden md:flex shrink-0 ml-8">

@@ -22,6 +22,7 @@ import * as portfolioBlogPageGlobalsMigration from './migrations/20250521_portfo
 import * as homepageHeroRedesignMigration     from './migrations/20250522_homepage_hero_redesign.ts'
 import * as homepageSectionsMigration         from './migrations/20260520_homepage_sections.ts'
 import * as portfolioOrderMigration           from './migrations/20260520_portfolio_order.ts'
+import * as featuredWorkCopyMigration         from './migrations/20260520_featured_work_copy.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -716,6 +717,18 @@ export default buildConfig({
           ],
         },
 
+        // ── Featured Work ─────────────────────────────────────────────────────────
+        {
+          name: 'featuredWork',
+          label: 'Featured Work Section',
+          type: 'group',
+          admin: { description: 'Label and heading shown above the featured portfolio grid on the homepage.' },
+          fields: [
+            { name: 'label',   label: 'Eyebrow Label', type: 'text', defaultValue: 'Featured Work' },
+            { name: 'heading', label: 'Heading',        type: 'text', defaultValue: 'Built for production pipelines' },
+          ],
+        },
+
         // ── Process / How We Work ─────────────────────────────────────────────────
         {
           name: 'process',
@@ -1220,6 +1233,11 @@ export default buildConfig({
         name: '20260520_portfolio_order',
         up: portfolioOrderMigration.up,
         down: portfolioOrderMigration.down,
+      },
+      {
+        name: '20260520_featured_work_copy',
+        up: featuredWorkCopyMigration.up,
+        down: featuredWorkCopyMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

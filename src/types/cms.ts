@@ -132,6 +132,10 @@ export interface HomepageGlobal {
     heading?: string
     items?:   Testimonial[]
   }
+  featuredWork?: {
+    label?:   string
+    heading?: string
+  }
   blogPreview?: {
     label?:   string
     heading?: string
