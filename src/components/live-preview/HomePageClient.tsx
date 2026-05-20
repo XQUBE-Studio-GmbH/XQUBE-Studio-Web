@@ -7,7 +7,10 @@ import { useLivePreview } from '@payloadcms/live-preview-react'
 import StatCounter from '@/components/StatCounter'
 import ScrollReveal from '@/components/ScrollReveal'
 import { getLivePreviewServerURL } from '@/lib/livePreview'
-import type { HeroSlide, Stat, ServiceItem, ClientItem, PortfolioItem, HomepageGlobal } from '@/types/cms'
+import type {
+  HeroSlide, Stat, ServiceItem, ClientItem, PortfolioItem, BlogPost,
+  HomepageGlobal, EngineBadge, ProcessStep, Testimonial,
+} from '@/types/cms'
 
 // ─── Fallbacks ────────────────────────────────────────────────────────────────
 
@@ -30,6 +33,24 @@ const FB_STATS: Stat[] = [
   { value: '3',   label: 'Global Hubs' },
 ]
 
+const FB_PROCESS_STEPS: ProcessStep[] = [
+  { icon: '📋', title: 'Brief & Scope',     description: 'You share references, specs, and deadline. We ask the right questions and confirm scope in writing.' },
+  { icon: '🎨', title: 'Concepting',         description: 'Our artists produce blockouts, style references, and approval sketches before committing to production.' },
+  { icon: '⚙️', title: 'Production',         description: 'High-poly sculpt → retopo → UV → bake → texture → rig. Weekly progress updates throughout.' },
+  { icon: '✅', title: 'Delivery & Handoff', description: 'Final assets in your target format, optimised for your engine. Full IP transfer on completion.' },
+]
+
+const FB_ENGINE_BADGES: EngineBadge[] = [
+  { name: 'Unreal Engine 5' },
+  { name: 'Unity' },
+  { name: 'UEFN' },
+  { name: 'Roblox' },
+  { name: 'Blender' },
+  { name: 'Maya' },
+  { name: 'ZBrush' },
+  { name: 'Substance Painter' },
+]
+
 const CATEGORY_LABELS: Record<string, string> = {
   characters: 'Characters', weapons: 'Weapons', vehicles: 'Vehicles',
   environments: 'Environments', props: 'Props', 'vr-assets': 'VR Assets',
@@ -42,6 +63,7 @@ interface Props {
   services:    ServiceItem[]
   clients:     ClientItem[]
   featured:    PortfolioItem[]
+  blogPosts:   BlogPost[]
   serverURL:   string
 }
 
@@ -62,7 +84,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
   slides: HeroSlide[]
 }) {
   const [activeIdx,  setActiveIdx]  = useState(0)
-  const [animSeed,   setAnimSeed]   = useState(0)   // increments to restart ken-burns
+  const [animSeed,   setAnimSeed]   = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const count = slides.length
@@ -99,31 +121,24 @@ function CinematicHero({ mode, videoUrl, slides }: {
     <section className="relative min-h-screen flex items-center overflow-hidden">
 
       {/* ── Backgrounds ─────────────────────────────────────────────────────── */}
-      {/* Base dark fallback (always visible) */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-[#060e08] to-[#0a1f13]" />
       <div className="absolute inset-0 opacity-10"
         style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
 
-      {/* VIDEO MODE: single looping video */}
       {mode === 'video' && videoUrl && (
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src={videoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
+          autoPlay loop muted playsInline
         />
       )}
 
-      {/* SLIDESHOW MODE: stacked slides with Ken Burns */}
       {mode === 'slideshow' && slides.map((slide, i) => (
         <div
           key={i}
           className={`absolute inset-0 transition-opacity duration-1000 ${i === activeIdx ? 'opacity-100' : 'opacity-0'}`}
         >
           {slide.image?.url && (
-            // key changes on each activation → React remounts this div → animation restarts
             <div
               key={i === activeIdx ? `kb-${animSeed}` : `static-${i}`}
               className={i === activeIdx ? 'absolute inset-0 animate-ken-burns' : 'absolute inset-0'}
@@ -131,8 +146,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
               <Image
                 src={slide.image.url}
                 alt={slide.image.alt || slide.title || 'XQube Studio'}
-                fill
-                className="object-cover"
+                fill className="object-cover"
                 priority={i === 0}
               />
             </div>
@@ -140,9 +154,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
         </div>
       ))}
 
-      {/* Dark gradient overlay — always on top of background */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
-      {/* Left-side fade for text readability */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
 
       {/* ── Slide text ──────────────────────────────────────────────────────── */}
@@ -167,10 +179,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
               {current.subtitle}
             </p>
           )}
-          <div
-            key={`cta-${activeIdx}`}
-            className="flex flex-wrap gap-4 animate-[fadeUp_0.7s_ease]"
-          >
+          <div key={`cta-${activeIdx}`} className="flex flex-wrap gap-4 animate-[fadeUp_0.7s_ease]">
             {current?.primaryCtaLabel && current?.primaryCtaUrl && (
               <Link
                 href={current.primaryCtaUrl}
@@ -196,45 +205,26 @@ function CinematicHero({ mode, videoUrl, slides }: {
       {/* ── Navigation — only if more than 1 slide ──────────────────────────── */}
       {count > 1 && (
         <>
-          {/* Arrow buttons */}
-          <button
-            onClick={prev}
-            aria-label="Previous slide"
-            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/70 hover:border-xq-accent/60 transition-all backdrop-blur-sm"
-          >
+          <button onClick={prev} aria-label="Previous slide"
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/70 hover:border-xq-accent/60 transition-all backdrop-blur-sm">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <button
-            onClick={next}
-            aria-label="Next slide"
-            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/70 hover:border-xq-accent/60 transition-all backdrop-blur-sm"
-          >
+          <button onClick={next} aria-label="Next slide"
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/70 hover:border-xq-accent/60 transition-all backdrop-blur-sm">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-
-          {/* Dot indicators */}
           <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-2">
             {slides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => dot(i)}
-                aria-label={`Go to slide ${i + 1}`}
-                className={`rounded-full transition-all duration-300 ${
-                  i === activeIdx
-                    ? 'w-8 h-2 bg-xq-accent'
-                    : 'w-2 h-2 bg-white/40 hover:bg-white/70'
-                }`}
-              />
+              <button key={i} onClick={() => dot(i)} aria-label={`Go to slide ${i + 1}`}
+                className={`rounded-full transition-all duration-300 ${i === activeIdx ? 'w-8 h-2 bg-xq-accent' : 'w-2 h-2 bg-white/40 hover:bg-white/70'}`} />
             ))}
           </div>
         </>
       )}
-
-      {/* Single-slide dot (just a visual indicator, not interactive) */}
       {count === 1 && (
         <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center">
           <div className="w-8 h-2 rounded-full bg-xq-accent" />
@@ -246,28 +236,88 @@ function CinematicHero({ mode, videoUrl, slides }: {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function HomePageClient({ initialData, services, clients, featured, serverURL }: Props) {
+export default function HomePageClient({ initialData, services, clients, featured, blogPosts, serverURL }: Props) {
   const { data: hp } = useLivePreview<HomepageGlobal>({
     initialData,
     serverURL: getLivePreviewServerURL(serverURL),
     depth: 2,
   })
 
-  const heroMode  = (hp.hero?.mode ?? 'slideshow') as 'slideshow' | 'video'
-  const videoUrl  = hp.hero?.videoUrl ?? ''
-  const rawSlides = (hp.hero?.slides ?? []) as HeroSlide[]
-  // Filter out placeholder slides that have no heading (e.g. auto-created empty rows)
+  // ── Showreel mute state ────────────────────────────────────────────────────
+  const showreelRef = useRef<HTMLVideoElement>(null)
+  const [isMuted, setIsMuted] = useState(true)
+
+  const toggleMute = () => {
+    const video = showreelRef.current
+    if (!video) return
+    if (isMuted) {
+      video.currentTime = 0
+      video.muted = false
+      video.play().catch(() => { video.muted = true; setIsMuted(true) })
+    } else {
+      video.muted = true
+    }
+    setIsMuted((m) => !m)
+  }
+
+  // ── Data ──────────────────────────────────────────────────────────────────
+  const heroMode   = (hp.hero?.mode ?? 'slideshow') as 'slideshow' | 'video'
+  const videoUrl   = hp.hero?.videoUrl ?? ''
+  const rawSlides  = (hp.hero?.slides ?? []) as HeroSlide[]
   const validSlides = rawSlides.filter((s) => s.title && s.title.trim() !== '')
   const slides      = validSlides.length > 0 ? validSlides : FB_SLIDES
 
-  const stats  = hp.stats && hp.stats.length > 0 ? hp.stats : FB_STATS
-  const cta    = hp.cta ?? {}
+  const stats = hp.stats && hp.stats.length > 0 ? hp.stats : FB_STATS
+  const cta   = hp.cta ?? {}
 
   const ctaHeadline = cta.headline    ?? 'Looking for a long-term art partner?'
   const ctaSubtitle = cta.subtitle    ?? 'We might be the right fit.'
   const ctaBtnLabel = cta.buttonLabel ?? 'Start a Conversation'
   const ctaBtnUrl   = cta.buttonUrl   ?? '/contact'
 
+  // Section visibility — default all content sections to true so they show
+  // before the admin has explicitly configured the global.
+  const show = {
+    studioIntro:  hp.sections?.showStudioIntro  ?? true,
+    engineBadges: hp.sections?.showEngineBadges ?? true,
+    featuredWork: hp.sections?.showFeaturedWork ?? true,
+    services:     hp.sections?.showServices     ?? true,
+    process:      hp.sections?.showProcess      ?? true,
+    showreel:     hp.sections?.showShowreel     ?? false,
+    testimonials: hp.sections?.showTestimonials ?? false,
+    blogPreview:  hp.sections?.showBlogPreview  ?? false,
+  }
+
+  // Studio intro
+  const si = hp.studioIntro ?? {}
+
+  // Engine badges
+  const engineBadgeList: EngineBadge[] =
+    hp.engineBadges && hp.engineBadges.length > 0
+      ? hp.engineBadges as EngineBadge[]
+      : FB_ENGINE_BADGES
+
+  // Process
+  const processLabel   = hp.process?.label   ?? 'How We Work'
+  const processHeading = hp.process?.heading ?? 'From brief to delivery — every time.'
+  const processSteps: ProcessStep[] =
+    hp.process?.steps && hp.process.steps.length > 0
+      ? hp.process.steps as ProcessStep[]
+      : FB_PROCESS_STEPS
+
+  // Showreel
+  const showreel = hp.showreel ?? {}
+
+  // Testimonials
+  const testimonialLabel   = hp.testimonials?.label   ?? 'Client Voices'
+  const testimonialHeading = hp.testimonials?.heading ?? 'Trusted by studios that ship.'
+  const testimonialItems: Testimonial[] = (hp.testimonials?.items ?? []) as Testimonial[]
+
+  // Blog preview
+  const blogLabel   = hp.blogPreview?.label   ?? 'From the Studio'
+  const blogHeading = hp.blogPreview?.heading ?? 'Latest insights.'
+
+  // Clients
   const clientList: ClientItem[] = clients.length > 0
     ? clients
     : [
@@ -282,10 +332,10 @@ export default function HomePageClient({ initialData, services, clients, feature
 
   return (
     <>
-      {/* ── Cinematic Hero ───────────────────────────────────── */}
+      {/* ── 1. Cinematic Hero (always visible) ───────────────────────────────── */}
       <CinematicHero mode={heroMode} videoUrl={videoUrl} slides={slides} />
 
-      {/* ── Stats ────────────────────────────────────────────── */}
+      {/* ── 2. Stats Bar (always visible) ────────────────────────────────────── */}
       <section className="border-y border-xq-border bg-xq-surface">
         <div className="xq-container py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
@@ -298,7 +348,7 @@ export default function HomePageClient({ initialData, services, clients, feature
         </div>
       </section>
 
-      {/* ── Client strip ─────────────────────────────────────── */}
+      {/* ── 3. Client Logo Strip (always visible) ────────────────────────────── */}
       <section className="border-b border-xq-border bg-xq-bg">
         <div className="xq-container py-10">
           <ScrollReveal>
@@ -310,11 +360,8 @@ export default function HomePageClient({ initialData, services, clients, feature
                 <div key={String(client.id)} className="opacity-50 hover:opacity-90 transition-opacity duration-200 grayscale hover:grayscale-0">
                   {client.logo?.url ? (
                     <Image
-                      src={client.logo.url}
-                      alt={client.logo.alt || client.name}
-                      width={180}
-                      height={72}
-                      className="h-14 w-auto object-contain"
+                      src={client.logo.url} alt={client.logo.alt || client.name}
+                      width={180} height={72} className="h-14 w-auto object-contain"
                     />
                   ) : (
                     <span className="text-xq-muted font-semibold text-sm tracking-wide">{client.name}</span>
@@ -326,8 +373,70 @@ export default function HomePageClient({ initialData, services, clients, feature
         </div>
       </section>
 
-      {/* ── Featured Work ─────────────────────────────────────── */}
-      {featured.length > 0 && (
+      {/* ── 4. Studio Intro ──────────────────────────────────────────────────── */}
+      {show.studioIntro && (
+        <section className="xq-section border-b border-xq-border">
+          <div className="xq-container">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              <ScrollReveal>
+                <div className="xq-label mb-4">{si.label || 'Who We Are'}</div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white mb-6 leading-tight">
+                  {si.heading || 'Built for precision. Scaled for production.'}
+                </h2>
+                {si.body1 && <p className="text-xq-muted leading-relaxed mb-4">{si.body1}</p>}
+                {si.body2 && <p className="text-xq-muted leading-relaxed mb-8">{si.body2}</p>}
+                <Link href={si.linkUrl || '/about'} className="xq-btn-ghost inline-flex">
+                  {si.linkLabel || 'Learn more about us'} →
+                </Link>
+              </ScrollReveal>
+              {si.image?.url && (
+                <ScrollReveal delay={200}>
+                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border">
+                    <Image
+                      src={si.image.url} alt={si.image.alt || 'XQube Studio'}
+                      fill className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  </div>
+                </ScrollReveal>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 5. Engine / Tech Badges ──────────────────────────────────────────── */}
+      {show.engineBadges && engineBadgeList.length > 0 && (
+        <section className="border-b border-xq-border bg-xq-surface">
+          <div className="xq-container py-14">
+            <ScrollReveal className="text-center mb-8">
+              <p className="xq-label">Our Tech Stack</p>
+            </ScrollReveal>
+            <ScrollReveal delay={100}>
+              <div className="flex flex-wrap justify-center gap-3">
+                {engineBadgeList.map((badge, i) => (
+                  <div
+                    key={String((badge as any).id) || i}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-xq-border bg-xq-bg text-xq-muted hover:border-xq-accent hover:text-white transition-all duration-200 text-sm font-medium cursor-default"
+                  >
+                    {badge.logo?.url && (
+                      <Image
+                        src={badge.logo.url} alt={badge.name}
+                        width={20} height={20}
+                        className="w-5 h-5 object-contain opacity-70"
+                      />
+                    )}
+                    {badge.name}
+                  </div>
+                ))}
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
+
+      {/* ── 6. Featured Work ─────────────────────────────────────────────────── */}
+      {show.featuredWork && featured.length > 0 && (
         <section className="xq-section border-b border-xq-border">
           <div className="xq-container">
             <ScrollReveal className="flex items-end justify-between mb-12">
@@ -381,8 +490,8 @@ export default function HomePageClient({ initialData, services, clients, feature
         </section>
       )}
 
-      {/* ── Services ──────────────────────────────────────────── */}
-      {services.length > 0 && (
+      {/* ── 7. Services ──────────────────────────────────────────────────────── */}
+      {show.services && services.length > 0 && (
         <section className="xq-section border-b border-xq-border">
           <div className="xq-container">
             <ScrollReveal className="mb-16">
@@ -394,20 +503,20 @@ export default function HomePageClient({ initialData, services, clients, feature
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {services.map((service, i) => (
                 <ScrollReveal key={String(service.id)} delay={i * 100}>
-                <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : ''}`}>
-                  {service.image?.url && (
-                    <div className="relative aspect-video">
-                      <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
-                    </div>
-                  )}
-                  <div className={service.image?.url ? 'p-6' : ''}>
-                    {service.icon && <div className="text-3xl mb-4">{service.icon}</div>}
-                    <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
-                    {service.shortDescription && (
-                      <p className="text-xq-muted text-sm leading-relaxed">{service.shortDescription}</p>
+                  <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : ''}`}>
+                    {service.image?.url && (
+                      <div className="relative aspect-video">
+                        <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
+                      </div>
                     )}
+                    <div className={service.image?.url ? 'p-6' : ''}>
+                      {service.icon && <div className="text-3xl mb-4">{service.icon}</div>}
+                      <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
+                      {service.shortDescription && (
+                        <p className="text-xq-muted text-sm leading-relaxed">{service.shortDescription}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
                 </ScrollReveal>
               ))}
             </div>
@@ -418,7 +527,162 @@ export default function HomePageClient({ initialData, services, clients, feature
         </section>
       )}
 
-      {/* ── CTA ───────────────────────────────────────────────── */}
+      {/* ── 8. Process / How We Work ─────────────────────────────────────────── */}
+      {show.process && processSteps.length > 0 && (
+        <section className="xq-section border-b border-xq-border bg-xq-surface">
+          <div className="xq-container">
+            <ScrollReveal className="mb-16">
+              <div className="xq-label mb-4">{processLabel}</div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
+                {processHeading}
+              </h2>
+            </ScrollReveal>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {processSteps.map((step, i) => (
+                <ScrollReveal key={(step as any).id || i} delay={i * 100}>
+                  <div className="xq-card h-full flex flex-col">
+                    <div className="flex items-center gap-3 mb-5">
+                      <span className="text-2xl">{step.icon || ''}</span>
+                      <span className="text-xq-accent text-xs font-bold uppercase tracking-widest">
+                        Step {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-3">{step.title}</h3>
+                    <p className="text-xq-muted text-sm leading-relaxed flex-1">{step.description}</p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 9. Showreel ──────────────────────────────────────────────────────── */}
+      {show.showreel && showreel.video?.url && (
+        <section className="border-b border-xq-border bg-black">
+          <div className="xq-container py-20">
+            <ScrollReveal className="text-center mb-10">
+              {showreel.label && (
+                <div className="xq-label mb-4">{showreel.label}</div>
+              )}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white">
+                {showreel.heading || 'See the work in motion.'}
+              </h2>
+              {showreel.tagline && (
+                <p className="text-xq-muted mt-3 text-lg max-w-xl mx-auto">{showreel.tagline}</p>
+              )}
+            </ScrollReveal>
+            <ScrollReveal delay={150}>
+              <div className="relative rounded-xl overflow-hidden aspect-video max-w-5xl mx-auto border border-xq-border/40">
+                <video
+                  ref={showreelRef}
+                  src={showreel.video.url}
+                  autoPlay loop muted={isMuted} playsInline
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  onClick={toggleMute}
+                  className="absolute top-4 right-4 z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-black/60 border border-white/20 text-white text-sm font-medium backdrop-blur-sm hover:bg-black/80 hover:border-xq-accent/60 transition-all duration-200"
+                >
+                  {isMuted
+                    ? <><span>🔇</span> Unmute</>
+                    : <><span>🔊</span> Mute</>
+                  }
+                </button>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
+
+      {/* ── 10. Testimonials ─────────────────────────────────────────────────── */}
+      {show.testimonials && testimonialItems.length > 0 && (
+        <section className="xq-section border-b border-xq-border">
+          <div className="xq-container">
+            <ScrollReveal className="mb-12">
+              <div className="xq-label mb-4">{testimonialLabel}</div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
+                {testimonialHeading}
+              </h2>
+            </ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {testimonialItems.map((t, i) => (
+                <ScrollReveal key={(t as any).id || i} delay={i * 100}>
+                  <div className="xq-card h-full flex flex-col">
+                    <div className="text-xq-accent text-4xl leading-none mb-4 font-serif">&ldquo;</div>
+                    <p className="text-xq-muted leading-relaxed flex-1 mb-6 italic text-sm">{t.quote}</p>
+                    <div className="flex items-center gap-3 pt-5 border-t border-xq-border">
+                      {t.avatar?.url && (
+                        <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-xq-border">
+                          <Image src={t.avatar.url} alt={t.name} fill className="object-cover" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-white font-semibold text-sm">{t.name}</p>
+                        {t.role && <p className="text-xq-muted text-xs mt-0.5">{t.role}</p>}
+                      </div>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 11. Blog Preview ─────────────────────────────────────────────────── */}
+      {show.blogPreview && blogPosts.length > 0 && (
+        <section className="xq-section border-b border-xq-border bg-xq-surface">
+          <div className="xq-container">
+            <ScrollReveal className="flex items-end justify-between mb-12">
+              <div>
+                <div className="xq-label mb-4">{blogLabel}</div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
+                  {blogHeading}
+                </h2>
+              </div>
+              <Link href="/blog" className="xq-btn-ghost text-sm hidden md:flex shrink-0 ml-8">
+                All Articles →
+              </Link>
+            </ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {blogPosts.map((post, i) => (
+                <ScrollReveal key={post.id} delay={i * 100}>
+                  <Link href={`/blog/${post.slug}`} className="group block xq-card p-0 overflow-hidden h-full flex flex-col">
+                    {post.coverImage?.url && (
+                      <div className="relative aspect-video overflow-hidden shrink-0">
+                        <Image
+                          src={post.coverImage.url} alt={post.coverImage.alt || post.title} fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6 flex flex-col flex-1">
+                      {post.createdAt && (
+                        <p className="text-xq-muted text-xs mb-2">
+                          {new Date(post.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      )}
+                      <h3 className="text-white font-bold mb-2 group-hover:text-xq-accent transition-colors leading-snug flex-1">
+                        {post.title}
+                      </h3>
+                      {post.excerpt && (
+                        <p className="text-xq-muted text-sm leading-relaxed line-clamp-3 mt-2">{post.excerpt}</p>
+                      )}
+                      <p className="text-xq-accent text-xs font-semibold mt-4 group-hover:underline">Read article →</p>
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              ))}
+            </div>
+            <div className="mt-8 text-center md:hidden">
+              <Link href="/blog" className="xq-btn-ghost">All Articles →</Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 12. Bottom CTA (always visible) ──────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
           <ScrollReveal className="max-w-2xl mx-auto text-center">

@@ -20,6 +20,7 @@ import * as addVersionTimestampsMigration   from './migrations/20250519_add_vers
 import * as fixVersionChildTablesMigration  from './migrations/20250520_fix_version_child_tables.ts'
 import * as portfolioBlogPageGlobalsMigration from './migrations/20250521_portfolio_blog_page_globals.ts'
 import * as homepageHeroRedesignMigration     from './migrations/20250522_homepage_hero_redesign.ts'
+import * as homepageSectionsMigration         from './migrations/20260520_homepage_sections.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -600,11 +601,30 @@ export default buildConfig({
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Pages',
-        description: 'Edit the homepage cinematic hero (slideshow or video), stats, and bottom CTA.',
+        description: 'Edit the homepage sections, visibility toggles, hero, and bottom CTA.',
         hideAPIURL: true,
       },
       access: { read: isLoggedIn, update: isEditorOrAbove },
       fields: [
+        // ── Section Visibility ───────────────────────────────────────────────────
+        {
+          name: 'sections',
+          label: 'Section Visibility',
+          type: 'group',
+          admin: { description: 'Toggle sections on/off. Content is preserved when hidden — safe to re-enable at any time.' },
+          fields: [
+            { name: 'showStudioIntro',  label: 'Studio Intro',          type: 'checkbox', defaultValue: true },
+            { name: 'showEngineBadges', label: 'Engine / Tech Badges',  type: 'checkbox', defaultValue: true },
+            { name: 'showFeaturedWork', label: 'Featured Work',         type: 'checkbox', defaultValue: true },
+            { name: 'showServices',     label: 'Services',              type: 'checkbox', defaultValue: true },
+            { name: 'showProcess',      label: 'Process / How We Work', type: 'checkbox', defaultValue: true },
+            { name: 'showShowreel',     label: 'Showreel',              type: 'checkbox', defaultValue: false },
+            { name: 'showTestimonials', label: 'Testimonials',          type: 'checkbox', defaultValue: false },
+            { name: 'showBlogPreview',  label: 'Blog Preview',          type: 'checkbox', defaultValue: false },
+          ],
+        },
+
+        // ── Hero ─────────────────────────────────────────────────────────────────
         {
           name: 'hero',
           label: 'Hero Section',
@@ -656,6 +676,122 @@ export default buildConfig({
             },
           ],
         },
+        // ── Studio Intro ──────────────────────────────────────────────────────────
+        {
+          name: 'studioIntro',
+          label: 'Studio Intro',
+          type: 'group',
+          admin: { description: 'Short "who we are" block — text left, studio photo right.' },
+          fields: [
+            { name: 'label',     label: 'Eyebrow Label', type: 'text',     defaultValue: 'Who We Are' },
+            { name: 'heading',   label: 'Heading',        type: 'text',     defaultValue: 'Built for precision. Scaled for production.' },
+            { name: 'body1',     label: 'Paragraph 1',    type: 'textarea', defaultValue: 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.' },
+            { name: 'body2',     label: 'Paragraph 2',    type: 'textarea', defaultValue: 'Our three-hub model combines European business standards with world-class production capability — giving clients the reliability of a Vienna GmbH with the speed and depth of a Dhaka production team.' },
+            { name: 'image',     label: 'Studio Photo',   type: 'upload',   relationTo: 'media', admin: { description: 'Landscape or 4:3 image works best.' } },
+            { name: 'linkLabel', label: 'Link Text',       type: 'text',     defaultValue: 'Learn more about us' },
+            { name: 'linkUrl',   label: 'Link URL',        type: 'text',     defaultValue: '/about' },
+          ],
+        },
+
+        // ── Engine / Tech Badges ──────────────────────────────────────────────────
+        {
+          name: 'engineBadges',
+          label: 'Engine / Tech Badges',
+          type: 'array',
+          admin: { description: 'Tech stack chips shown on the homepage. 8–10 is the sweet spot — beyond 12 it looks cluttered.' },
+          fields: [
+            { name: 'name', label: 'Engine / Tool Name', type: 'text', required: true },
+            { name: 'logo', label: 'Logo Image (optional)', type: 'upload', relationTo: 'media', admin: { description: 'Small square logo. If omitted, name text is shown instead.' } },
+          ],
+          defaultValue: [
+            { name: 'Unreal Engine 5' },
+            { name: 'Unity' },
+            { name: 'UEFN' },
+            { name: 'Roblox' },
+            { name: 'Blender' },
+            { name: 'Maya' },
+            { name: 'ZBrush' },
+            { name: 'Substance Painter' },
+          ],
+        },
+
+        // ── Process / How We Work ─────────────────────────────────────────────────
+        {
+          name: 'process',
+          label: 'Process / How We Work',
+          type: 'group',
+          fields: [
+            { name: 'label',   label: 'Eyebrow Label', type: 'text', defaultValue: 'How We Work' },
+            { name: 'heading', label: 'Heading',        type: 'text', defaultValue: 'From brief to delivery — every time.' },
+            {
+              name: 'steps',
+              label: 'Process Steps',
+              type: 'array',
+              admin: { description: 'Add, remove, or reorder steps. 4 steps fits cleanest in the grid layout.' },
+              fields: [
+                { name: 'icon',        label: 'Icon (emoji)',  type: 'text',     admin: { description: 'Single emoji e.g. 📋 — shown if no step number is preferred.' } },
+                { name: 'title',       label: 'Step Title',    type: 'text',     required: true },
+                { name: 'description', label: 'Description',   type: 'textarea', required: true },
+              ],
+              defaultValue: [
+                { icon: '📋', title: 'Brief & Scope',      description: 'You share references, specs, and deadline. We ask the right questions and confirm scope in writing.' },
+                { icon: '🎨', title: 'Concepting',          description: 'Our artists produce blockouts, style references, and approval sketches before committing to production.' },
+                { icon: '⚙️', title: 'Production',          description: 'High-poly sculpt → retopo → UV → bake → texture → rig. Weekly progress updates throughout.' },
+                { icon: '✅', title: 'Delivery & Handoff',  description: 'Final assets in your target format, optimised for your engine. Full IP transfer on completion.' },
+              ],
+            },
+          ],
+        },
+
+        // ── Showreel ──────────────────────────────────────────────────────────────
+        {
+          name: 'showreel',
+          label: 'Showreel',
+          type: 'group',
+          admin: { description: 'Autoplays muted. Visitors can unmute with a single click.' },
+          fields: [
+            { name: 'label',   label: 'Eyebrow Label', type: 'text',   defaultValue: 'SHOWREEL 2025' },
+            { name: 'heading', label: 'Heading',        type: 'text',   defaultValue: 'See the work in motion.' },
+            { name: 'tagline', label: 'Tagline',        type: 'text',   defaultValue: 'AAA game art and XR production — delivered at scale.' },
+            { name: 'video',   label: 'Showreel Video', type: 'upload', relationTo: 'media', admin: { description: 'Upload mp4 or webm to the Media Library. Pre-optimise to 720p–1080p H.264 before upload.' } },
+          ],
+        },
+
+        // ── Testimonials ──────────────────────────────────────────────────────────
+        {
+          name: 'testimonials',
+          label: 'Testimonials',
+          type: 'group',
+          fields: [
+            { name: 'label',   label: 'Eyebrow Label', type: 'text', defaultValue: 'Client Voices' },
+            { name: 'heading', label: 'Heading',        type: 'text', defaultValue: 'Trusted by studios that ship.' },
+            {
+              name: 'items',
+              label: 'Testimonials',
+              type: 'array',
+              fields: [
+                { name: 'quote',  label: 'Quote',          type: 'textarea', required: true, admin: { description: 'Do not include opening/closing quote marks — the design adds them.' } },
+                { name: 'name',   label: 'Client Name',    type: 'text',     required: true },
+                { name: 'role',   label: 'Role / Company', type: 'text',     admin: { description: 'e.g. Art Director · Ubisoft' } },
+                { name: 'avatar', label: 'Photo',           type: 'upload',   relationTo: 'media', admin: { description: 'Optional headshot. Square images work best.' } },
+              ],
+            },
+          ],
+        },
+
+        // ── Blog Preview ──────────────────────────────────────────────────────────
+        {
+          name: 'blogPreview',
+          label: 'Blog Preview',
+          type: 'group',
+          admin: { description: 'Automatically pulls the 3 latest published blog posts. No content to edit here — just the section heading.' },
+          fields: [
+            { name: 'label',   label: 'Eyebrow Label', type: 'text', defaultValue: 'From the Studio' },
+            { name: 'heading', label: 'Heading',        type: 'text', defaultValue: 'Latest insights.' },
+          ],
+        },
+
+        // ── Stats ─────────────────────────────────────────────────────────────────
         {
           name: 'stats',
           label: 'Stats Bar',
@@ -1055,6 +1191,11 @@ export default buildConfig({
         name: '20250522_homepage_hero_redesign',
         up: homepageHeroRedesignMigration.up,
         down: homepageHeroRedesignMigration.down,
+      },
+      {
+        name: '20260520_homepage_sections',
+        up: homepageSectionsMigration.up,
+        down: homepageSectionsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

@@ -69,11 +69,72 @@ export interface HeroSlide {
 
 export interface Stat { id?: string; value: string; label: string }
 
+export interface EngineBadge {
+  id?:   string
+  name:  string
+  logo?: MediaRef | null
+}
+
+export interface ProcessStep {
+  id?:          string
+  icon?:        string
+  title:        string
+  description:  string
+}
+
+export interface Testimonial {
+  id?:     string
+  quote:   string
+  name:    string
+  role?:   string
+  avatar?: MediaRef | null
+}
+
 export interface HomepageGlobal {
+  sections?: {
+    showStudioIntro?:  boolean
+    showEngineBadges?: boolean
+    showFeaturedWork?: boolean
+    showServices?:     boolean
+    showProcess?:      boolean
+    showShowreel?:     boolean
+    showTestimonials?: boolean
+    showBlogPreview?:  boolean
+  }
   hero?: {
     mode?:     'slideshow' | 'video'
     videoUrl?: string
     slides?:   HeroSlide[]
+  }
+  studioIntro?: {
+    label?:     string
+    heading?:   string
+    body1?:     string
+    body2?:     string
+    image?:     MediaRef | null
+    linkLabel?: string
+    linkUrl?:   string
+  }
+  engineBadges?: EngineBadge[]
+  process?: {
+    label?:  string
+    heading?: string
+    steps?:  ProcessStep[]
+  }
+  showreel?: {
+    label?:   string
+    heading?: string
+    tagline?: string
+    video?:   MediaRef | null
+  }
+  testimonials?: {
+    label?:   string
+    heading?: string
+    items?:   Testimonial[]
+  }
+  blogPreview?: {
+    label?:   string
+    heading?: string
   }
   stats?: Stat[]
   cta?:  { headline?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }

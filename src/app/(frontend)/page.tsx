@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../payload/payload.config'
 import HomePageClient from '@/components/live-preview/HomePageClient'
-import type { HomepageGlobal, ServiceItem, ClientItem, PortfolioItem } from '@/types/cms'
+import type { HomepageGlobal, ServiceItem, ClientItem, PortfolioItem, BlogPost } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,27 +26,29 @@ export const metadata: Metadata = {
 async function getData() {
   try {
     const payload = await getPayload({ config })
-    const [hp, servicesRes, clientsRes, featuredRes] = await Promise.all([
+    const [hp, servicesRes, clientsRes, featuredRes, blogRes] = await Promise.all([
       payload.findGlobal({ slug: 'home-page' }) as Promise<HomepageGlobal>,
-      payload.find({ collection: 'services', where: { featured: { equals: true } }, sort: 'order', limit: 4, depth: 1 }),
-      payload.find({ collection: 'clients',  where: { featured: { equals: true } }, sort: 'order', limit: 20, depth: 1 }),
+      payload.find({ collection: 'services',  where: { featured: { equals: true } }, sort: 'order', limit: 4, depth: 1 }),
+      payload.find({ collection: 'clients',   where: { featured: { equals: true } }, sort: 'order', limit: 20, depth: 1 }),
       payload.find({ collection: 'portfolio', where: { featured: { equals: true }, status: { equals: 'published' } }, limit: 6, depth: 1 }),
+      payload.find({ collection: 'blog-posts', where: { status: { equals: 'published' } }, sort: '-createdAt', limit: 3, depth: 1 }),
     ])
     return {
-      hp:       hp as HomepageGlobal,
-      services: servicesRes.docs  as unknown as ServiceItem[],
-      clients:  clientsRes.docs   as unknown as ClientItem[],
-      featured: featuredRes.docs  as unknown as PortfolioItem[],
+      hp:        hp as HomepageGlobal,
+      services:  servicesRes.docs  as unknown as ServiceItem[],
+      clients:   clientsRes.docs   as unknown as ClientItem[],
+      featured:  featuredRes.docs  as unknown as PortfolioItem[],
+      blogPosts: blogRes.docs      as unknown as BlogPost[],
     }
   } catch {
-    return { hp: {} as HomepageGlobal, services: [], clients: [], featured: [] }
+    return { hp: {} as HomepageGlobal, services: [], clients: [], featured: [], blogPosts: [] }
   }
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const { hp, services, clients, featured } = await getData()
+  const { hp, services, clients, featured, blogPosts } = await getData()
 
   const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
@@ -56,6 +58,7 @@ export default async function HomePage() {
       services={services}
       clients={clients}
       featured={featured}
+      blogPosts={blogPosts}
       serverURL={serverURL}
     />
   )
