@@ -173,14 +173,16 @@ export interface AboutGlobal {
 export interface PipelineStep { id?: string; step: string }
 
 export interface Pipeline {
-  id?:         string
-  title:       string
-  subtitle?:   string
-  description?: string
-  steps?:      (PipelineStep | string)[]
-  toolsUsed?:  string
-  image?:      MediaRef | null
-  imageLabel?: string
+  id?:             string
+  title:           string
+  subtitle?:       string
+  description?:    string
+  steps?:          (PipelineStep | string)[]
+  toolsUsed?:      string
+  image?:          MediaRef | null
+  imageLabel?:     string
+  categoryLabel?:  string
+  categoryOrder?:  number
 }
 
 export interface ServicesPageGlobal {

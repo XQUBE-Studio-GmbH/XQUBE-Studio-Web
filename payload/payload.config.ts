@@ -23,6 +23,7 @@ import * as homepageHeroRedesignMigration     from './migrations/20250522_homepa
 import * as homepageSectionsMigration         from './migrations/20260520_homepage_sections.ts'
 import * as portfolioOrderMigration           from './migrations/20260520_portfolio_order.ts'
 import * as featuredWorkCopyMigration         from './migrations/20260520_featured_work_copy.ts'
+import * as pipelineCategoriesMigration       from './migrations/20260520_pipeline_categories.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1019,11 +1020,27 @@ export default buildConfig({
             },
             { name: 'toolsUsed', label: 'Tools Used', type: 'text' },
             {
+              name: 'categoryLabel',
+              label: 'Tab Category',
+              type: 'text',
+              admin: {
+                description: 'Groups this pipeline under a tab — e.g. "Modeling", "Texturing", "Rigging". Must match exactly (case-sensitive) across all pipelines in the same tab. Leave blank and it will appear under "Uncategorized".',
+              },
+            },
+            {
+              name: 'categoryOrder',
+              label: 'Tab Order',
+              type: 'number',
+              admin: {
+                description: 'Controls which tab appears first. Set the same number on every pipeline in a tab — e.g. Modeling=1, Texturing=2, Rigging=3. Lower number = earlier tab.',
+              },
+            },
+            {
               name: 'image',
               label: 'Pipeline Image',
               type: 'upload',
               relationTo: 'media',
-              admin: { description: 'Showcase image for this pipeline step (e.g. a rendered asset).' },
+              admin: { description: 'Optional showcase image for this pipeline (e.g. a rendered asset).' },
             },
           ],
         },
@@ -1247,6 +1264,11 @@ export default buildConfig({
         name: '20260520_featured_work_copy',
         up: featuredWorkCopyMigration.up,
         down: featuredWorkCopyMigration.down,
+      },
+      {
+        name: '20260520_pipeline_categories',
+        up: pipelineCategoriesMigration.up,
+        down: pipelineCategoriesMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

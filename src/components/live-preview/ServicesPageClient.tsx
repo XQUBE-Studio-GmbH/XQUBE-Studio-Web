@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { useLivePreview } from '@payloadcms/live-preview-react'
 import ScrollReveal from '@/components/ScrollReveal'
 import PageHero from '@/components/PageHero'
@@ -44,6 +45,38 @@ const tools = [
   { category: 'Project Management',  items: 'Jira · Asana · Trello · Slack' },
 ]
 
+// ─── Pipeline grouping ────────────────────────────────────────────────────────
+
+interface PipelineGroup { label: string; order: number; items: Pipeline[] }
+
+function buildGroups(pipelines: Pipeline[]): PipelineGroup[] {
+  // Sort by categoryOrder first (nulls last), then by original array position
+  const ordered = pipelines
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => {
+      const oa = a.p.categoryOrder ?? 9999
+      const ob = b.p.categoryOrder ?? 9999
+      return oa !== ob ? oa - ob : a.i - b.i
+    })
+    .map(({ p }) => p)
+
+  const groups: PipelineGroup[] = []
+  const index = new Map<string, number>()
+
+  for (const p of ordered) {
+    const label = p.categoryLabel?.trim() || ''
+    const key   = label || '__uncategorized__'
+    const display = label || 'Uncategorized'
+    if (!index.has(key)) {
+      index.set(key, groups.length)
+      groups.push({ label: display, order: p.categoryOrder ?? 9999, items: [] })
+    }
+    groups[index.get(key)!].items.push(p)
+  }
+
+  return groups
+}
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -52,9 +85,61 @@ interface Props {
   serverURL:   string
 }
 
+// ─── Pipeline Card ────────────────────────────────────────────────────────────
+
+function PipelineCard({ pipeline, index }: { pipeline: Pipeline; index: number }) {
+  return (
+    <ScrollReveal delay={index * 80}>
+      <div className="xq-card h-full flex flex-col">
+        {/* Optional image — only shown if one is uploaded */}
+        {pipeline.image?.url && (
+          <div className="relative aspect-video rounded-lg overflow-hidden mb-5 border border-xq-border">
+            <Image src={pipeline.image.url} alt={pipeline.image.alt || pipeline.title} fill className="object-cover" />
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="mb-3">
+          <h3 className="text-white font-black text-base leading-snug">{pipeline.title}</h3>
+          {pipeline.subtitle && (
+            <div className="text-xq-accent text-xs font-semibold tracking-wide mt-1">{pipeline.subtitle}</div>
+          )}
+        </div>
+
+        {/* Description */}
+        {pipeline.description && (
+          <p className="text-xq-muted text-sm leading-relaxed mb-4">{pipeline.description}</p>
+        )}
+
+        {/* Steps */}
+        {pipeline.steps && pipeline.steps.length > 0 && (
+          <ol className="space-y-1.5 mb-5 flex-1">
+            {pipeline.steps.map((step, i) => (
+              <li key={i} className="flex gap-2.5 text-sm text-xq-muted">
+                <span className="text-xq-accent font-bold shrink-0 w-4 text-xs mt-0.5">{i + 1}.</span>
+                <span>{typeof step === 'string' ? step : step.step}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {/* Tools */}
+        {pipeline.toolsUsed && (
+          <div className="text-xs text-xq-muted border-t border-xq-border pt-3 mt-auto">
+            <span className="text-xq-accent font-semibold">Tools: </span>
+            {pipeline.toolsUsed}
+          </div>
+        )}
+      </div>
+    </ScrollReveal>
+  )
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ServicesPageClient({ initialData, services, serverURL }: Props) {
+  const [activeTab, setActiveTab] = useState(0)
+
   const { data: sp } = useLivePreview<ServicesPageGlobal>({
     initialData,
     serverURL: getLivePreviewServerURL(serverURL),
@@ -150,47 +235,56 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
             heading="Production Pipeline"
             description="Standardized workflows built for quality and consistency across every project. Full pipeline documentation available on request."
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {activePipelines.map((pipeline, pi) => (
-              <ScrollReveal key={pipeline.id ?? pi} delay={pi * 100}>
-              <div className="xq-card p-0 overflow-hidden">
-                <div className="aspect-video bg-xq-surface border-b border-xq-border flex items-center justify-center relative">
-                  {pipeline.image?.url ? (
-                    <Image src={pipeline.image.url} alt={pipeline.image.alt || pipeline.title} fill className="object-cover" />
-                  ) : (
-                    <div className="text-center px-6">
-                      <div className="text-xq-accent text-xs font-semibold mb-1 tracking-widest uppercase">Portfolio Asset</div>
-                      <div className="text-xq-muted text-xs">{pipeline.imageLabel ?? 'Upload an image via the Services Page in the admin panel'}</div>
-                    </div>
-                  )}
+
+          {(() => {
+            const groups = buildGroups(activePipelines)
+            const useTabs = groups.length > 1
+
+            return useTabs ? (
+              <>
+                {/* Tab bar */}
+                <div className="flex gap-1 mb-10 overflow-x-auto pb-px border-b border-xq-border">
+                  {groups.map((group, gi) => (
+                    <button
+                      key={group.label}
+                      type="button"
+                      onClick={() => setActiveTab(gi)}
+                      className={`px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors shrink-0 border-b-2 -mb-px ${
+                        activeTab === gi
+                          ? 'border-xq-accent text-xq-accent'
+                          : 'border-transparent text-xq-muted hover:text-white'
+                      }`}
+                    >
+                      {group.label}
+                      <span className="ml-1.5 text-xs opacity-50">({group.items.length})</span>
+                    </button>
+                  ))}
                 </div>
-                <div className="p-6">
-                  <div className="mb-3">
-                    <h3 className="text-white font-black text-lg">{pipeline.title}</h3>
-                    {pipeline.subtitle && <div className="text-xq-accent text-xs font-semibold tracking-wide mt-0.5">{pipeline.subtitle}</div>}
+
+                {/* Cards for active tab */}
+                {groups[activeTab] && (
+                  <div className={`grid gap-6 ${
+                    groups[activeTab].items.length === 1
+                      ? 'grid-cols-1 max-w-xl'
+                      : groups[activeTab].items.length === 2
+                      ? 'grid-cols-1 md:grid-cols-2'
+                      : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                  }`}>
+                    {groups[activeTab].items.map((pipeline, pi) => (
+                      <PipelineCard key={pipeline.id ?? pi} pipeline={pipeline} index={pi} />
+                    ))}
                   </div>
-                  {pipeline.description && <p className="text-xq-muted text-sm mb-4 leading-relaxed">{pipeline.description}</p>}
-                  {pipeline.steps && pipeline.steps.length > 0 && (
-                    <ol className="space-y-1.5 mb-5">
-                      {pipeline.steps.map((step, i) => (
-                        <li key={i} className="flex gap-3 text-sm text-xq-muted">
-                          <span className="text-xq-accent font-bold shrink-0 w-4">{i + 1}.</span>
-                          {typeof step === 'string' ? step : step.step}
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-                  {pipeline.toolsUsed && (
-                    <div className="text-xs text-xq-muted border-t border-xq-border pt-4">
-                      <span className="text-xq-accent font-semibold">Tools: </span>
-                      {pipeline.toolsUsed}
-                    </div>
-                  )}
-                </div>
+                )}
+              </>
+            ) : (
+              /* No categories yet — flat 2-column grid (original layout) */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {activePipelines.map((pipeline, pi) => (
+                  <PipelineCard key={pipeline.id ?? pi} pipeline={pipeline} index={pi} />
+                ))}
               </div>
-            </ScrollReveal>
-            ))}
-          </div>
+            )
+          })()}
         </div>
       </section>
 
