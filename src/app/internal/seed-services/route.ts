@@ -81,7 +81,6 @@ export async function POST(req: NextRequest) {
     const results: string[] = []
 
     for (const service of SERVICES) {
-      // Skip if a service with this slug already exists
       const existing = await payload.find({
         collection: 'services',
         where: { slug: { equals: service.slug } },
