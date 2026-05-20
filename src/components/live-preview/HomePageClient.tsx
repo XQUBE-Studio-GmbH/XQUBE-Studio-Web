@@ -237,11 +237,28 @@ function CinematicHero({ mode, videoUrl, slides }: {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function HomePageClient({ initialData, services, clients, featured, blogPosts, serverURL }: Props) {
-  const { data: hp } = useLivePreview<HomepageGlobal>({
+  // Detect whether we are inside the Payload admin live-preview iframe.
+  // When viewing the public page directly, we always use the server-fetched
+  // initialData (fully-populated relationships including image URLs).
+  // When inside the admin iframe, we switch to livePreviewData so content
+  // updates appear instantly as the editor types.
+  //
+  // Why: useLivePreview sends a ready postMessage on mount. If the admin is
+  // open in another tab it responds with draft data where relationships are
+  // bare IDs (not populated objects). That would set slide.image.url to
+  // undefined, causing the hero image to disappear on the public page.
+  const [isInIframe, setIsInIframe] = useState(false)
+  useEffect(() => {
+    setIsInIframe(window !== window.parent)
+  }, [])
+
+  const { data: livePreviewData } = useLivePreview<HomepageGlobal>({
     initialData,
     serverURL: getLivePreviewServerURL(serverURL),
     depth: 2,
   })
+
+  const hp = isInIframe ? livePreviewData : initialData
 
   // ── Showreel mute state ────────────────────────────────────────────────────
   const showreelRef = useRef<HTMLVideoElement>(null)
