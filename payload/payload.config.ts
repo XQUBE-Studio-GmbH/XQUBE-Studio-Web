@@ -25,6 +25,7 @@ import * as portfolioOrderMigration           from './migrations/20260520_portfo
 import * as featuredWorkCopyMigration         from './migrations/20260520_featured_work_copy.ts'
 import * as pipelineCategoriesMigration       from './migrations/20260520_pipeline_categories.ts'
 import * as toolsCollectionMigration          from './migrations/20260521_tools_collection.ts'
+import * as toolsRelsColumnsMigration         from './migrations/20260522_tools_rels_columns.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1349,6 +1350,11 @@ export default buildConfig({
         name: '20260521_tools_collection',
         up: toolsCollectionMigration.up,
         down: toolsCollectionMigration.down,
+      },
+      {
+        name: '20260522_tools_rels_columns',
+        up: toolsRelsColumnsMigration.up,
+        down: toolsRelsColumnsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
