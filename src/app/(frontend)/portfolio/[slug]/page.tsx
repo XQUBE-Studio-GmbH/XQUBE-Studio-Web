@@ -25,6 +25,11 @@ interface SoftwareItem {
   tool: string
 }
 
+interface ToolItem {
+  id: string
+  tool?: { id: string; name: string; logo?: { url?: string; alt?: string } | null } | null
+}
+
 interface PortfolioItem {
   id: string
   title: string
@@ -37,6 +42,7 @@ interface PortfolioItem {
   heroImage?: { url?: string; alt?: string; width?: number; height?: number }
   gallery?: GalleryItem[]
   overview?: unknown
+  toolsUsed?: ToolItem[]
   software?: SoftwareItem[]
   polyCount?: string
   textureRes?: string
@@ -273,7 +279,26 @@ export default async function PortfolioItemPage({ params }: Props) {
                   </div>
                 )}
 
-                {item.software && item.software.length > 0 && (
+                {/* Tools Used — logo-based pills */}
+                {item.toolsUsed && item.toolsUsed.length > 0 && (
+                  <div className="border-t border-xq-border pt-5">
+                    <div className="text-xq-muted text-xs uppercase tracking-widest mb-3">Software Used</div>
+                    <div className="flex flex-wrap gap-2">
+                      {item.toolsUsed.map((t) =>
+                        t.tool ? (
+                          <span key={t.id} className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-xq-surface border border-xq-border text-white rounded-full">
+                            {t.tool.logo?.url && (
+                              <Image src={t.tool.logo.url} alt={t.tool.logo.alt || t.tool.name} width={14} height={14} className="object-contain shrink-0" />
+                            )}
+                            {t.tool.name}
+                          </span>
+                        ) : null
+                      )}
+                    </div>
+                  </div>
+                )}
+                {/* Legacy software fallback */}
+                {(!item.toolsUsed || item.toolsUsed.length === 0) && item.software && item.software.length > 0 && (
                   <div className="border-t border-xq-border pt-5">
                     <div className="text-xq-muted text-xs uppercase tracking-widest mb-3">Software Used</div>
                     <div className="flex flex-wrap gap-2">
