@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import AboutPageClient from '@/components/live-preview/AboutPageClient'
-import type { AboutGlobal, ClientItem, TeamMember } from '@/types/cms'
+import type { AboutGlobal, TeamMember } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,32 +26,29 @@ export const metadata: Metadata = {
 async function getData() {
   try {
     const payload = await getPayload({ config })
-    const [ap, clientsRes, teamRes] = await Promise.all([
+    const [ap, teamRes] = await Promise.all([
       payload.findGlobal({ slug: 'about-page' }) as Promise<AboutGlobal>,
-      payload.find({ collection: 'clients',      sort: 'order', limit: 20, depth: 0 }),
       payload.find({ collection: 'team-members', sort: 'order', limit: 50, depth: 1 }),
     ])
     return {
       ap:          ap as AboutGlobal,
-      clients:     clientsRes.docs as unknown as ClientItem[],
-      teamMembers: teamRes.docs    as unknown as TeamMember[],
+      teamMembers: teamRes.docs as unknown as TeamMember[],
     }
   } catch {
-    return { ap: {} as AboutGlobal, clients: [], teamMembers: [] }
+    return { ap: {} as AboutGlobal, teamMembers: [] }
   }
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function AboutPage() {
-  const { ap, clients, teamMembers } = await getData()
+  const { ap, teamMembers } = await getData()
 
   const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   return (
     <AboutPageClient
       initialData={ap}
-      clients={clients}
       teamMembers={teamMembers}
       serverURL={serverURL}
     />

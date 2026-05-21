@@ -7,7 +7,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import PageHero from '@/components/PageHero'
 import SectionHeader from '@/components/SectionHeader'
 import { getLivePreviewServerURL } from '@/lib/livePreview'
-import type { AboutGlobal, ClientItem, TeamMember, MediaRef, Credential, Hub, WhyCard } from '@/types/cms'
+import type { AboutGlobal, TeamMember, MediaRef, Credential, Hub, WhyCard } from '@/types/cms'
 
 // ─── Fallbacks ────────────────────────────────────────────────────────────────
 
@@ -36,28 +36,17 @@ const FB_WHY: WhyCard[] = [
   { title: 'Pilot-First Model',        body: 'Try one asset before signing anything. Fee credited to Month 1 if you proceed. Zero obligation.' },
   { title: 'End-to-End Pipeline',      body: 'Concept to engine-ready — ZBrush, Substance, UE5, Unity. Full ownership of the deliverable.' },
 ]
-const FB_CLIENTS = [
-  { id: 'fresh-tv',  name: 'Fresh TV',         sector: 'Media & TV',  note: 'Total Drama Island · UEFN — shipped & live' },
-  { id: 'bmw',       name: 'BMW',              sector: 'Automotive',  note: 'Interactive configurators & simulation models' },
-  { id: 'c3d',       name: 'C3D',             sector: 'Game Studio', note: 'AAA 3D assets and environment art production' },
-  { id: 'barney',    name: 'Barney Studio',    sector: 'Creative',    note: 'Characters, rigged animations & concept art' },
-  { id: 'indg',      name: 'INDG',             sector: 'CGI Tech',    note: 'Photorealistic CGI & digital twin — automotive' },
-  { id: 'cyberfox',  name: 'Cyberfox',         sector: 'Game Studio', note: 'Game-ready assets · VR environments' },
-  { id: 'flightsim', name: 'FlightSim Studio', sector: 'Flight Sim',  note: 'Aircraft & scenery to sim-ready spec' },
-]
-
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
   initialData: AboutGlobal
-  clients:     ClientItem[]
   teamMembers: TeamMember[]
   serverURL:   string
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function AboutPageClient({ initialData, clients, teamMembers, serverURL }: Props) {
+export default function AboutPageClient({ initialData, teamMembers, serverURL }: Props) {
   const { data: ap } = useLivePreview<AboutGlobal>({
     initialData,
     serverURL: getLivePreviewServerURL(serverURL),
@@ -75,7 +64,6 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
   const credentials = ap.credentials && ap.credentials.length > 0 ? ap.credentials : FB_CREDENTIALS
   const hubs        = ap.hubs        && ap.hubs.length > 0        ? ap.hubs        : FB_HUBS
   const whyCards    = ap.whyXqube    && ap.whyXqube.length > 0    ? ap.whyXqube    : FB_WHY
-  const clientList  = clients.length > 0 ? clients : FB_CLIENTS
 
   return (
     <>
@@ -145,31 +133,6 @@ export default function AboutPageClient({ initialData, clients, teamMembers, ser
                 <p className="text-xq-accent text-sm font-semibold mb-3">{hub.country}</p>
                 {hub.role   && <p className="text-xq-muted text-sm mb-2">{hub.role}</p>}
                 {hub.detail && <p className="text-xq-muted text-xs opacity-70">{hub.detail}</p>}
-              </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Clients ──────────────────────────────────────────── */}
-      <section className="xq-section border-t border-xq-border bg-xq-surface">
-        <div className="xq-container">
-          <SectionHeader
-            label="Clients & Partners"
-            heading="Trusted by leading brands across gaming, automotive, simulation, and entertainment"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {clientList.map((client, i) => (
-              <ScrollReveal key={String(client.id)} delay={i * 60}>
-              <div className="xq-card py-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-bold">{client.name}</h3>
-                  {client.sector && (
-                    <span className="text-xs text-xq-accent border border-xq-accent/30 px-2 py-0.5 rounded">{client.sector}</span>
-                  )}
-                </div>
-                {client.note && <p className="text-xq-muted text-sm">{client.note}</p>}
               </div>
               </ScrollReveal>
             ))}

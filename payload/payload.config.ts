@@ -505,8 +505,8 @@ export default buildConfig({
       labels: { singular: 'Client Logo', plural: 'Client Logos' },
       admin: {
         useAsTitle: 'name',
-        group: 'Pages',
-        description: 'Client logos shown in the homepage logo strip.',
+        hidden: true,
+        description: 'Client logos. Managed via Homepage → Client Logo Strip. Sector and note fields retained for future use.',
         hideAPIURL: true,
       },
       access: contentAccess,
