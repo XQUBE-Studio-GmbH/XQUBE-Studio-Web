@@ -26,6 +26,7 @@ import * as featuredWorkCopyMigration         from './migrations/20260520_featur
 import * as pipelineCategoriesMigration       from './migrations/20260520_pipeline_categories.ts'
 import * as toolsCollectionMigration          from './migrations/20260521_tools_collection.ts'
 import * as toolsRelsColumnsMigration         from './migrations/20260522_tools_rels_columns.ts'
+import * as homepageBadgesToToolsMigration    from './migrations/20260522_homepage_badges_to_tools.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -221,8 +222,8 @@ export default buildConfig({
       labels: { singular: 'Tool', plural: 'Tools' },
       admin: {
         useAsTitle: 'name',
-        group: 'Content',
-        description: 'Software and tools used in production. Referenced from portfolio items.',
+        hidden: true,
+        description: 'Software and tools used in production. Managed via Homepage → Engine Badges and Portfolio items.',
         hideAPIURL: true,
         defaultColumns: ['name', 'category', 'logo'],
       },
@@ -786,20 +787,9 @@ export default buildConfig({
           name: 'engineBadges',
           label: 'Engine / Tech Badges',
           type: 'array',
-          admin: { description: 'Tech stack chips shown on the homepage. 8–10 is the sweet spot — beyond 12 it looks cluttered.' },
+          admin: { description: 'Tech stack chips shown on the homepage. 8–10 is the sweet spot — beyond 12 it looks cluttered. Add tools via the relationship picker — new tools can be created inline.' },
           fields: [
-            { name: 'name', label: 'Engine / Tool Name', type: 'text', required: true },
-            { name: 'logo', label: 'Logo Image (optional)', type: 'upload', relationTo: 'media', admin: { description: 'Small square logo. If omitted, name text is shown instead.' } },
-          ],
-          defaultValue: [
-            { name: 'Unreal Engine 5' },
-            { name: 'Unity' },
-            { name: 'UEFN' },
-            { name: 'Roblox' },
-            { name: 'Blender' },
-            { name: 'Maya' },
-            { name: 'ZBrush' },
-            { name: 'Substance Painter' },
+            { name: 'tool', label: 'Tool', type: 'relationship', relationTo: 'tools', required: true },
           ],
         },
 
@@ -1355,6 +1345,11 @@ export default buildConfig({
         name: '20260522_tools_rels_columns',
         up: toolsRelsColumnsMigration.up,
         down: toolsRelsColumnsMigration.down,
+      },
+      {
+        name: '20260522_homepage_badges_to_tools',
+        up: homepageBadgesToToolsMigration.up,
+        down: homepageBadgesToToolsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

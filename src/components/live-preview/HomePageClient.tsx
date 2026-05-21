@@ -41,14 +41,14 @@ const FB_PROCESS_STEPS: ProcessStep[] = [
 ]
 
 const FB_ENGINE_BADGES: EngineBadge[] = [
-  { name: 'Unreal Engine 5' },
-  { name: 'Unity' },
-  { name: 'UEFN' },
-  { name: 'Roblox' },
-  { name: 'Blender' },
-  { name: 'Maya' },
-  { name: 'ZBrush' },
-  { name: 'Substance Painter' },
+  { tool: { id: 'fb-1', name: 'Unreal Engine 5' } },
+  { tool: { id: 'fb-2', name: 'Unity' } },
+  { tool: { id: 'fb-3', name: 'UEFN' } },
+  { tool: { id: 'fb-4', name: 'Roblox' } },
+  { tool: { id: 'fb-5', name: 'Blender' } },
+  { tool: { id: 'fb-6', name: 'Maya' } },
+  { tool: { id: 'fb-7', name: 'ZBrush' } },
+  { tool: { id: 'fb-8', name: 'Substance Painter' } },
 ]
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -431,21 +431,21 @@ export default function HomePageClient({ initialData, services, clients, feature
             </ScrollReveal>
             <ScrollReveal delay={100}>
               <div className="flex flex-wrap justify-center gap-3">
-                {engineBadgeList.map((badge, i) => (
+                {engineBadgeList.map((badge, i) => badge.tool ? (
                   <div
-                    key={String((badge as any).id) || i}
+                    key={String(badge.id || badge.tool.id || i)}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-xq-border bg-xq-bg text-xq-muted hover:border-xq-accent hover:text-white transition-all duration-200 text-sm font-medium cursor-default"
                   >
-                    {badge.logo?.url && (
+                    {badge.tool.logo?.url && (
                       <Image
-                        src={badge.logo.url} alt={badge.name}
+                        src={badge.tool.logo.url} alt={badge.tool.name}
                         width={20} height={20}
                         className="w-5 h-5 object-contain opacity-70"
                       />
                     )}
-                    {badge.name}
+                    {badge.tool.name}
                   </div>
-                ))}
+                ) : null)}
               </div>
             </ScrollReveal>
           </div>

@@ -27,7 +27,7 @@ async function getData() {
   try {
     const payload = await getPayload({ config })
     const [hp, servicesRes, clientsRes, featuredRes, blogRes, ppGlobal] = await Promise.all([
-      payload.findGlobal({ slug: 'home-page' }) as Promise<HomepageGlobal>,
+      payload.findGlobal({ slug: 'home-page', depth: 2 }) as Promise<HomepageGlobal>,
       payload.find({ collection: 'services',  where: { featured: { equals: true } }, sort: 'order', limit: 4, depth: 1 }),
       payload.find({ collection: 'clients',   where: { featured: { equals: true } }, sort: 'order', limit: 20, depth: 1 }),
       payload.find({ collection: 'portfolio', where: { featured: { equals: true }, status: { equals: 'published' } }, limit: 6, depth: 1 }),

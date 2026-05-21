@@ -70,9 +70,8 @@ export interface HeroSlide {
 export interface Stat { id?: string; value: string; label: string }
 
 export interface EngineBadge {
-  id?:   string
-  name:  string
-  logo?: MediaRef | null
+  id?:  string
+  tool?: { id: string | number; name: string; logo?: MediaRef | null } | null
 }
 
 export interface ProcessStep {
