@@ -24,6 +24,7 @@ import * as homepageSectionsMigration         from './migrations/20260520_homepa
 import * as portfolioOrderMigration           from './migrations/20260520_portfolio_order.ts'
 import * as featuredWorkCopyMigration         from './migrations/20260520_featured_work_copy.ts'
 import * as pipelineCategoriesMigration       from './migrations/20260520_pipeline_categories.ts'
+import * as toolsCollectionMigration          from './migrations/20260521_tools_collection.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -204,6 +205,69 @@ export default buildConfig({
           required: true,
           admin: { description: 'Describe the image for accessibility and SEO.' },
         },
+        {
+          name: 'folder',
+          label: 'Folder',
+          type: 'text',
+          admin: {
+            description: 'Organise files by folder, e.g. "portfolio", "services", "team", "blog".',
+          },
+        },
+      ],
+    },
+
+    // ─── Tools / Software Library ───────────────────────────
+    {
+      slug: 'tools',
+      labels: { singular: 'Tool', plural: 'Tools' },
+      admin: {
+        useAsTitle: 'name',
+        group: 'Content',
+        description: 'Software and tools used in production. Referenced from portfolio items and the Services page.',
+        hideAPIURL: true,
+        defaultColumns: ['name', 'category', 'logo'],
+      },
+      access: {
+        read:   () => true,
+        create: isEditorOrAbove,
+        update: isEditorOrAbove,
+        delete: isAdminOrAbove,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+          admin: { description: 'Tool name as it should appear on the site, e.g. "Blender", "ZBrush", "Unreal Engine 5".' },
+        },
+        {
+          name: 'logo',
+          label: 'Logo',
+          type: 'upload',
+          relationTo: 'media',
+          admin: { description: 'Square or transparent PNG/SVG logo. Shown next to the tool name on portfolio detail pages.' },
+        },
+        {
+          name: 'category',
+          label: 'Category',
+          type: 'select',
+          options: [
+            { label: '3D Modelling',        value: '3d-modelling' },
+            { label: 'Sculpting',           value: 'sculpting' },
+            { label: 'Retopology',          value: 'retopology' },
+            { label: 'UV & Unwrapping',     value: 'uv-unwrapping' },
+            { label: 'Texturing',           value: 'texturing' },
+            { label: 'Photogrammetry',      value: 'photogrammetry' },
+            { label: 'Rigging & Animation', value: 'rigging-animation' },
+            { label: 'Game Engines',        value: 'game-engines' },
+            { label: 'Rendering',           value: 'rendering' },
+            { label: 'Concepting',          value: 'concepting' },
+            { label: 'Generative 3D',       value: 'generative-3d' },
+            { label: 'Version Control',     value: 'version-control' },
+            { label: 'Project Management',  value: 'project-management' },
+          ],
+          admin: { description: 'Used to group tools on the Services page.' },
+        },
       ],
     },
 
@@ -291,9 +355,27 @@ export default buildConfig({
         },
         { name: 'overview', label: 'Project Overview', type: 'richText' },
         {
-          name: 'software',
-          label: 'Software Used',
+          name: 'toolsUsed',
+          label: 'Tools Used',
           type: 'array',
+          admin: { description: 'Tag the tools used on this project. Add new tools in the Tools collection first.' },
+          fields: [
+            {
+              name: 'tool',
+              type: 'relationship',
+              relationTo: 'tools',
+              required: true,
+            },
+          ],
+        },
+        {
+          name: 'software',
+          label: 'Software Used (Legacy)',
+          type: 'array',
+          admin: {
+            description: 'Replaced by Tools Used above. Hidden from view — existing data is preserved.',
+            hidden: true,
+          },
           fields: [{ name: 'tool', type: 'text', required: true }],
         },
         { name: 'polyCount',     label: 'Poly Count',         type: 'text' },
@@ -307,7 +389,11 @@ export default buildConfig({
           options: [
             { label: 'Published', value: 'published' },
             { label: 'Draft',     value: 'draft' },
+            { label: 'Archived',  value: 'archived' },
           ],
+          admin: {
+            description: 'Published — visible on site. Draft — hidden. Archived — hidden, kept for reference. Only admins can permanently delete.',
+          },
         },
       ],
     },
@@ -1269,6 +1355,11 @@ export default buildConfig({
         name: '20260520_pipeline_categories',
         up: pipelineCategoriesMigration.up,
         down: pipelineCategoriesMigration.down,
+      },
+      {
+        name: '20260521_tools_collection',
+        up: toolsCollectionMigration.up,
+        down: toolsCollectionMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

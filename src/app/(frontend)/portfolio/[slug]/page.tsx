@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '../../../../../payload/payload.config'
 import { serializeLexical } from '@/lib/serializeLexical'
+import PortfolioGallery from '@/components/PortfolioGallery'
 
 // force-dynamic: prevents build-time DB calls; rendered at request time instead.
 export const dynamic = 'force-dynamic'
@@ -24,6 +25,16 @@ interface SoftwareItem {
   tool: string
 }
 
+interface ToolItem {
+  id: string
+  tool?: {
+    id: string
+    name: string
+    logo?: { url?: string; alt?: string } | null
+    category?: string
+  } | null
+}
+
 interface PortfolioItem {
   id: string
   title: string
@@ -36,6 +47,7 @@ interface PortfolioItem {
   heroImage?: { url?: string; alt?: string; width?: number; height?: number }
   gallery?: GalleryItem[]
   overview?: unknown
+  toolsUsed?: ToolItem[]
   software?: SoftwareItem[]
   polyCount?: string
   textureRes?: string
@@ -188,31 +200,11 @@ export default async function PortfolioItemPage({ params }: Props) {
                 <p className="text-xq-muted text-lg leading-relaxed max-w-2xl">{item.shortDescription}</p>
               )}
 
-              {/* Gallery grid */}
+              {/* Gallery grid with lightbox */}
               {item.gallery && item.gallery.length > 0 && (
                 <div>
                   <h2 className="text-sm font-semibold text-xq-muted uppercase tracking-widest mb-5">Gallery</h2>
-                  <div className={`grid gap-3 ${item.gallery.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
-                    {item.gallery.map((g, i) => (
-                      g.image?.url && (
-                        <div key={g.id} className={`relative overflow-hidden rounded-lg border border-xq-border group ${i === 0 && item.gallery!.length > 2 ? 'sm:col-span-2' : ''}`}>
-                          <div className="relative aspect-video">
-                            <Image
-                              src={g.image.url}
-                              alt={g.image.alt || g.caption || `${item.title} — view ${i + 1}`}
-                              fill
-                              className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                            />
-                          </div>
-                          {g.caption && (
-                            <div className="px-3 py-2 bg-xq-surface border-t border-xq-border">
-                              <p className="text-xq-muted text-xs">{g.caption}</p>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    ))}
-                  </div>
+                  <PortfolioGallery items={item.gallery} title={item.title} />
                 </div>
               )}
 
@@ -292,7 +284,36 @@ export default async function PortfolioItemPage({ params }: Props) {
                   </div>
                 )}
 
-                {item.software && item.software.length > 0 && (
+                {/* Tools Used — new logo-based display */}
+                {item.toolsUsed && item.toolsUsed.length > 0 && (
+                  <div className="border-t border-xq-border pt-5">
+                    <div className="text-xq-muted text-xs uppercase tracking-widest mb-3">Software Used</div>
+                    <div className="flex flex-wrap gap-2">
+                      {item.toolsUsed.map((t) =>
+                        t.tool ? (
+                          <span
+                            key={t.id}
+                            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-xq-surface border border-xq-border text-white rounded-full"
+                          >
+                            {t.tool.logo?.url && (
+                              <Image
+                                src={t.tool.logo.url}
+                                alt={t.tool.logo.alt || t.tool.name}
+                                width={14}
+                                height={14}
+                                className="object-contain shrink-0"
+                              />
+                            )}
+                            {t.tool.name}
+                          </span>
+                        ) : null
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Legacy software fallback — shown only when new toolsUsed is empty */}
+                {(!item.toolsUsed || item.toolsUsed.length === 0) && item.software && item.software.length > 0 && (
                   <div className="border-t border-xq-border pt-5">
                     <div className="text-xq-muted text-xs uppercase tracking-widest mb-3">Software Used</div>
                     <div className="flex flex-wrap gap-2">
