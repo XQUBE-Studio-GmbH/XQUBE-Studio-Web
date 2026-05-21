@@ -601,6 +601,24 @@ await db.execute(sql`DO $$ BEGIN ALTER TABLE "tools" ADD CONSTRAINT ... END $$;`
 
 ---
 
+### ERROR 25 — Global admin 404 after changing array field subfields
+**Error:** `Failed query: select "_home_page_v"."id", "_home_page_v"."version_sections_show_engine_badges" ...` → `/admin/globals/home-page` returns 404
+**Where:** Runtime — Vercel logs after changing the subfields of an array field on a global that has `versions` enabled
+**Root cause:** When an array field's subfields change (e.g. from `name`+`logo` to a `tool` relationship), TWO tables must be updated:
+1. The regular child table (e.g. `home_page_engine_badges`) — handled by the data migration
+2. The version child table (e.g. `_home_page_v_version_engine_badges`) — easily forgotten
+
+Payload queries the version child table on every global admin load. If its schema doesn't match the new field definition, the query fails and Payload returns 404 for the entire global.
+**Fix:** Whenever an array field's subfields change on a versioned global, always add a second migration step to also update the version child table:
+```ts
+// Version child tables: id serial PRIMARY KEY + _uuid varchar (not varchar like regular child tables)
+await db.execute(sql`DROP TABLE IF EXISTS "_home_page_v_version_engine_badges";`)
+await db.execute(sql`CREATE TABLE "_home_page_v_version_engine_badges" ("_order" integer NOT NULL, "_parent_id" integer NOT NULL, "id" serial PRIMARY KEY NOT NULL, "_uuid" varchar, "tool_id" integer);`)
+```
+**Rule:** Any time you migrate an array field's subfields on a global with versions enabled, always migrate BOTH `{slug}_{field}` AND `_{slug}_v_version_{field}` tables. Version child tables use `id serial PRIMARY KEY` + `_uuid varchar` (see ERROR 22). Forgetting the version child table causes the global admin page to 404.
+
+---
+
 ## Git Rule
 **Never push to git unless the user explicitly asks.** Always commit locally first,
 show what was changed, then wait for "push" confirmation.
