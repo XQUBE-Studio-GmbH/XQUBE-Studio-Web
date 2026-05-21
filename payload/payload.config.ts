@@ -27,6 +27,7 @@ import * as pipelineCategoriesMigration       from './migrations/20260520_pipeli
 import * as toolsCollectionMigration          from './migrations/20260521_tools_collection.ts'
 import * as toolsRelsColumnsMigration         from './migrations/20260522_tools_rels_columns.ts'
 import * as homepageBadgesToToolsMigration    from './migrations/20260522_homepage_badges_to_tools.ts'
+import * as homepageVersionEngineBadgesMigration from './migrations/20260522_homepage_version_engine_badges.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1350,6 +1351,11 @@ export default buildConfig({
         name: '20260522_homepage_badges_to_tools',
         up: homepageBadgesToToolsMigration.up,
         down: homepageBadgesToToolsMigration.down,
+      },
+      {
+        name: '20260522_homepage_version_engine_badges',
+        up: homepageVersionEngineBadgesMigration.up,
+        down: homepageVersionEngineBadgesMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
