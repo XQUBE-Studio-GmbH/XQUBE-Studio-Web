@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 
 // ─── Types & defaults ─────────────────────────────────────────────────────────
 
-export interface NavLink    { label: string; url: string }
+export interface NavLink    { label: string; url: string; visible?: boolean }
 export interface CtaButton  { label?: string; url?: string }
 
 const DEFAULT_NAV_LINKS: NavLink[] = [
@@ -29,7 +29,8 @@ interface Props {
 }
 
 export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Props) {
-  const navLinks = (propLinks && propLinks.length > 0) ? propLinks : DEFAULT_NAV_LINKS
+  const navLinks = ((propLinks && propLinks.length > 0) ? propLinks : DEFAULT_NAV_LINKS)
+    .filter((link) => link.visible !== false)
   const ctaLabel = propCta?.label ?? DEFAULT_CTA.label!
   const ctaUrl   = propCta?.url   ?? DEFAULT_CTA.url!
 

@@ -29,6 +29,7 @@ import * as toolsRelsColumnsMigration         from './migrations/20260522_tools_
 import * as homepageBadgesToToolsMigration    from './migrations/20260522_homepage_badges_to_tools.ts'
 import * as homepageVersionEngineBadgesMigration from './migrations/20260522_homepage_version_engine_badges.ts'
 import * as homepageFeaturedClientsMigration    from './migrations/20260522_homepage_featured_clients.ts'
+import * as navLinkVisibilityMigration          from './migrations/20260522_nav_link_visibility.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1230,16 +1231,17 @@ export default buildConfig({
           label: 'Menu Links',
           type: 'array',
           fields: [
-            { name: 'label', type: 'text', required: true },
-            { name: 'url',   type: 'text', required: true },
+            { name: 'label',   type: 'text',     required: true },
+            { name: 'url',     type: 'text',     required: true },
+            { name: 'visible', type: 'checkbox', defaultValue: true, admin: { description: 'Uncheck to hide this link from the nav without deleting it.' } },
           ],
           defaultValue: [
-            { label: 'Home',      url: '/' },
-            { label: 'About',     url: '/about' },
-            { label: 'Services',  url: '/services' },
-            { label: 'Portfolio', url: '/portfolio' },
-            { label: 'Blog',      url: '/blog' },
-            { label: 'Contact',   url: '/contact' },
+            { label: 'Home',      url: '/',          visible: true },
+            { label: 'About',     url: '/about',     visible: true },
+            { label: 'Services',  url: '/services',  visible: true },
+            { label: 'Portfolio', url: '/portfolio', visible: true },
+            { label: 'Blog',      url: '/blog',      visible: false },
+            { label: 'Contact',   url: '/contact',   visible: true },
           ],
         },
         {
@@ -1373,6 +1375,11 @@ export default buildConfig({
         name: '20260522_homepage_featured_clients',
         up: homepageFeaturedClientsMigration.up,
         down: homepageFeaturedClientsMigration.down,
+      },
+      {
+        name: '20260522_nav_link_visibility',
+        up: navLinkVisibilityMigration.up,
+        down: navLinkVisibilityMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
