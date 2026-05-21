@@ -349,9 +349,12 @@ This is the only place for:
 ### Migrations
 - `push: true` is ignored in production — use `prodMigrations` array
 - Each DDL statement = its own `await db.execute(sql\`...\`)` — no multi-statement blocks
-- Always `IF NOT EXISTS` for idempotency on tables, columns, and indexes
-- **NEVER use `DO $$ BEGIN ... END $$;`** — Drizzle's `sql` tag mishandles PostgreSQL dollar-quoting (`$$`); the block fails with a cryptic error (see ERROR 24)
-- **FK constraints: declare inline in `CREATE TABLE IF NOT EXISTS`** — this way the FK is created atomically with the table on first run, and the entire statement is a no-op (including the FK) on re-runs when the table already exists
+- **Single-line statements only** — multiline template content can cause edge cases with Drizzle's sql tag
+- **NEVER use `DO $$ BEGIN ... END $$;`** — Drizzle's `sql` tag mishandles PostgreSQL dollar-quoting (`$$`); the block fails (see ERROR 24)
+- **NEVER use REFERENCES / inline FK constraints in CREATE TABLE** — Drizzle + PgBouncer rejects them (see ERROR 24); omit FKs entirely; Payload works without DB-level FK constraints
+- **Idempotency for new tables**: use `DROP TABLE IF EXISTS` then `CREATE TABLE` (no IF NOT EXISTS on CREATE); safe because new tables start empty. Do NOT use `CREATE TABLE IF NOT EXISTS` with any REFERENCES or complex column definitions
+- **Idempotency for new columns**: use `ALTER TABLE "x" ADD COLUMN IF NOT EXISTS "col" type;` — this is safe and works correctly
+- **Idempotency for indexes**: use `CREATE INDEX IF NOT EXISTS` — safe
 - DB reset (`DROP SCHEMA public CASCADE`) wipes `payload_migrations` — next cold start re-runs all migrations from scratch
 
 ### DB reset procedure (when needed)
@@ -571,32 +574,30 @@ serverURL: typeof window !== 'undefined'
 
 ---
 
-### ERROR 24 — `DO $$ BEGIN ... END $$;` migration block crashes with `"type": "f"` error
-**Error:** `Error running migration <name> Failed query: DO $$ BEGIN ALTER TABLE ... EXCEPTION WHEN duplicate_object THEN NULL; END $$; err: { "type": "f", "message": "Failed query: ..."}`
-**Where:** Runtime — Vercel logs on cold start when a migration contains a `DO $$ ... $$` block
-**Root cause:** Drizzle's `sql` tagged template literal mishandles PostgreSQL dollar-quoting (`$$`). The `$$` delimiters used in PL/pgSQL anonymous blocks are incorrectly parsed by the Drizzle query builder, causing the statement to fail before it even reaches PostgreSQL.
-**Wrong fix:** Using `DO $body$ BEGIN ... END $body$;` with different delimiters — same underlying issue.
-**Correct fix:** Never use `DO $$ ... $$` blocks. Instead, declare FK constraints **inline** in the `CREATE TABLE IF NOT EXISTS` statement:
+### ERROR 24 — Migration CREATE TABLE fails with `"type": "f"` error on cold start
+**Error:** `Error running migration <name> Failed query: CREATE TABLE IF NOT EXISTS "tools" (...) err: { "type": "f", ... }` or `DO $$ BEGIN ... END $$; err: { "type": "f", ... }`
+**Where:** Runtime — Vercel logs on cold start when a migration contains `REFERENCES` inline in `CREATE TABLE` or `DO $$ ... $$` blocks
+**Root cause (two related issues):**
+1. `DO $$ BEGIN ... END $$;` — Drizzle's `sql` tag mishandles PostgreSQL dollar-quoting (`$$`); fails before reaching DB.
+2. `CREATE TABLE IF NOT EXISTS "x" (... "col" varchar REFERENCES "other"("id") ...)` — when the table already exists from a previous partial migration, Drizzle + PgBouncer transaction mode rejects the `REFERENCES` clause in the `CREATE TABLE` statement.
+**Wrong fixes tried:**
+- `DO $body$ BEGIN ... END $body$;` — same dollar-quoting issue
+- `CREATE TABLE IF NOT EXISTS` with inline `REFERENCES` — rejected by Drizzle/PgBouncer when table pre-exists
+**Correct fix:** For NEW tables (no existing production data):
 ```ts
-// CORRECT — FK inline, IF NOT EXISTS handles re-runs
-await db.execute(sql`
-  CREATE TABLE IF NOT EXISTS "tools" (
-    "id"      varchar PRIMARY KEY NOT NULL,
-    "logo_id" varchar REFERENCES "media"("id") ON DELETE SET NULL,
-    ...
-  );
-`)
+// CORRECT — drop first, then plain CREATE (no FK constraints, no IF NOT EXISTS)
+await db.execute(sql`DROP TABLE IF EXISTS "portfolio_tools_used";`) // children first
+await db.execute(sql`DROP TABLE IF EXISTS "tools";`)
+await db.execute(sql`CREATE TABLE "tools" ("id" varchar PRIMARY KEY NOT NULL, "name" varchar NOT NULL, "logo_id" varchar, "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL, "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL);`)
+// No REFERENCES/FK constraints — Payload works without DB-level FKs
 
-// WRONG — DO block crashes Drizzle's sql tag
-await db.execute(sql`
-  DO $$ BEGIN
-    ALTER TABLE "tools" ADD CONSTRAINT "fk" FOREIGN KEY ...;
-  EXCEPTION WHEN duplicate_object THEN NULL;
-  END $$;
-`)
+// WRONG
+await db.execute(sql`CREATE TABLE IF NOT EXISTS "tools" ("logo_id" varchar REFERENCES "media"("id") ON DELETE SET NULL, ...);`)
+
+// WRONG
+await db.execute(sql`DO $$ BEGIN ALTER TABLE "tools" ADD CONSTRAINT ... END $$;`)
 ```
-**Why inline FK works for idempotency:** When `IF NOT EXISTS` finds the table already exists, the entire `CREATE TABLE` statement is a no-op — the FK declaration inside is also skipped. No duplicate constraint error on re-runs.
-**Rule:** ALL FK constraints in migrations must be declared inline in `CREATE TABLE IF NOT EXISTS`. Never use `DO $$ ... $$` PL/pgSQL blocks in Drizzle migrations. `ALTER TABLE ... ADD CONSTRAINT` is only safe for non-production one-off scripts, not Payload prodMigrations.
+**Rule:** Never use `DO $$ ... $$` blocks. Never use inline `REFERENCES` in `CREATE TABLE`. For new empty tables: `DROP IF EXISTS` then plain `CREATE TABLE`. For new columns on existing tables: `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` (safe and works). FK constraints are never needed — Payload manages relationships in its own query layer.
 
 ---
 
