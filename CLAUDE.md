@@ -349,7 +349,9 @@ This is the only place for:
 ### Migrations
 - `push: true` is ignored in production — use `prodMigrations` array
 - Each DDL statement = its own `await db.execute(sql\`...\`)` — no multi-statement blocks
-- Always `IF NOT EXISTS` / `DO $$ BEGIN ... EXCEPTION WHEN duplicate_object` for idempotency
+- Always `IF NOT EXISTS` for idempotency on tables, columns, and indexes
+- **NEVER use `DO $$ BEGIN ... END $$;`** — Drizzle's `sql` tag mishandles PostgreSQL dollar-quoting (`$$`); the block fails with a cryptic error (see ERROR 24)
+- **FK constraints: declare inline in `CREATE TABLE IF NOT EXISTS`** — this way the FK is created atomically with the table on first run, and the entire statement is a no-op (including the FK) on re-runs when the table already exists
 - DB reset (`DROP SCHEMA public CASCADE`) wipes `payload_migrations` — next cold start re-runs all migrations from scratch
 
 ### DB reset procedure (when needed)
@@ -566,6 +568,35 @@ serverURL: typeof window !== 'undefined'
 ```
 **Why `document.referrer`:** When the frontend page is loaded inside the admin's iframe, `document.referrer` is set to the parent admin page URL. Extracting `.origin` from it gives the exact admin origin at runtime — works regardless of whether admin is accessed via the Vercel URL or the custom domain.
 **Rule:** Never apply `X-Frame-Options: DENY` globally in `vercel.json` on a project that uses Payload live preview. Always scope it to `/admin(.*)` only, and control frontend framing policy via CSP `frame-ancestors` in `next.config.mjs`.
+
+---
+
+### ERROR 24 — `DO $$ BEGIN ... END $$;` migration block crashes with `"type": "f"` error
+**Error:** `Error running migration <name> Failed query: DO $$ BEGIN ALTER TABLE ... EXCEPTION WHEN duplicate_object THEN NULL; END $$; err: { "type": "f", "message": "Failed query: ..."}`
+**Where:** Runtime — Vercel logs on cold start when a migration contains a `DO $$ ... $$` block
+**Root cause:** Drizzle's `sql` tagged template literal mishandles PostgreSQL dollar-quoting (`$$`). The `$$` delimiters used in PL/pgSQL anonymous blocks are incorrectly parsed by the Drizzle query builder, causing the statement to fail before it even reaches PostgreSQL.
+**Wrong fix:** Using `DO $body$ BEGIN ... END $body$;` with different delimiters — same underlying issue.
+**Correct fix:** Never use `DO $$ ... $$` blocks. Instead, declare FK constraints **inline** in the `CREATE TABLE IF NOT EXISTS` statement:
+```ts
+// CORRECT — FK inline, IF NOT EXISTS handles re-runs
+await db.execute(sql`
+  CREATE TABLE IF NOT EXISTS "tools" (
+    "id"      varchar PRIMARY KEY NOT NULL,
+    "logo_id" varchar REFERENCES "media"("id") ON DELETE SET NULL,
+    ...
+  );
+`)
+
+// WRONG — DO block crashes Drizzle's sql tag
+await db.execute(sql`
+  DO $$ BEGIN
+    ALTER TABLE "tools" ADD CONSTRAINT "fk" FOREIGN KEY ...;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END $$;
+`)
+```
+**Why inline FK works for idempotency:** When `IF NOT EXISTS` finds the table already exists, the entire `CREATE TABLE` statement is a no-op — the FK declaration inside is also skipped. No duplicate constraint error on re-runs.
+**Rule:** ALL FK constraints in migrations must be declared inline in `CREATE TABLE IF NOT EXISTS`. Never use `DO $$ ... $$` PL/pgSQL blocks in Drizzle migrations. `ALTER TABLE ... ADD CONSTRAINT` is only safe for non-production one-off scripts, not Payload prodMigrations.
 
 ---
 
