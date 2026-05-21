@@ -114,6 +114,7 @@ export interface HomepageGlobal {
     linkLabel?: string
     linkUrl?:   string
   }
+  featuredClients?: { id?: string; client?: ClientItem | null }[]
   engineBadges?: EngineBadge[]
   process?: {
     label?:  string

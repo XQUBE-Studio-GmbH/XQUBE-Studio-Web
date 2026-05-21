@@ -52,10 +52,18 @@ async function getData() {
       featured = rawFeatured
     }
 
+    // Use homepage global's ordered client list if populated; fall back to collection query
+    const clients: ClientItem[] =
+      hp.featuredClients && hp.featuredClients.length > 0
+        ? hp.featuredClients
+            .filter((e) => e.client && typeof e.client === 'object')
+            .map((e) => e.client as ClientItem)
+        : (clientsRes.docs as unknown as ClientItem[])
+
     return {
       hp:        hp as HomepageGlobal,
       services:  servicesRes.docs  as unknown as ServiceItem[],
-      clients:   clientsRes.docs   as unknown as ClientItem[],
+      clients,
       featured,
       blogPosts: blogRes.docs      as unknown as BlogPost[],
     }

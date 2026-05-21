@@ -28,6 +28,7 @@ import * as toolsCollectionMigration          from './migrations/20260521_tools_
 import * as toolsRelsColumnsMigration         from './migrations/20260522_tools_rels_columns.ts'
 import * as homepageBadgesToToolsMigration    from './migrations/20260522_homepage_badges_to_tools.ts'
 import * as homepageVersionEngineBadgesMigration from './migrations/20260522_homepage_version_engine_badges.ts'
+import * as homepageFeaturedClientsMigration    from './migrations/20260522_homepage_featured_clients.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -783,6 +784,17 @@ export default buildConfig({
           ],
         },
 
+        // ── Client Logo Strip ─────────────────────────────────────────────────────
+        {
+          name: 'featuredClients',
+          label: 'Client Logo Strip',
+          type: 'array',
+          admin: { description: 'Logos shown in the "Trusted by studios worldwide" strip. Drag to reorder. New clients can be created inline via the picker.' },
+          fields: [
+            { name: 'client', label: 'Client', type: 'relationship', relationTo: 'clients', required: true },
+          ],
+        },
+
         // ── Engine / Tech Badges ──────────────────────────────────────────────────
         {
           name: 'engineBadges',
@@ -1356,6 +1368,11 @@ export default buildConfig({
         name: '20260522_homepage_version_engine_badges',
         up: homepageVersionEngineBadgesMigration.up,
         down: homepageVersionEngineBadgesMigration.down,
+      },
+      {
+        name: '20260522_homepage_featured_clients',
+        up: homepageFeaturedClientsMigration.up,
+        down: homepageFeaturedClientsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
