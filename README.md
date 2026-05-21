@@ -175,7 +175,7 @@ DNS switch from Wix to Vercel will happen after full local QA is complete. No pu
 
 1. **Game Art Production** — Characters, environments, weapons, vehicles, props, UI/UX. Platforms: UE5, Unity, UEFN, Roblox.
 2. **VR Game Assets** — Production-ready assets for Meta Quest, HTC Vive, PSVR2.
-3. **Interactive Development** — UEFN islands, Roblox experiences, VR games (Unity C# + Unreal Blueprint).
+3. **UEFN & Roblox Productiont** — UEFN islands, Roblox experiences, VR games (Unity C# + Unreal Blueprint).
 4. **Staff Augmentation** — Dedicated resources embedded in client pipelines.
 
 ---
