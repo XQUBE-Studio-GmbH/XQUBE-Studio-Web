@@ -2,6 +2,11 @@
 
 import { useAuth } from '@payloadcms/ui'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+
+interface AdminUser {
+  mustChangePassword?: boolean
+}
 
 // Full-screen overlay that blocks the admin until the user changes their
 // temporary password. Cleared automatically when they save a new password
@@ -10,7 +15,7 @@ export default function MustChangePasswordGuard({ children }: { children?: React
   const { user } = useAuth()
   const pathname = usePathname()
 
-  const mustChange = (user as any)?.mustChangePassword === true
+  const mustChange = (user as AdminUser)?.mustChangePassword === true
   // Allow the account page — that's where they change their password
   const isAccountPage = pathname?.includes('/account')
 
@@ -78,7 +83,7 @@ export default function MustChangePasswordGuard({ children }: { children?: React
           </p>
 
           {/* CTA */}
-          <a
+          <Link
             href="/admin/account"
             style={{
               display:        'inline-block',
@@ -93,7 +98,7 @@ export default function MustChangePasswordGuard({ children }: { children?: React
             }}
           >
             Set New Password →
-          </a>
+          </Link>
         </div>
       </div>
     </>
