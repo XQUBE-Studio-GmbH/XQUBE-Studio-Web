@@ -199,6 +199,11 @@ export default buildConfig({
         group: 'Access',
         description: 'People who can log into this admin panel.',
         hideAPIURL: true,
+        components: {
+          edit: {
+            SaveButton: '@/components/UsersSaveButton#default',
+          },
+        },
       },
       access: {
         read:   isAdminOrAbove,

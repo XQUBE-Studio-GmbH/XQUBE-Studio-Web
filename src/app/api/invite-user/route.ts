@@ -16,9 +16,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
     }
 
-    const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL || 'https://xqube-studio-web.vercel.app'
+    const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com'
     const adminUrl = `${siteUrl}/admin`
-    const logoUrl  = `${siteUrl}/logo.svg`
+    const logoUrl  = `${siteUrl}/xqube-logo-light.svg`
 
     const firstName = name?.split(' ')[0] || 'there'
     const roleLabels: Record<string, string> = {
@@ -30,18 +30,18 @@ export async function POST(req: NextRequest) {
     const roleLabel = role ? ` as <strong style="color:#fff;">${roleLabels[role] ?? role}</strong>` : ''
 
     await resend.emails.send({
-      from:    'XQube Studio <noreply@xqubestudio.com>',
+      from:    'XQUBE Studio <noreply@xqubestudio.com>',
       to:      [email],
-      subject: "You've been invited to XQube Studio Admin Panel",
+      subject: "You've been invited to XQUBE Studio Admin Panel",
       html: `
         <div style="font-family:sans-serif;max-width:600px;background:#0e0e0e;color:#c4cad8;padding:32px;border-radius:8px;">
-          <img src="${logoUrl}" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
+          <img src="${logoUrl}" alt="XQUBE Studio" width="180" style="display:block;margin-bottom:28px;" />
           <div style="border-left:3px solid #14CB72;padding-left:16px;margin-bottom:28px;">
-            <h2 style="color:#fff;margin:0;">You've been invited to XQube Studio Admin Panel</h2>
+            <h2 style="color:#fff;margin:0;">You've been invited to XQUBE Studio Admin Panel</h2>
           </div>
 
           <p style="color:#c4cad8;line-height:1.6;margin:0 0 20px;">
-            Hi ${firstName}, you've been added to the XQube Studio admin panel${roleLabel}. Use the credentials below to log in for the first time.
+            Hi ${firstName}, you've been added to the XQUBE Studio admin panel${roleLabel}. Use the credentials below to log in for the first time.
           </p>
 
           <div style="background:#111;border:1px solid #222;border-radius:6px;padding:20px;margin-bottom:24px;">
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
           </a>
 
           <p style="color:#555;font-size:12px;margin-top:32px;padding-top:24px;border-top:1px solid #1a1a1a;">
-            XQube Studio GmbH · Vienna, Austria · info@xqubestudio.com
+            XQUBE Studio GmbH · Vienna, Austria · info@xqubestudio.com
           </p>
         </div>
       `,
