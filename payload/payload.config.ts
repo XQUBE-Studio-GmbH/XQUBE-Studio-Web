@@ -247,9 +247,11 @@ export default buildConfig({
           name: 'mustChangePassword',
           type: 'checkbox',
           defaultValue: false,
+          saveToJWT: true,
           admin: { hidden: true },
           access: {
             read:   () => true,
+            create: isAdminOrAbove,
             update: isAdminOrAbove,
           },
         },

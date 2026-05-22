@@ -109,7 +109,7 @@ export default function GeneratePasswordButton() {
       const resetRes = await fetch(`/api/users/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password, confirmPassword: password }),
+        body: JSON.stringify({ password, confirmPassword: password, mustChangePassword: true }),
       })
       if (!resetRes.ok) throw new Error('Password reset failed.')
 
