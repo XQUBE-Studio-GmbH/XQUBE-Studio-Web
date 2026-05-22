@@ -3,6 +3,7 @@
 import { useAuth } from '@payloadcms/ui'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 interface AdminUser {
   mustChangePassword?: boolean
@@ -14,12 +15,16 @@ interface AdminUser {
 export default function MustChangePasswordGuard({ children }: { children?: React.ReactNode }) {
   const { user } = useAuth()
   const pathname = usePathname()
+  const [showOverlay, setShowOverlay] = useState(false)
 
-  const mustChange = (user as AdminUser)?.mustChangePassword === true
-  // Allow the account page — that's where they change their password
-  const isAccountPage = pathname?.includes('/account')
+  // Defer to client only — avoids SSR/hydration mismatch (React error #418)
+  useEffect(() => {
+    const mustChange = (user as AdminUser)?.mustChangePassword === true
+    const isAccountPage = pathname?.includes('/account')
+    setShowOverlay(mustChange && !isAccountPage)
+  }, [user, pathname])
 
-  if (!mustChange || isAccountPage) return <>{children}</>
+  if (!showOverlay) return <>{children}</>
 
   return (
     <>
