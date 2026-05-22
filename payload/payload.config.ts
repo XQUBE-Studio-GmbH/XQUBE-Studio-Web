@@ -197,6 +197,7 @@ export default buildConfig({
     {
       slug: 'users',
       auth: true,
+      lockDocuments: false,
       labels: { singular: 'Admin User', plural: 'Admin Users' },
       admin: {
         useAsTitle: 'email',
