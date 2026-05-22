@@ -27,8 +27,9 @@ interface SoftwareItem {
 }
 
 interface ToolItem {
-  id: string
-  tool?: { id: string; name: string; logo?: { url?: string; alt?: string } | null } | null
+  id: string | number
+  name: string
+  logo?: { url?: string; alt?: string } | null
 }
 
 interface PortfolioItem {
@@ -283,16 +284,14 @@ export default async function PortfolioItemPage({ params }: Props) {
                   <div className="border-t border-xq-border pt-5">
                     <div className="text-xq-muted text-xs uppercase tracking-widest mb-3">Software Used</div>
                     <div className="flex flex-wrap gap-2">
-                      {item.toolsUsed.map((t) =>
-                        t.tool ? (
-                          <span key={t.id} className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-xq-surface border border-xq-border text-white rounded-full">
-                            {t.tool.logo?.url && (
-                              <Image src={t.tool.logo.url} alt={t.tool.logo.alt || t.tool.name} width={14} height={14} className="object-contain shrink-0" />
-                            )}
-                            {t.tool.name}
-                          </span>
-                        ) : null
-                      )}
+                      {item.toolsUsed.map((t) => (
+                        <span key={t.id} className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-xq-surface border border-xq-border text-white rounded-full">
+                          {t.logo?.url && (
+                            <Image src={t.logo.url} alt={t.logo.alt || t.name} width={14} height={14} className="object-contain shrink-0" />
+                          )}
+                          {t.name}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 )}

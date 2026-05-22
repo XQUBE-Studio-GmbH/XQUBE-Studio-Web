@@ -34,6 +34,7 @@ import * as siteSettingsLegalNoteMigration      from './migrations/20260522_site
 import * as siteSettingsSocialLinksMigration    from './migrations/20260522_site_settings_social_links.ts'
 import * as mediaFoldersMigration               from './migrations/20260522_media_folders.ts'
 import * as seoFieldsMigration                   from './migrations/20260522_seo_fields.ts'
+import * as portfolioToolsHasManyMigration        from './migrations/20260522_portfolio_tools_hasMany.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -423,11 +424,10 @@ export default buildConfig({
         {
           name: 'toolsUsed',
           label: 'Tools Used',
-          type: 'array',
-          admin: { description: 'Tag tools used on this project. Add new tools in the Tools collection first.' },
-          fields: [
-            { name: 'tool', type: 'relationship', relationTo: 'tools', required: true },
-          ],
+          type: 'relationship',
+          relationTo: 'tools',
+          hasMany: true,
+          admin: { description: 'Tag the tools used on this project. Select multiple — tools are managed in the Tools collection.' },
         },
         {
           name: 'software',
@@ -1492,6 +1492,11 @@ export default buildConfig({
         name: '20260522_seo_fields',
         up: seoFieldsMigration.up,
         down: seoFieldsMigration.down,
+      },
+      {
+        name: '20260522_portfolio_tools_hasMany',
+        up: portfolioToolsHasManyMigration.up,
+        down: portfolioToolsHasManyMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
