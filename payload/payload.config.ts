@@ -35,6 +35,7 @@ import * as siteSettingsSocialLinksMigration    from './migrations/20260522_site
 import * as mediaFoldersMigration               from './migrations/20260522_media_folders.ts'
 import * as seoFieldsMigration                   from './migrations/20260522_seo_fields.ts'
 import * as portfolioToolsHasManyMigration        from './migrations/20260522_portfolio_tools_hasMany.ts'
+import * as usersMustChangePasswordMigration      from './migrations/20260523_users_must_change_password.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -141,6 +142,9 @@ export default buildConfig({
         Logo: '@/components/admin/AdminLogo#default',
         Icon: '@/components/admin/AdminIcon#default',
       },
+      providers: [
+        '@/components/admin/MustChangePasswordGuard#default',
+      ],
     },
     livePreview: {
       // Opens an iframe inside the admin showing the live site.
@@ -236,7 +240,31 @@ export default buildConfig({
             { label: 'Viewer',         value: 'viewer' },
           ],
         },
+        {
+          // Set to true when user is created via invite flow.
+          // Triggers the MustChangePasswordGuard overlay in the admin.
+          // Cleared automatically by the beforeChange hook when a new password is saved.
+          name: 'mustChangePassword',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: { hidden: true },
+          access: {
+            read:   () => true,
+            update: isAdminOrAbove,
+          },
+        },
       ],
+      hooks: {
+        beforeChange: [
+          ({ data, operation }: { data: any; operation: string }) => {
+            // When a user saves a new password, clear the mustChangePassword flag.
+            if (operation === 'update' && data.password) {
+              data.mustChangePassword = false
+            }
+            return data
+          },
+        ],
+      },
     },
 
     // ─── Media Library ───────────────────────────────────────
@@ -1502,6 +1530,11 @@ export default buildConfig({
         name: '20260522_portfolio_tools_hasMany',
         up: portfolioToolsHasManyMigration.up,
         down: portfolioToolsHasManyMigration.down,
+      },
+      {
+        name: '20260523_users_must_change_password',
+        up: usersMustChangePasswordMigration.up,
+        down: usersMustChangePasswordMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

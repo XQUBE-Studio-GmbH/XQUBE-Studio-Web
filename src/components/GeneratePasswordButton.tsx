@@ -72,7 +72,7 @@ export default function GeneratePasswordButton() {
       const createRes = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, confirmPassword: password, role }),
+        body: JSON.stringify({ name, email, password, confirmPassword: password, role, mustChangePassword: true }),
       })
       if (!createRes.ok) {
         const data = await createRes.json().catch(() => ({}))
