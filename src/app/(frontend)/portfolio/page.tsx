@@ -3,24 +3,25 @@ import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import PortfolioPageClient from '@/components/live-preview/PortfolioPageClient'
 import type { PortfolioPageGlobal, PortfolioItem, PortfolioOrderRow } from '@/types/cms'
-
-export const metadata: Metadata = {
-  title: 'Portfolio',
-  description: "Browse XQube Studio's portfolio of AAA game art — characters, weapons, vehicles, environments, props, and VR assets.",
-  openGraph: {
-    title: 'Portfolio | XQube Studio',
-    description: 'AAA game art for studios worldwide — characters, weapons, environments, VR assets.',
-    url: 'https://www.xqubestudio.com/portfolio',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Portfolio | XQube Studio',
-    description: 'AAA game art — characters, weapons, environments, VR assets.',
-  },
-}
+import { buildPageMetadata } from '@/lib/buildPageMetadata'
 
 // force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const payload = await getPayload({ config })
+    const page = await payload.findGlobal({ slug: 'portfolio-page', depth: 1 }) as any
+    return buildPageMetadata({
+      seo: page?.seo,
+      defaultTitle: 'Portfolio',
+      defaultDescription: "Browse XQube Studio's portfolio of AAA game art — characters, weapons, vehicles, environments, props, and VR assets.",
+      url: 'https://www.xqubestudio.com/portfolio',
+    })
+  } catch {
+    return { title: 'Portfolio', description: "Browse XQube Studio's portfolio of AAA game art." }
+  }
+}
 
 // Sorts portfolio items by the explicit order array set in the admin.
 // Items not listed in the order array are appended at the end (newest first).

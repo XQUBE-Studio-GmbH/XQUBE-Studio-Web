@@ -3,22 +3,26 @@ import { getPayload } from 'payload'
 import config from '../../../payload/payload.config'
 import HomePageClient from '@/components/live-preview/HomePageClient'
 import type { HomepageGlobal, ServiceItem, ClientItem, PortfolioItem, BlogPost, PortfolioPageGlobal, PortfolioOrderRow } from '@/types/cms'
+import { buildPageMetadata } from '@/lib/buildPageMetadata'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'XQube Studio | AAA Game Art & XR Production',
-  description: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
-  openGraph: {
-    title: 'XQube Studio | AAA Game Art & XR Production',
-    description: 'AAA-quality game art and XR production. Vienna · Dubai · Dhaka.',
-    url: 'https://www.xqubestudio.com',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'XQube Studio | AAA Game Art & XR Production',
-    description: 'AAA-quality game art and XR production. Vienna · Dubai · Dhaka.',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const payload = await getPayload({ config })
+    const page = await payload.findGlobal({ slug: 'home-page', depth: 1 }) as any
+    return buildPageMetadata({
+      seo: page?.seo,
+      defaultTitle: 'XQube Studio | AAA Game Art & XR Production',
+      defaultDescription: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
+      url: 'https://www.xqubestudio.com',
+    })
+  } catch {
+    return {
+      title: 'XQube Studio | AAA Game Art & XR Production',
+      description: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide.',
+    }
+  }
 }
 
 // ─── Data fetchers ────────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import { getPayload } from 'payload'
 import config from '../../../../../payload/payload.config'
 import { serializeLexical } from '@/lib/serializeLexical'
 import PortfolioGallery from '@/components/PortfolioGallery'
+import { buildPageMetadata } from '@/lib/buildPageMetadata'
 
 // force-dynamic: prevents build-time DB calls; rendered at request time instead.
 export const dynamic = 'force-dynamic'
@@ -48,6 +49,12 @@ interface PortfolioItem {
   textureRes?: string
   deliveryTime?: string
   status?: string
+  seo?: {
+    title?: string | null
+    description?: string | null
+    image?: { url?: string } | null
+    noIndex?: boolean | null
+  } | null
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -105,21 +112,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const item = await getItem(slug)
   if (!item) return { title: 'Not Found' }
-  return {
-    title: `${item.title} | XQube Studio Portfolio`,
-    description: item.shortDescription || `${item.title} — AAA game art by XQube Studio.`,
-    openGraph: {
-      title: `${item.title} | XQube Studio Portfolio`,
-      description: item.shortDescription || `${item.title} — AAA game art by XQube Studio.`,
-      images: item.heroImage?.url ? [{ url: item.heroImage.url }] : [],
-      url: `https://www.xqubestudio.com/portfolio/${slug}`,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${item.title} | XQube Studio`,
-      description: item.shortDescription || `${item.title} — AAA game art by XQube Studio.`,
-    },
-  }
+  return buildPageMetadata({
+    seo: item.seo,
+    defaultTitle: `${item.title} | XQube Studio Portfolio`,
+    defaultDescription: item.shortDescription || `${item.title} — AAA game art by XQube Studio.`,
+    url: `https://www.xqubestudio.com/portfolio/${slug}`,
+    ogImage: item.heroImage?.url,
+  })
 }
 
 export default async function PortfolioItemPage({ params }: Props) {

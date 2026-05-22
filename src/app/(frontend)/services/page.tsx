@@ -3,22 +3,24 @@ import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import ServicesPageClient from '@/components/live-preview/ServicesPageClient'
 import type { ServicesPageGlobal, ServiceItem } from '@/types/cms'
+import { buildPageMetadata } from '@/lib/buildPageMetadata'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'Services',
-  description: 'Game art production, VR game assets, interactive development for UEFN and Roblox, and staff augmentation for game studios worldwide.',
-  openGraph: {
-    title: 'Services | XQube Studio',
-    description: 'Game Art · VR Assets · Interactive Dev · Staff Augmentation. Delivered to your pipeline.',
-    url: 'https://www.xqubestudio.com/services',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Services | XQube Studio',
-    description: 'Game Art · VR Assets · Interactive Dev · Staff Augmentation.',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const payload = await getPayload({ config })
+    const page = await payload.findGlobal({ slug: 'services-page', depth: 1 }) as any
+    return buildPageMetadata({
+      seo: page?.seo,
+      defaultTitle: 'Services',
+      defaultDescription: 'Game art production, VR game assets, interactive development for UEFN and Roblox, and staff augmentation for game studios worldwide.',
+      url: 'https://www.xqubestudio.com/services',
+      ogTitle: 'Services | XQube Studio',
+    })
+  } catch {
+    return { title: 'Services', description: 'Game art production, VR game assets, interactive development for UEFN and Roblox, and staff augmentation for game studios worldwide.' }
+  }
 }
 
 // ─── Services fallback ───────────────────────────────────────────────────────

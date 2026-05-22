@@ -33,6 +33,7 @@ import * as navLinkVisibilityMigration          from './migrations/20260522_nav_
 import * as siteSettingsLegalNoteMigration      from './migrations/20260522_site_settings_legal_note.ts'
 import * as siteSettingsSocialLinksMigration    from './migrations/20260522_site_settings_social_links.ts'
 import * as mediaFoldersMigration               from './migrations/20260522_media_folders.ts'
+import * as seoFieldsMigration                   from './migrations/20260522_seo_fields.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -57,6 +58,52 @@ const contentAccess = {
   create: isEditorOrAbove,
   update: isEditorOrAbove,
   delete: isAdminOrAbove,
+}
+
+// ─── Shared SEO group ─────────────────────────────────────────────────────────
+const seoGroup = {
+  name: 'seo',
+  label: 'SEO & Social',
+  type: 'group' as const,
+  admin: {
+    description: 'Controls how this page appears in Google search results and when shared on social media.',
+  },
+  fields: [
+    {
+      name: 'title',
+      label: 'Meta Title',
+      type: 'text' as const,
+      admin: {
+        description: 'Overrides the page title in Google search results. 50–60 characters recommended. Leave blank to use the default.',
+      },
+    },
+    {
+      name: 'description',
+      label: 'Meta Description',
+      type: 'textarea' as const,
+      admin: {
+        description: 'Summary shown below the title in search results. 140–160 characters ideal. Leave blank to use the default.',
+      },
+    },
+    {
+      name: 'image',
+      label: 'Social Share Image (OG Image)',
+      type: 'upload' as const,
+      relationTo: 'media' as const,
+      admin: {
+        description: 'Image shown when sharing on LinkedIn, Twitter/X, Facebook. 1200×630px recommended. Leave blank to use the default branded image.',
+      },
+    },
+    {
+      name: 'noIndex',
+      label: 'Hide from search engines',
+      type: 'checkbox' as const,
+      defaultValue: false,
+      admin: {
+        description: 'When checked, Google will not index this page. Use for drafts or private content.',
+      },
+    },
+  ],
 }
 
 export default buildConfig({
@@ -407,6 +454,7 @@ export default buildConfig({
             description: 'Published — visible on site. Draft — hidden. Archived — hidden, kept for reference. Only admins can permanently delete.',
           },
         },
+        seoGroup,
       ],
     },
 
@@ -627,6 +675,7 @@ export default buildConfig({
             { label: 'Draft',     value: 'draft' },
           ],
         },
+        seoGroup,
       ],
     },
   ],
@@ -955,6 +1004,7 @@ export default buildConfig({
             { name: 'buttonUrl',   label: 'Button URL',  type: 'text', defaultValue: '/contact' },
           ],
         },
+        seoGroup,
       ],
     },
 
@@ -1045,6 +1095,7 @@ export default buildConfig({
             { name: 'body',  type: 'textarea', required: true },
           ],
         },
+        seoGroup,
       ],
     },
 
@@ -1078,6 +1129,7 @@ export default buildConfig({
             },
           ],
         },
+        seoGroup,
       ],
     },
 
@@ -1162,6 +1214,7 @@ export default buildConfig({
             },
           ],
         },
+        seoGroup,
       ],
     },
 
@@ -1214,6 +1267,7 @@ export default buildConfig({
             },
           ],
         },
+        seoGroup,
       ],
     },
 
@@ -1246,6 +1300,7 @@ export default buildConfig({
             },
           ],
         },
+        seoGroup,
       ],
     },
 
@@ -1433,6 +1488,11 @@ export default buildConfig({
         name: '20260522_media_folders',
         up: mediaFoldersMigration.up,
         down: mediaFoldersMigration.down,
+      },
+      {
+        name: '20260522_seo_fields',
+        up: seoFieldsMigration.up,
+        down: seoFieldsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

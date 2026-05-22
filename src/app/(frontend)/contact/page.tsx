@@ -3,22 +3,23 @@ import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import ContactPageClient from '@/components/live-preview/ContactPageClient'
 import type { ContactPageGlobal } from '@/types/cms'
+import { buildPageMetadata } from '@/lib/buildPageMetadata'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'Contact',
-  description: "Get in touch with XQube Studio. Book a discovery call or send us a message — we respond within 24–48 hours.",
-  openGraph: {
-    title: 'Contact XQube Studio',
-    description: "Let's talk about your project. Book a call or send a message.",
-    url: 'https://www.xqubestudio.com/contact',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Contact XQube Studio',
-    description: "Let's talk about your project. Book a call or send a message.",
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const payload = await getPayload({ config })
+    const page = await payload.findGlobal({ slug: 'contact-page', depth: 1 }) as any
+    return buildPageMetadata({
+      seo: page?.seo,
+      defaultTitle: 'Contact',
+      defaultDescription: "Get in touch with XQube Studio. Book a discovery call or send us a message — we respond within 24–48 hours.",
+      url: 'https://www.xqubestudio.com/contact',
+    })
+  } catch {
+    return { title: 'Contact', description: "Get in touch with XQube Studio. Book a discovery call or send us a message — we respond within 24–48 hours." }
+  }
 }
 
 interface SiteSettings {

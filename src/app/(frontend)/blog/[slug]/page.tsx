@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '../../../../../payload/payload.config'
+import { buildPageMetadata } from '@/lib/buildPageMetadata'
 
 // force-dynamic: prevents build-time DB calls; rendered at request time instead.
 export const dynamic = 'force-dynamic'
@@ -22,6 +23,12 @@ interface BlogPost {
   updatedAt?: string
   status?: string
   coverImage?: { url?: string; alt?: string } | null
+  seo?: {
+    title?: string | null
+    description?: string | null
+    image?: { url?: string } | null
+    noIndex?: boolean | null
+  } | null
 }
 
 async function getPost(slug: string): Promise<BlogPost | null> {
@@ -48,22 +55,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const post = await getPost(slug)
   if (!post) return { title: 'Not Found' }
-
-  return {
-    title: post.title,
-    description: post.excerpt || `${post.title} — insights from XQube Studio.`,
-    openGraph: {
-      title: `${post.title} | XQube Studio Blog`,
-      description: post.excerpt || `${post.title} — insights from XQube Studio.`,
-      url: `https://www.xqubestudio.com/blog/${slug}`,
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${post.title} | XQube Studio`,
-      description: post.excerpt || `${post.title} — insights from XQube Studio.`,
-    },
-  }
+  return buildPageMetadata({
+    seo: post.seo,
+    defaultTitle: `${post.title} | XQube Studio Blog`,
+    defaultDescription: post.excerpt || `${post.title} — insights from XQube Studio.`,
+    url: `https://www.xqubestudio.com/blog/${slug}`,
+    ogTitle: `${post.title} | XQube Studio Blog`,
+    ogImage: post.coverImage?.url || undefined,
+    ogType: 'article',
+  })
 }
 
 // generateStaticParams removed: force-dynamic renders all slugs on-demand at

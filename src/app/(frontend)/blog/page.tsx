@@ -3,24 +3,25 @@ import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import BlogPageClient from '@/components/live-preview/BlogPageClient'
 import type { BlogPageGlobal, BlogPost } from '@/types/cms'
-
-export const metadata: Metadata = {
-  title: 'Blog & Insights',
-  description: 'Insights on game art production, XR development, and studio operations from XQube Studio.',
-  openGraph: {
-    title: 'Blog & Insights | XQube Studio',
-    description: 'Insights on game art production, XR development, and studio operations.',
-    url: 'https://www.xqubestudio.com/blog',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Blog | XQube Studio',
-    description: 'Insights on game art production, XR development, and studio operations.',
-  },
-}
+import { buildPageMetadata } from '@/lib/buildPageMetadata'
 
 // force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const payload = await getPayload({ config })
+    const page = await payload.findGlobal({ slug: 'blog-page', depth: 1 }) as any
+    return buildPageMetadata({
+      seo: page?.seo,
+      defaultTitle: 'Blog & Insights',
+      defaultDescription: 'Insights on game art production, XR development, and studio operations from XQube Studio.',
+      url: 'https://www.xqubestudio.com/blog',
+    })
+  } catch {
+    return { title: 'Blog & Insights', description: 'Insights on game art production, XR development, and studio operations from XQube Studio.' }
+  }
+}
 
 async function getData() {
   try {
