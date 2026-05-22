@@ -290,8 +290,7 @@ export default buildConfig({
       labels: { singular: 'Tool', plural: 'Tools' },
       admin: {
         useAsTitle: 'name',
-        hidden: true,
-        description: 'Software and tools used in production. Managed via Homepage → Engine Badges and Portfolio items.',
+        description: 'Software and tools used in production. Add tools here first, then assign them to portfolio items.',
         hideAPIURL: true,
         defaultColumns: ['name', 'category', 'logo'],
       },
