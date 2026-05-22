@@ -258,10 +258,18 @@ export default buildConfig({
       ],
       hooks: {
         beforeChange: [
-          ({ data, operation }: { data: any; operation: string }) => {
-            // When a user saves a new password, clear the mustChangePassword flag.
+          ({ data, operation, req, originalDoc }: { data: any; operation: string; req: any; originalDoc?: any }) => {
+            // Clear mustChangePassword ONLY when a user changes their OWN password.
+            // When an admin resets another user's password (via resetAndSendInvite), we
+            // preserve the mustChangePassword: true flag that was explicitly sent in the request.
             if (operation === 'update' && data.password) {
-              data.mustChangePassword = false
+              const isOwnUpdate =
+                req?.user?.id &&
+                originalDoc?.id &&
+                String(req.user.id) === String(originalDoc.id)
+              if (isOwnUpdate) {
+                data.mustChangePassword = false
+              }
             }
             return data
           },
