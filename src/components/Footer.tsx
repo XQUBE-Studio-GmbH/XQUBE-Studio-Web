@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import type { NavLink } from '@/components/Navbar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface SiteSettingsGlobal {
+  tagline?: string
   contact?: {
     email?:      string
     phone?:      string
@@ -13,16 +15,39 @@ export interface SiteSettingsGlobal {
     artstation?: string
   }
   footerCopy?: string
+  legalNote?:  string
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function Footer({ settings }: { settings?: SiteSettingsGlobal }) {
-  const email      = settings?.contact?.email      ?? 'info@xqubestudio.com'
-  const calendly   = settings?.contact?.calendly   ?? 'https://calendly.com/tanvirkhandlxqsmgs'
-  const linkedin   = settings?.contact?.linkedin   ?? 'https://www.linkedin.com/company/xqubestudio'
-  const artstation = settings?.contact?.artstation ?? 'https://www.artstation.com/xqubestudio'
-  const footerCopy = settings?.footerCopy          ?? `© ${new Date().getFullYear()} XQube Studio GmbH. All rights reserved.`
+interface Props {
+  settings?: SiteSettingsGlobal
+  navLinks?: NavLink[]
+}
+
+const DEFAULT_NAV_LINKS: NavLink[] = [
+  { label: 'Home',      url: '/' },
+  { label: 'About',     url: '/about' },
+  { label: 'Services',  url: '/services' },
+  { label: 'Portfolio', url: '/portfolio' },
+  { label: 'Blog',      url: '/blog' },
+  { label: 'Contact',   url: '/contact' },
+]
+
+export default function Footer({ settings, navLinks: propNavLinks }: Props) {
+  const tagline    = settings?.tagline               ?? 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.'
+  const email      = settings?.contact?.email        ?? 'info@xqubestudio.com'
+  const phone      = settings?.contact?.phone
+  const address    = settings?.contact?.address
+  const calendly   = settings?.contact?.calendly     ?? 'https://calendly.com/tanvirkhandlxqsmgs'
+  const linkedin   = settings?.contact?.linkedin     ?? 'https://www.linkedin.com/company/xqubestudio'
+  const artstation = settings?.contact?.artstation   ?? 'https://www.artstation.com/xqubestudio'
+  const footerCopy = settings?.footerCopy            ?? `© ${new Date().getFullYear()} XQube Studio GmbH. All rights reserved.`
+  const legalNote  = settings?.legalNote             ?? 'GmbH registered in Vienna, Austria. GDPR compliant.'
+
+  // Use nav links from Navigation global, filtered by visible flag; fall back to defaults
+  const visibleNavLinks = (propNavLinks && propNavLinks.length > 0 ? propNavLinks : DEFAULT_NAV_LINKS)
+    .filter((link) => link.visible !== false)
 
   return (
     <footer className="border-t border-xq-border bg-xq-bg">
@@ -36,7 +61,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsGlobal }) 
               <Image src="/logo.svg" alt="XQube Studio" width={120} height={69} className="h-14 w-auto" />
             </Link>
             <p className="text-xq-muted text-sm leading-relaxed max-w-xs mt-4">
-              AAA game art and XR production studio. Vienna · Dubai · Dhaka.
+              {tagline}
             </p>
             <div className="flex gap-3 mt-6">
               <a href={linkedin} target="_blank" rel="noopener noreferrer"
@@ -54,16 +79,9 @@ export default function Footer({ settings }: { settings?: SiteSettingsGlobal }) 
           <div>
             <h4 className="text-white font-semibold text-sm mb-4">Navigation</h4>
             <ul className="space-y-3">
-              {[
-                { label: 'Home',      href: '/' },
-                { label: 'About',     href: '/about' },
-                { label: 'Services',  href: '/services' },
-                { label: 'Portfolio', href: '/portfolio' },
-                { label: 'Blog',      href: '/blog' },
-                { label: 'Contact',   href: '/contact' },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-xq-muted hover:text-white transition-colors">
+              {visibleNavLinks.map((link) => (
+                <li key={link.url}>
+                  <Link href={link.url} className="text-sm text-xq-muted hover:text-white transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -80,6 +98,18 @@ export default function Footer({ settings }: { settings?: SiteSettingsGlobal }) 
                   {email}
                 </a>
               </li>
+              {phone && (
+                <li>
+                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="text-sm text-xq-muted hover:text-xq-accent transition-colors">
+                    {phone}
+                  </a>
+                </li>
+              )}
+              {address && (
+                <li>
+                  <p className="text-sm text-xq-muted leading-relaxed">{address}</p>
+                </li>
+              )}
               <li>
                 <a href={calendly} target="_blank" rel="noopener noreferrer"
                   className="text-sm text-xq-accent hover:opacity-80 transition-opacity">
@@ -88,7 +118,7 @@ export default function Footer({ settings }: { settings?: SiteSettingsGlobal }) 
               </li>
             </ul>
             <div className="mt-6 pt-6 border-t border-xq-border">
-              <p className="text-xs text-xq-muted">GmbH registered in Vienna, Austria. GDPR compliant.</p>
+              <p className="text-xs text-xq-muted">{legalNote}</p>
             </div>
           </div>
         </div>

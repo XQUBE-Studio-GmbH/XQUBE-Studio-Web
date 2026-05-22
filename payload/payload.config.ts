@@ -30,6 +30,7 @@ import * as homepageBadgesToToolsMigration    from './migrations/20260522_homepa
 import * as homepageVersionEngineBadgesMigration from './migrations/20260522_homepage_version_engine_badges.ts'
 import * as homepageFeaturedClientsMigration    from './migrations/20260522_homepage_featured_clients.ts'
 import * as navLinkVisibilityMigration          from './migrations/20260522_nav_link_visibility.ts'
+import * as siteSettingsLegalNoteMigration      from './migrations/20260522_site_settings_legal_note.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -679,9 +680,16 @@ export default buildConfig({
         },
         {
           name: 'footerCopy',
-          label: 'Footer Text',
+          label: 'Footer Copyright Text',
           type: 'text',
           defaultValue: '© 2025 XQube Studio GmbH. All rights reserved.',
+        },
+        {
+          name: 'legalNote',
+          label: 'Footer Legal Note',
+          type: 'text',
+          defaultValue: 'GmbH registered in Vienna, Austria. GDPR compliant.',
+          admin: { description: 'Small legal line shown under the contact details in the footer.' },
         },
       ],
     },
@@ -1380,6 +1388,11 @@ export default buildConfig({
         name: '20260522_nav_link_visibility',
         up: navLinkVisibilityMigration.up,
         down: navLinkVisibilityMigration.down,
+      },
+      {
+        name: '20260522_site_settings_legal_note',
+        up: siteSettingsLegalNoteMigration.up,
+        down: siteSettingsLegalNoteMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

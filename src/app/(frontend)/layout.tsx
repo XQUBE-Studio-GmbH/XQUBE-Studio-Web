@@ -94,7 +94,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
 
       {/* FooterClient uses useLivePreview — updates in real-time when editing
           the site-settings global in the Payload admin Live Preview panel */}
-      <FooterClient initialData={settings} serverURL={serverURL} />
+      <FooterClient initialData={settings} navLinks={nav.mainNav} serverURL={serverURL} />
 
       <CookieBanner gaId={GA_ID} />
     </>
