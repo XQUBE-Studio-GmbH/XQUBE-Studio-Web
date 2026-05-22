@@ -32,6 +32,7 @@ import * as homepageFeaturedClientsMigration    from './migrations/20260522_home
 import * as navLinkVisibilityMigration          from './migrations/20260522_nav_link_visibility.ts'
 import * as siteSettingsLegalNoteMigration      from './migrations/20260522_site_settings_legal_note.ts'
 import * as siteSettingsSocialLinksMigration    from './migrations/20260522_site_settings_social_links.ts'
+import * as mediaFoldersMigration               from './migrations/20260522_media_folders.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -61,6 +62,24 @@ const contentAccess = {
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+
+  // ─── Visual folder browser for Media ─────────────────────────────────────────
+  // Enables Payload's built-in folder tree inside the Media list and upload pickers.
+  // collectionSpecific: false — folders are not scoped per-collection (simpler, one shared tree).
+  // collectionOverrides — restricts folder create/rename/delete to Super Admin and Admin only.
+  // Content Editors can browse and pick from folders but cannot reorganise the tree.
+  folders: {
+    collectionSpecific: false,
+    collectionOverrides: async ({ collection }) => ({
+      ...collection,
+      access: {
+        create: ({ req }: { req: any }) => isAdminOrAbove({ req }),
+        delete: ({ req }: { req: any }) => isAdminOrAbove({ req }),
+        read:   () => true,
+        update: ({ req }: { req: any }) => isAdminOrAbove({ req }),
+      },
+    }),
+  },
 
   admin: {
     meta: {
@@ -168,6 +187,7 @@ export default buildConfig({
     // ─── Media Library ───────────────────────────────────────
     {
       slug: 'media',
+      folders: true,
       upload: {
         // Accept images and common video formats. Videos are stored as-is (no transcoding).
         // Pre-optimise videos before uploading — max 100 MB after limit increase below.
@@ -211,12 +231,6 @@ export default buildConfig({
           type: 'text',
           required: true,
           admin: { description: 'Describe the image for accessibility and SEO.' },
-        },
-        {
-          name: 'folder',
-          label: 'Folder',
-          type: 'text',
-          admin: { description: 'Organise files by folder, e.g. "portfolio", "services", "team", "blog".' },
         },
       ],
     },
@@ -1412,6 +1426,11 @@ export default buildConfig({
         name: '20260522_site_settings_social_links',
         up: siteSettingsSocialLinksMigration.up,
         down: siteSettingsSocialLinksMigration.down,
+      },
+      {
+        name: '20260522_media_folders',
+        up: mediaFoldersMigration.up,
+        down: mediaFoldersMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
