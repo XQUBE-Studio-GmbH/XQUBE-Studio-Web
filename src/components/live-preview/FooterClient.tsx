@@ -23,7 +23,7 @@ export default function FooterClient({ initialData, navLinks, serverURL }: Props
         ? new URL(document.referrer).origin
         : window.location.origin)
       : serverURL,
-    depth: 0,
+    depth: 1,
   })
 
   return <Footer settings={settings} navLinks={navLinks} />

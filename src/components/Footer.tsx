@@ -4,26 +4,32 @@ import type { NavLink } from '@/components/Navbar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export interface SocialLink {
+  id?:    string
+  label:  string
+  url:    string
+  icon?:  { url?: string; alt?: string } | null
+}
+
 export interface SiteSettingsGlobal {
   tagline?: string
   contact?: {
-    email?:      string
-    phone?:      string
-    address?:    string
-    calendly?:   string
-    linkedin?:   string
-    artstation?: string
+    email?:       string
+    phone?:       string
+    address?:     string
+    calendly?:    string
+    socialLinks?: SocialLink[]
   }
   footerCopy?: string
   legalNote?:  string
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Defaults ─────────────────────────────────────────────────────────────────
 
-interface Props {
-  settings?: SiteSettingsGlobal
-  navLinks?: NavLink[]
-}
+const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
+  { label: 'LinkedIn',   url: 'https://www.linkedin.com/company/xqubestudio' },
+  { label: 'ArtStation', url: 'https://www.artstation.com/xqubestudio' },
+]
 
 const DEFAULT_NAV_LINKS: NavLink[] = [
   { label: 'Home',      url: '/' },
@@ -34,18 +40,25 @@ const DEFAULT_NAV_LINKS: NavLink[] = [
   { label: 'Contact',   url: '/contact' },
 ]
 
-export default function Footer({ settings, navLinks: propNavLinks }: Props) {
-  const tagline    = settings?.tagline               ?? 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.'
-  const email      = settings?.contact?.email        ?? 'info@xqubestudio.com'
-  const phone      = settings?.contact?.phone
-  const address    = settings?.contact?.address
-  const calendly   = settings?.contact?.calendly     ?? 'https://calendly.com/tanvirkhandlxqsmgs'
-  const linkedin   = settings?.contact?.linkedin     ?? 'https://www.linkedin.com/company/xqubestudio'
-  const artstation = settings?.contact?.artstation   ?? 'https://www.artstation.com/xqubestudio'
-  const footerCopy = settings?.footerCopy            ?? `© ${new Date().getFullYear()} XQube Studio GmbH. All rights reserved.`
-  const legalNote  = settings?.legalNote             ?? 'GmbH registered in Vienna, Austria. GDPR compliant.'
+// ─── Component ───────────────────────────────────────────────────────────────
 
-  // Use nav links from Navigation global, filtered by visible flag; fall back to defaults
+interface Props {
+  settings?: SiteSettingsGlobal
+  navLinks?: NavLink[]
+}
+
+export default function Footer({ settings, navLinks: propNavLinks }: Props) {
+  const tagline     = settings?.tagline             ?? 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.'
+  const email       = settings?.contact?.email      ?? 'info@xqubestudio.com'
+  const phone       = settings?.contact?.phone
+  const address     = settings?.contact?.address
+  const calendly    = settings?.contact?.calendly   ?? 'https://calendly.com/tanvirkhandlxqsmgs'
+  const socialLinks = settings?.contact?.socialLinks?.length
+    ? settings.contact.socialLinks
+    : DEFAULT_SOCIAL_LINKS
+  const footerCopy  = settings?.footerCopy          ?? `© ${new Date().getFullYear()} XQube Studio GmbH. All rights reserved.`
+  const legalNote   = settings?.legalNote           ?? 'GmbH registered in Vienna, Austria. GDPR compliant.'
+
   const visibleNavLinks = (propNavLinks && propNavLinks.length > 0 ? propNavLinks : DEFAULT_NAV_LINKS)
     .filter((link) => link.visible !== false)
 
@@ -63,15 +76,32 @@ export default function Footer({ settings, navLinks: propNavLinks }: Props) {
             <p className="text-xq-muted text-sm leading-relaxed max-w-xs mt-4">
               {tagline}
             </p>
-            <div className="flex gap-3 mt-6">
-              <a href={linkedin} target="_blank" rel="noopener noreferrer"
-                className="w-9 h-9 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors text-xs font-bold">
-                in
-              </a>
-              <a href={artstation} target="_blank" rel="noopener noreferrer"
-                className="w-9 h-9 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors text-xs font-bold">
-                AS
-              </a>
+            {/* Dynamic social links */}
+            <div className="flex flex-wrap gap-3 mt-6">
+              {socialLinks.map((social, i) => (
+                <a
+                  key={social.id ?? i}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="w-9 h-9 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors overflow-hidden"
+                >
+                  {social.icon?.url ? (
+                    <Image
+                      src={social.icon.url}
+                      alt={social.icon.alt || social.label}
+                      width={18}
+                      height={18}
+                      className="object-contain opacity-60 group-hover:opacity-100"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold">
+                      {social.label.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </a>
+              ))}
             </div>
           </div>
 

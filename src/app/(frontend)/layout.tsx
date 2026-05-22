@@ -27,8 +27,8 @@ async function getLayoutData(): Promise<{
   try {
     const payload = await getPayload({ config })
     const [nav, settings] = await Promise.all([
-      payload.findGlobal({ slug: 'navigation' })    as Promise<NavigationGlobal>,
-      payload.findGlobal({ slug: 'site-settings' }) as Promise<SiteSettingsGlobal>,
+      payload.findGlobal({ slug: 'navigation' })                    as Promise<NavigationGlobal>,
+      payload.findGlobal({ slug: 'site-settings', depth: 1 })      as Promise<SiteSettingsGlobal>,
     ])
     return { nav, settings }
   } catch {
@@ -88,7 +88,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
 
       {/* NavbarClient uses useLivePreview — updates in real-time when editing
           the navigation global in the Payload admin Live Preview panel */}
-      <NavbarClient initialData={nav} serverURL={serverURL} />
+      <NavbarClient initialData={nav} serverURL={serverURL} socialLinks={settings.contact?.socialLinks} />
 
       <main className="pt-[72px] relative z-0">{children}</main>
 

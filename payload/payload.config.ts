@@ -31,6 +31,7 @@ import * as homepageVersionEngineBadgesMigration from './migrations/20260522_hom
 import * as homepageFeaturedClientsMigration    from './migrations/20260522_homepage_featured_clients.ts'
 import * as navLinkVisibilityMigration          from './migrations/20260522_nav_link_visibility.ts'
 import * as siteSettingsLegalNoteMigration      from './migrations/20260522_site_settings_legal_note.ts'
+import * as siteSettingsSocialLinksMigration    from './migrations/20260522_site_settings_social_links.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -641,12 +642,25 @@ export default buildConfig({
           name: 'contact',
           type: 'group',
           fields: [
-            { name: 'email',      type: 'email', defaultValue: 'info@xqubestudio.com' },
-            { name: 'phone',      type: 'text',  defaultValue: '+43 650 5207329' },
-            { name: 'address',    type: 'text',  defaultValue: 'Rathausstrasse 21/12, 1010 Vienna, Austria' },
-            { name: 'calendly',   type: 'text',  defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
-            { name: 'linkedin',   type: 'text',  defaultValue: 'https://www.linkedin.com/company/xqubestudio' },
-            { name: 'artstation', type: 'text',  defaultValue: 'https://www.artstation.com/xqubestudio' },
+            { name: 'email',    type: 'email', defaultValue: 'info@xqubestudio.com' },
+            { name: 'phone',    type: 'text',  defaultValue: '+43 650 5207329' },
+            { name: 'address',  type: 'text',  defaultValue: 'Rathausstrasse 21/12, 1010 Vienna, Austria' },
+            { name: 'calendly', type: 'text',  defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
+            {
+              name: 'socialLinks',
+              label: 'Social Links',
+              type: 'array',
+              admin: { description: 'Add, remove or reorder social handles. Each entry needs a label, URL and optionally an icon image.' },
+              fields: [
+                { name: 'label', label: 'Platform Name', type: 'text', required: true, admin: { description: 'e.g. LinkedIn, Facebook, ArtStation — used as icon alt text.' } },
+                { name: 'url',   label: 'URL',            type: 'text', required: true },
+                { name: 'icon',  label: 'Icon',           type: 'upload', relationTo: 'media', admin: { description: 'Square SVG or PNG logo. If omitted, first two letters of the platform name are shown.' } },
+              ],
+              defaultValue: [
+                { label: 'LinkedIn',   url: 'https://www.linkedin.com/company/xqubestudio' },
+                { label: 'ArtStation', url: 'https://www.artstation.com/xqubestudio' },
+              ],
+            },
           ],
         },
         {
@@ -1393,6 +1407,11 @@ export default buildConfig({
         name: '20260522_site_settings_legal_note',
         up: siteSettingsLegalNoteMigration.up,
         down: siteSettingsLegalNoteMigration.down,
+      },
+      {
+        name: '20260522_site_settings_social_links',
+        up: siteSettingsSocialLinksMigration.up,
+        down: siteSettingsSocialLinksMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

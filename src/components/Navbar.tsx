@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import type { SocialLink } from '@/components/Footer'
 
 // ─── Types & defaults ─────────────────────────────────────────────────────────
 
@@ -24,11 +25,12 @@ const DEFAULT_CTA: CtaButton = {
 }
 
 interface Props {
-  navLinks?:  NavLink[]
-  ctaButton?: CtaButton
+  navLinks?:    NavLink[]
+  ctaButton?:   CtaButton
+  socialLinks?: SocialLink[]
 }
 
-export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Props) {
+export default function Navbar({ navLinks: propLinks, ctaButton: propCta, socialLinks: propSocial }: Props) {
   const navLinks = ((propLinks && propLinks.length > 0) ? propLinks : DEFAULT_NAV_LINKS)
     .filter((link) => link.visible !== false)
   const ctaLabel = propCta?.label ?? DEFAULT_CTA.label!
@@ -197,24 +199,34 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta }: Prop
           </div>
 
           {/* Social links */}
-          <div className="mt-auto pt-8 pb-6 flex gap-4">
-            <a
-              href="https://www.linkedin.com/company/xqubestudio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors text-xs font-bold"
-            >
-              in
-            </a>
-            <a
-              href="https://www.artstation.com/xqubestudio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors text-xs font-bold"
-            >
-              AS
-            </a>
-          </div>
+          {propSocial && propSocial.length > 0 && (
+            <div className="mt-auto pt-8 pb-6 flex flex-wrap gap-3">
+              {propSocial.map((social, i) => (
+                <a
+                  key={social.id ?? i}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="w-10 h-10 border border-xq-border rounded flex items-center justify-center text-xq-muted hover:text-xq-accent hover:border-xq-accent transition-colors overflow-hidden"
+                >
+                  {social.icon?.url ? (
+                    <Image
+                      src={social.icon.url}
+                      alt={social.icon.alt || social.label}
+                      width={18}
+                      height={18}
+                      className="object-contain opacity-60"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold">
+                      {social.label.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>
