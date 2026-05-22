@@ -70,15 +70,17 @@ export default buildConfig({
   // Content Editors can browse and pick from folders but cannot reorganise the tree.
   folders: {
     collectionSpecific: false,
-    collectionOverrides: async ({ collection }) => ({
-      ...collection,
-      access: {
-        create: ({ req }: { req: any }) => isAdminOrAbove({ req }),
-        delete: ({ req }: { req: any }) => isAdminOrAbove({ req }),
-        read:   () => true,
-        update: ({ req }: { req: any }) => isAdminOrAbove({ req }),
-      },
-    }),
+    collectionOverrides: [
+      async ({ collection }) => ({
+        ...collection,
+        access: {
+          create: ({ req }: { req: any }) => isAdminOrAbove({ req }),
+          delete: ({ req }: { req: any }) => isAdminOrAbove({ req }),
+          read:   () => true,
+          update: ({ req }: { req: any }) => isAdminOrAbove({ req }),
+        },
+      }),
+    ],
   },
 
   admin: {
