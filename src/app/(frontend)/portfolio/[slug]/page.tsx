@@ -118,7 +118,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     defaultTitle: `${item.title} | XQube Studio Portfolio`,
     defaultDescription: item.shortDescription || `${item.title} — AAA game art by XQube Studio.`,
     url: `https://www.xqubestudio.com/portfolio/${slug}`,
-    ogImage: item.heroImage?.url,
+    ogImage: item.heroImage?.url || item.gallery?.[0]?.image?.url,
   })
 }
 
