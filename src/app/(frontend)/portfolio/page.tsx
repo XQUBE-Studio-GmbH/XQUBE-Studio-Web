@@ -59,8 +59,7 @@ async function getData() {
     const items     = applyPortfolioOrder(rawItems, orderRows)
 
     return { items, pp }
-  } catch (err) {
-    console.error('[portfolio/getData] DB error:', err)
+  } catch {
     return { items: [] as PortfolioItem[], pp: {} as PortfolioPageGlobal }
   }
 }
