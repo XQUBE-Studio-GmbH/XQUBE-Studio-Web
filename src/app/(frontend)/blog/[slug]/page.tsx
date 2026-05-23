@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '../../../../../payload/payload.config'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
+import { buildBreadcrumbList, BASE_URL, LOGO_URL, ORG_REF } from '@/lib/jsonLd'
 
 // force-dynamic: prevents build-time DB calls; rendered at request time instead.
 export const dynamic = 'force-dynamic'
@@ -117,8 +118,45 @@ export default async function BlogPostPage({ params }: Props) {
 
   const htmlContent = post.content ? serializeLexical(post.content) : ''
 
+  const postUrl = `${BASE_URL}/blog/${post.slug}`
+
   return (
     <>
+      {/* BlogPosting structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context':       'https://schema.org',
+            '@type':          'BlogPosting',
+            headline:         post.title,
+            description:      post.seo?.description || post.excerpt || undefined,
+            image:            post.seo?.image?.url || post.coverImage?.url || undefined,
+            datePublished:    post.createdAt,
+            dateModified:     post.updatedAt || post.createdAt,
+            url:              postUrl,
+            mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+            author:           { ...ORG_REF, name: 'XQUBE Studio' },
+            publisher: {
+              ...ORG_REF,
+              name:  'XQUBE Studio',
+              logo:  { '@type': 'ImageObject', url: LOGO_URL },
+            },
+          }),
+        }}
+      />
+      {/* BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildBreadcrumbList([
+            { name: 'Home', url: BASE_URL },
+            { name: 'Blog', url: `${BASE_URL}/blog` },
+            { name: post.title, url: postUrl },
+          ])),
+        }}
+      />
+
       <section className="xq-section">
         <div className="xq-container">
           {/* Breadcrumb */}

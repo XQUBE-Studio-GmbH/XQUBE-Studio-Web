@@ -7,6 +7,7 @@ import config from '../../../../../payload/payload.config'
 import { serializeLexical } from '@/lib/serializeLexical'
 import PortfolioGallery from '@/components/PortfolioGallery'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
+import { buildBreadcrumbList, BASE_URL, ORG_REF } from '@/lib/jsonLd'
 
 // force-dynamic: prevents build-time DB calls; rendered at request time instead.
 export const dynamic = 'force-dynamic'
@@ -131,8 +132,42 @@ export default async function PortfolioItemPage({ params }: Props) {
   const overviewHtml = item.overview ? serializeLexical(item.overview) : ''
   const embedUrl = item.videoUrl ? getEmbedUrl(item.videoUrl) : null
 
+  const itemUrl      = `${BASE_URL}/portfolio/${item.slug}`
+  const categoryLabel = item.category ? (CATEGORY_LABELS[item.category] ?? item.category) : undefined
+
   return (
     <>
+      {/* CreativeWork structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context':   'https://schema.org',
+            '@type':      'CreativeWork',
+            name:          item.title,
+            description:   item.seo?.description || item.shortDescription || undefined,
+            url:           itemUrl,
+            image:         item.seo?.image?.url || item.heroImage?.url || undefined,
+            creator:       ORG_REF,
+            ...(categoryLabel ? { genre: categoryLabel } : {}),
+            ...(item.toolsUsed?.length
+              ? { keywords: item.toolsUsed.map((t) => t.name).join(', ') }
+              : {}),
+          }),
+        }}
+      />
+      {/* BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildBreadcrumbList([
+            { name: 'Home',      url: BASE_URL },
+            { name: 'Portfolio', url: `${BASE_URL}/portfolio` },
+            { name: item.title,  url: itemUrl },
+          ])),
+        }}
+      />
+
       {/* Full-width hero */}
       {item.heroImage?.url && (
         <div className="relative w-full h-[50vh] md:h-[65vh] overflow-hidden bg-xq-surface">

@@ -4,6 +4,7 @@ import config from '../../../../payload/payload.config'
 import ServicesPageClient from '@/components/live-preview/ServicesPageClient'
 import type { ServicesPageGlobal, ServiceItem } from '@/types/cms'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
+import { BASE_URL, ORG_REF } from '@/lib/jsonLd'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,11 +109,37 @@ export default async function ServicesPage() {
 
   const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type':    'ItemList',
+    name:       'XQUBE Studio Services',
+    url:        `${BASE_URL}/services`,
+    itemListElement: services.map((s, i) => ({
+      '@type':    'ListItem',
+      position:   i + 1,
+      item: {
+        '@type':      'Service',
+        '@id':        `${BASE_URL}/services#${s.id || i}`,
+        name:          s.title,
+        description:   s.shortDescription || undefined,
+        provider:      ORG_REF,
+        ...(s.platforms ? { serviceType: s.platforms } : {}),
+      },
+    })),
+  }
+
   return (
-    <ServicesPageClient
-      initialData={sp}
-      services={services}
-      serverURL={serverURL}
-    />
+    <>
+      {/* Service + ItemList structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <ServicesPageClient
+        initialData={sp}
+        services={services}
+        serverURL={serverURL}
+      />
+    </>
   )
 }

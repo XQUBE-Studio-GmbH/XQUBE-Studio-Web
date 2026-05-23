@@ -69,19 +69,47 @@ export default async function FrontendLayout({ children }: { children: React.Rea
         />
       )}
 
-      {/* Organisation structured data — frontend only */}
+      {/* Organisation + WebSite structured data — applied to every frontend page.
+          Organization pulls live contact/social data from the site-settings global.
+          WebSite enables sitelinks search box eligibility in Google. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Organization',
-            name: 'XQube Studio GmbH',
-            url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com',
+            name: 'XQUBE Studio GmbH',
+            url: serverURL,
+            logo: `${serverURL}/logo.svg`,
             description: 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.',
-            address: { '@type': 'PostalAddress', streetAddress: 'Rathausstrasse 21/12', addressLocality: 'Vienna', postalCode: '1010', addressCountry: 'AT' },
-            contactPoint: { '@type': 'ContactPoint', email: 'info@xqubestudio.com', telephone: '+43 650 5207329' },
-            sameAs: ['https://www.linkedin.com/company/xqubestudio', 'https://www.artstation.com/xqubestudio'],
+            address: {
+              '@type':           'PostalAddress',
+              streetAddress:     'Rathausstrasse 21/12',
+              addressLocality:   'Vienna',
+              postalCode:        '1010',
+              addressCountry:    'AT',
+            },
+            contactPoint: {
+              '@type':      'ContactPoint',
+              email:        settings.contact?.email      || 'info@xqubestudio.com',
+              telephone:    settings.contact?.phone      || '+43 650 5207329',
+              contactType:  'customer service',
+            },
+            sameAs: settings.contact?.socialLinks?.map((l) => l.url).filter(Boolean) ?? [
+              'https://www.linkedin.com/company/xqubestudio',
+              'https://www.artstation.com/xqubestudio',
+            ],
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type':    'WebSite',
+            name:       'XQUBE Studio',
+            url:        serverURL,
           }),
         }}
       />

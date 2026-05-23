@@ -4,6 +4,7 @@ import config from '../../../../payload/payload.config'
 import ContactPageClient from '@/components/live-preview/ContactPageClient'
 import type { ContactPageGlobal } from '@/types/cms'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
+import { BASE_URL, LOGO_URL } from '@/lib/jsonLd'
 
 export const dynamic = 'force-dynamic'
 
@@ -116,10 +117,35 @@ export default async function ContactPage() {
   }
 
   return (
-    <ContactPageClient
-      initialData={initialData}
-      contactInfo={contactInfo}
-      serverURL={serverURL}
-    />
+    <>
+      {/* LocalBusiness structured data — puts XQUBE in Google's Knowledge Panel */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context':    'https://schema.org',
+            '@type':       'LocalBusiness',
+            name:           'XQUBE Studio GmbH',
+            url:            BASE_URL,
+            logo:           LOGO_URL,
+            email:          contactInfo.email,
+            telephone:      contactInfo.phone,
+            address: {
+              '@type':           'PostalAddress',
+              streetAddress:     'Rathausstrasse 21/12',
+              addressLocality:   'Vienna',
+              postalCode:        '1010',
+              addressCountry:    'AT',
+            },
+            sameAs: [contactInfo.linkedin, contactInfo.artstation].filter(Boolean),
+          }),
+        }}
+      />
+      <ContactPageClient
+        initialData={initialData}
+        contactInfo={contactInfo}
+        serverURL={serverURL}
+      />
+    </>
   )
 }

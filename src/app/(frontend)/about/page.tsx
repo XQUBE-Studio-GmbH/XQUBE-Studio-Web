@@ -4,6 +4,7 @@ import config from '../../../../payload/payload.config'
 import AboutPageClient from '@/components/live-preview/AboutPageClient'
 import type { AboutGlobal, TeamMember } from '@/types/cms'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
+import { BASE_URL, LOGO_URL } from '@/lib/jsonLd'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,10 +50,37 @@ export default async function AboutPage() {
   const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   return (
-    <AboutPageClient
-      initialData={ap}
-      teamMembers={teamMembers}
-      serverURL={serverURL}
-    />
+    <>
+      {/* Organization + team (Person[]) structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type':    'Organization',
+            name:        'XQUBE Studio GmbH',
+            url:          BASE_URL,
+            logo:         LOGO_URL,
+            description: 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.',
+            ...(teamMembers.length > 0
+              ? {
+                  employee: teamMembers.map((m) => ({
+                    '@type':    'Person',
+                    name:        m.name,
+                    jobTitle:    m.role || undefined,
+                    description: m.bio  || undefined,
+                    image:       (m.photo as { url?: string } | null)?.url || undefined,
+                  })),
+                }
+              : {}),
+          }),
+        }}
+      />
+      <AboutPageClient
+        initialData={ap}
+        teamMembers={teamMembers}
+        serverURL={serverURL}
+      />
+    </>
   )
 }
