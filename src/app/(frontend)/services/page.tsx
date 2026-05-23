@@ -119,7 +119,8 @@ export default async function ServicesPage() {
       position:   i + 1,
       item: {
         '@type':      'Service',
-        '@id':        `${BASE_URL}/services#${s.id || i}`,
+        '@id':        s.slug ? `${BASE_URL}/services/${s.slug}` : `${BASE_URL}/services#${s.id || i}`,
+        url:           s.slug ? `${BASE_URL}/services/${s.slug}` : undefined,
         name:          s.title,
         description:   s.shortDescription || undefined,
         provider:      ORG_REF,

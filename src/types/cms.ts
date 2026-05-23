@@ -11,12 +11,20 @@ export interface MediaRef { url?: string; alt?: string }
 export interface ServiceItem {
   id:               string | number
   title:            string
+  slug?:            string
   shortDescription?: string
+  description?:     unknown   // Lexical richText
   icon?:            string
   order?:           number
-  image?:           { url?: string; alt?: string } | null
+  image?:           { url?: string; alt?: string; width?: number; height?: number } | null
   features?:        { id: string; feature: string }[]
   platforms?:       string
+  seo?: {
+    title?:       string | null
+    description?: string | null
+    image?:       { url?: string } | null
+    noIndex?:     boolean | null
+  } | null
 }
 
 export interface ClientItem {

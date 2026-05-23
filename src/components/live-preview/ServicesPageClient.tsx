@@ -200,6 +200,16 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
                     {service.platforms}
                   </div>
                 )}
+                {service.slug && (
+                  <div className="pt-4">
+                    <Link
+                      href={`/services/${service.slug}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-xq-accent hover:underline transition-colors"
+                    >
+                      Learn more →
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
             </ScrollReveal>
