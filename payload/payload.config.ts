@@ -258,13 +258,12 @@ export default buildConfig({
           defaultValue: 'viewer',
           admin: {
             description: 'Controls what this user can see and edit.',
-            // Hide from non-admins — they cannot see or change their own role.
-            // Admins and super-admins still see it when editing any user.
-            condition: (_, __, { user }: { user: any }) =>
-              [ROLES.SUPER_ADMIN, ROLES.ADMIN].includes(user?.role),
+            // No condition — field is always visible so non-admins can see their own role
+            // on the account page. access.update: isAdminOrAbove makes it render as
+            // a disabled (read-only) input for Viewers and Content Editors.
           },
           access: {
-            update: isAdminOrAbove, // belt-and-suspenders: block role changes via REST API too
+            update: isAdminOrAbove, // non-admins cannot change their role (renders as disabled)
           },
           options: [
             { label: 'Super Admin',    value: ROLES.SUPER_ADMIN },
