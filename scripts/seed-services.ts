@@ -2,7 +2,10 @@
  * Seed script — deletes all existing service records and creates 6 new ones.
  *
  * Run with:
- *   npx tsx --env-file=.env.local scripts/seed-services.ts
+ *   NODE_ENV=production npx tsx --env-file=.env.local scripts/seed-services.ts
+ *
+ * NODE_ENV=production is REQUIRED — without it Payload sets push:true and
+ * attempts to sync the live DB schema directly, which can corrupt tables.
  */
 
 import { getPayload } from 'payload'
