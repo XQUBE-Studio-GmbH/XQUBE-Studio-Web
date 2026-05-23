@@ -16,10 +16,10 @@ export const dynamic = 'force-dynamic'
 // Maps service slug → portfolio categories to show relevant work on the detail page.
 
 const SERVICE_CATEGORIES: Record<string, string[]> = {
-  'game-art-production': ['characters', 'weapons', 'vehicles', 'environments', 'props'],
-  'vr-assets':           ['vr-assets'],
-  'interactive-dev':     ['characters', 'environments', 'vr-assets'],
-  'staff-augmentation':  ['characters', 'weapons', 'vehicles', 'environments', 'props', 'vr-assets'],
+  'game-art-production':   ['characters', 'weapons', 'vehicles', 'environments', 'props'],
+  'vr-game-assets':        ['vr-assets'],
+  'uefn-roblox-production': ['characters', 'environments', 'props'],
+  'staff-augmentation':    ['characters', 'weapons', 'vehicles', 'environments', 'props', 'vr-assets'],
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
