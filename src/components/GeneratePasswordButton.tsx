@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo, useFormFields } from '@payloadcms/ui'
+import { useAuth, useDocumentInfo, useFormFields } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -19,15 +19,19 @@ export default function GeneratePasswordButton() {
   const [status, setStatus]     = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const { id } = useDocumentInfo()
-  const isSaved = !!id
-  const router = useRouter()
+  // All hooks must be called unconditionally (React Rules of Hooks).
+  // Early returns may only come AFTER all hook calls.
+  const { user } = useAuth()
+  const { id }   = useDocumentInfo()
+  const isSaved  = !!id
+  const router   = useRouter()
 
   const dispatchFields = useFormFields(([, dispatch]) => dispatch)
   const email = useFormFields(([fields]) => fields?.email?.value as string | undefined)
   const name  = useFormFields(([fields]) => fields?.name?.value as string | undefined)
   const role  = useFormFields(([fields]) => fields?.role?.value as string | undefined)
 
+  // Helper — dispatch generated password into the hidden password/confirm fields
   const dispatchToForm = (p: string) => {
     if (dispatchFields) {
       dispatchFields({ type: 'UPDATE', path: 'password',         value: p })
@@ -35,16 +39,25 @@ export default function GeneratePasswordButton() {
     }
   }
 
-  // Auto-generate password on mount for both create and edit pages.
+  // Auto-generate password on mount (create & edit pages only — not own profile).
   // On create: dispatch to form so it's saved with the user.
-  // On edit: just show it — admin must click Reset & Send to apply it.
+  // On edit:   just display it — admin must click Reset & Send to apply it.
   useEffect(() => {
+    const isOwnProfile = user && id && String((user as any).id) === String(id)
+    if (isOwnProfile) return
     const p = generatePassword()
     setPassword(p)
     setMounted(true)
     if (!isSaved) setTimeout(() => dispatchToForm(p), 0)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Hide on /admin/account and when any user edits their own profile.
+  // The built-in "Change Password" button handles self-service password changes.
+  const isOwnProfile = user && id && String((user as any).id) === String(id)
+  if (isOwnProfile) return null
+
+  if (!mounted) return null
 
   const generateNew = () => {
     const p = generatePassword()
@@ -126,8 +139,6 @@ export default function GeneratePasswordButton() {
       setErrorMsg(err instanceof Error ? err.message : 'Something went wrong.')
     }
   }
-
-  if (!mounted) return null
 
   // ─── Shared: password display ─────────────────────────────────────────────
   const PasswordDisplay = () => (
