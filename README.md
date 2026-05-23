@@ -1,9 +1,8 @@
-# XQube Studio — Official Website
+# XQUBE Studio — Official Website
 
-Official marketing website for **XQube Studio GmbH**, a AAA game art and XR production studio headquartered in Vienna, Austria with hubs in Dubai (MENA) and Dhaka (Production).
+Official marketing website for **XQUBE Studio GmbH**, a AAA game art and XR production studio headquartered in Vienna, Austria with hubs in Dubai (MENA) and Dhaka (Production).
 
-**Live:** https://xqube-studio-web.vercel.app  
-**Production domain:** https://www.xqubestudio.com  
+**Live:** https://www.xqubestudio.com
 **Repository:** https://github.com/XQUBE-Studio-GmbH/XQUBE-Studio-Web
 
 ---
@@ -20,8 +19,8 @@ Official marketing website for **XQube Studio GmbH**, a AAA game art and XR prod
 | Styling | Tailwind CSS v3 |
 | Language | TypeScript (strict mode) |
 | Email | Resend |
-| Analytics | Google Analytics 4 (GDPR consent-gated) |
-| Node.js | 20.x (pinned in Vercel project settings) |
+| Analytics | Google Analytics 4 (GDPR Consent Mode v2) |
+| Node.js | 24.x (pinned in Vercel project settings) |
 
 ---
 
@@ -51,53 +50,64 @@ xqube-web/
 │   └── logo.svg
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx                   # Root layout — minimal shell (no CSS)
-│   │   ├── globals.css                  # Design system tokens & component classes
+│   │   ├── layout.tsx                     # Root layout — minimal shell
+│   │   ├── globals.css                    # Design system tokens & component classes
 │   │   ├── robots.ts
-│   │   ├── sitemap.ts                   # Build-phase guarded sitemap
-│   │   ├── (frontend)/                  # Marketing site route group
-│   │   │   ├── layout.tsx               # Navbar + Footer + globals.css
-│   │   │   ├── page.tsx                 # Home
-│   │   │   ├── about/page.tsx           # About
-│   │   │   ├── services/page.tsx        # Services
+│   │   ├── sitemap.ts                     # Build-phase guarded sitemap
+│   │   ├── (frontend)/                    # Marketing site route group
+│   │   │   ├── layout.tsx                 # Navbar + Footer + GA4 + cookie consent
+│   │   │   ├── page.tsx                   # Home
+│   │   │   ├── about/page.tsx
+│   │   │   ├── services/page.tsx
 │   │   │   ├── portfolio/
-│   │   │   │   ├── page.tsx             # Portfolio listing with category filter
-│   │   │   │   └── [slug]/page.tsx      # Portfolio detail with gallery lightbox
-│   │   │   ├── blog/page.tsx            # Blog listing
-│   │   │   ├── contact/page.tsx         # Contact (form → Resend)
+│   │   │   │   ├── page.tsx               # Portfolio grid with category filter
+│   │   │   │   └── [slug]/page.tsx        # Portfolio detail — gallery, video, tools
+│   │   │   ├── blog/page.tsx
+│   │   │   ├── contact/page.tsx           # Contact form → Resend
 │   │   │   ├── privacy/page.tsx
 │   │   │   └── cookies/page.tsx
-│   │   ├── (payload)/                   # Payload CMS route group
-│   │   │   ├── admin/                   # /admin panel
-│   │   │   └── api/                     # Payload REST API
+│   │   ├── (payload)/                     # Payload CMS route group
+│   │   │   ├── admin/
+│   │   │   │   └── admin.css              # Custom admin overrides
+│   │   │   └── api/                       # Payload REST API
 │   │   └── api/
-│   │       └── contact/route.ts         # Contact form → Resend
+│   │       ├── contact/route.ts           # Contact form → Resend
+│   │       └── invite-user/route.ts       # Admin invite → Resend
 │   ├── components/
-│   │   ├── Navbar.tsx                   # Responsive navbar — reads visible flag per link
-│   │   ├── PortfolioGallery.tsx         # Gallery grid with fullscreen lightbox
+│   │   ├── Navbar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── CookieBanner.tsx               # GA4 Consent Mode v2 banner
+│   │   ├── PortfolioGallery.tsx           # Gallery grid with fullscreen lightbox
 │   │   ├── ScrollReveal.tsx
 │   │   ├── PageHero.tsx
 │   │   ├── SectionHeader.tsx
-│   │   ├── CookieBanner.tsx
-│   │   └── live-preview/               # Live-preview client wrappers (one per page)
+│   │   ├── GeneratePasswordButton.tsx     # Admin: password gen + invite send
+│   │   ├── UsersSaveButton.tsx            # Admin: hides Save on create (invite handles it)
+│   │   ├── admin/
+│   │   │   ├── MustChangePasswordGuard.tsx  # Blocks panel until password is changed
+│   │   │   ├── AdminLogo.tsx
+│   │   │   ├── AdminIcon.tsx
+│   │   │   └── SlugField.tsx              # Auto-generates URL slug from title
+│   │   └── live-preview/                  # Live-preview client wrappers (one per page)
 │   │       ├── HomePageClient.tsx
 │   │       ├── AboutPageClient.tsx
 │   │       ├── ServicesPageClient.tsx
 │   │       ├── NavbarClient.tsx
 │   │       └── ...
+│   ├── instrumentation.ts                 # Runs DB migrations + clears locks on startup
 │   ├── types/
-│   │   └── cms.ts                       # Shared CMS TypeScript interfaces
+│   │   └── cms.ts                         # Shared CMS TypeScript interfaces
 │   └── lib/
-│       ├── serializeLexical.ts          # Lexical rich-text → HTML
+│       ├── serializeLexical.ts            # Lexical rich-text → HTML
 │       └── livePreview.ts
 ├── payload/
-│   ├── payload.config.ts                # Full CMS configuration
-│   ├── constants.ts                     # Role constants
-│   └── migrations/                      # All production migrations (applied via prodMigrations)
+│   ├── payload.config.ts                  # Full CMS configuration
+│   ├── constants.ts                       # Role constants (ROLES.SUPER_ADMIN etc.)
+│   └── migrations/                        # All production migrations
 ├── next.config.mjs
 ├── tailwind.config.ts
 ├── tsconfig.json
-└── CLAUDE.md                            # Project rules & resolved error log for AI context
+└── CLAUDE.md                              # Project rules & resolved error log for AI context
 ```
 
 ---
@@ -106,11 +116,11 @@ xqube-web/
 
 | Route | Description |
 |---|---|
-| `/` | Home — hero, stats, client strip, engine badges, featured work, services, process, CTA |
-| `/about` | About — intro, credentials, hubs, team, why XQube, CTA |
-| `/services` | Services listing |
+| `/` | Home — hero slideshow, stats, client strip, engine badges, featured work, services, process, CTA |
+| `/about` | About — intro, credentials, hubs, team, why XQUBE, CTA |
+| `/services` | Services listing with pipeline tabs |
 | `/portfolio` | Portfolio grid with category filter |
-| `/portfolio/[slug]` | Portfolio detail — gallery lightbox, video embed, tools used, related work |
+| `/portfolio/[slug]` | Portfolio detail — gallery lightbox, video embed, tools used |
 | `/blog` | Blog listing |
 | `/contact` | Contact form (sends via Resend) |
 | `/privacy` | Privacy Policy |
@@ -121,42 +131,54 @@ xqube-web/
 
 ## Payload CMS
 
-Admin panel at `/admin`. All DB schema changes are managed via `prodMigrations` in `payload.config.ts` — Payload runs these automatically on cold start.
+Admin panel at `/admin`. All DB schema changes are managed via `prodMigrations` in `payload.config.ts` — applied automatically on cold start via `instrumentation.ts`.
+
+### User Roles
+
+| Role | Access |
+|---|---|
+| `super-admin` | Full access — can create/delete users, access everything |
+| `admin` | Can manage users, all content, all settings |
+| `content-editor` | Can create/edit/delete content; cannot manage users or settings |
+| `viewer` | Read-only — can browse the admin but cannot edit anything |
 
 ### Collections
 
-| Slug | Description | Sidebar |
-|---|---|---|
-| `users` | Admin accounts — 5 roles: Super Admin, Admin, BD Manager, Content Editor, Viewer | ✓ |
-| `media` | File uploads (DigitalOcean Spaces CDN) with alt text and folder field | ✓ |
-| `portfolio` | Portfolio items — title, slug, category, hero image, gallery, video, overview (Lexical), tools used, specs, status (draft / published / archived) | ✓ |
-| `services` | Service definitions with features, platforms, and pipeline steps | ✓ |
-| `team-members` | Team profiles with photo, role, bio | ✓ |
-| `blog-posts` | Blog articles with Lexical rich-text, cover image, tags | ✓ |
-| `clients` | Client logos, sector, project note — managed inline via Homepage → Client Logo Strip | Hidden |
-| `tools` | Software/tool library (name, logo, category) — managed inline via Homepage → Engine Badges and Portfolio → Tools Used | Hidden |
+| Slug | Description |
+|---|---|
+| `users` | Admin accounts with invite flow, role management, and forced password change on first login |
+| `media` | File uploads (images + video) stored on DigitalOcean Spaces CDN — with alt text and folder organisation |
+| `portfolio` | Portfolio items — title, slug, category, hero image, gallery, video, overview (Lexical), tools used, specs, SEO fields, status (draft / published / archived) |
+| `services` | Service definitions with features, platforms |
+| `team-members` | Team profiles with photo, role, bio |
+| `blog-posts` | Blog articles with Lexical rich-text, cover image, SEO fields |
+| `clients` | Client logos — managed inline via Homepage → Client Logo Strip (hidden from sidebar) |
+| `tools` | Software/tool library (name, logo, category) — referenced by Portfolio and Homepage Engine Badges (hidden from sidebar) |
 
 ### Globals
 
 | Slug | Group | Description |
 |---|---|---|
-| `site-settings` | Settings | Sitename, tagline, contact info, Calendly URL, footer copy, GA ID |
+| `site-settings` | Settings | Studio name, tagline, contact info, social links, Calendly URL, footer copy, GA ID, global SEO defaults |
 | `navigation` | Settings | Menu links with per-link visibility toggle, CTA button |
-| `home-page` | Pages | Full homepage content — hero slides, studio intro, client logo strip (drag-to-reorder), engine badges (drag-to-reorder), featured work, process, showreel, testimonials, stats, CTA |
-| `about-page` | Pages | Hero, intro, credentials, hubs, team layout, why XQube cards |
-| `services-page` | Pages | Services hero and section copy |
-| `portfolio-page` | Pages | Portfolio hero, category labels, featured work display order |
-| `contact-page` | Pages | Contact hero and section copy |
-| `blog-page` | Pages | Blog hero and section copy |
+| `home-page` | Pages | Full homepage — hero slides, studio intro, client logo strip, engine badges, featured work, process steps, showreel, testimonials, stats, CTA, SEO |
+| `about-page` | Pages | Hero, intro, credentials, hubs, why XQUBE cards, SEO |
+| `services-page` | Services | Services hero, production pipeline tabs, SEO |
+| `portfolio-page` | Portfolio | Portfolio hero, drag-to-reorder display order, SEO |
+| `contact-page` | Pages | Contact hero and section copy, SEO |
+| `blog-page` | Blog | Blog hero and section copy, SEO |
 
 ### Key Admin Features
 
-- **Drag-to-reorder** — Client Logo Strip and Engine Badges on Homepage global support drag handles
-- **Nav visibility** — Each nav link has a Visible checkbox; uncheck to hide without deleting (e.g. Blog hidden until content is ready)
-- **Portfolio archive** — Status field supports `draft`, `published`, `archived` — soft-delete without permanent removal
-- **Gallery lightbox** — Portfolio gallery images open fullscreen with arrow navigation, ESC to close
-- **Tools Used** — Portfolio items reference the shared Tools collection; tools display with logo + name pill
-- **Inline creation** — Clients and Tools can be created directly from the relationship pickers without leaving the current page
+- **Invite flow** — Admins generate a password and send an invitation email in one click. New users must change their password on first login (`MustChangePasswordGuard` blocks the panel until they do)
+- **SEO fields** — Every portfolio item, blog post, and page global has Meta Title, Meta Description, OG Image, and noIndex toggle
+- **Media folders** — Visual folder tree in the Media library for organising uploads
+- **Drag-to-reorder** — Client Logo Strip and Engine Badges on the Homepage global; Portfolio display order on the Portfolio Page global
+- **Nav visibility** — Each nav link has a Visible toggle; uncheck to hide without deleting
+- **Portfolio archive** — Status field: `draft`, `published`, `archived` — soft-delete without permanent removal
+- **Gallery lightbox** — Portfolio gallery opens fullscreen with arrow navigation and ESC to close
+- **Live Preview** — Edit any page global and see the site update in real-time in the split-screen preview panel
+- **Auto-migrations** — `instrumentation.ts` runs `payload.db.migrate()` on every cold start; no manual `payload migrate` step needed on deploy
 
 ---
 
@@ -165,23 +187,22 @@ Admin panel at `/admin`. All DB schema changes are managed via `prodMigrations` 
 | Variable | Description |
 |---|---|
 | `DATABASE_URI` | Supabase PostgreSQL transaction pooler URL (`port 6543`, append `?pgbouncer=true`) |
-| `PAYLOAD_SECRET` | 32-char random secret for Payload CMS |
-| `NEXT_PUBLIC_SITE_URL` | Full site URL (e.g. `https://www.xqubestudio.com`) |
-| `RESEND_API_KEY` | Resend API key for contact form emails |
-| `CONTACT_EMAIL` | Recipient email for contact form submissions |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 Measurement ID |
+| `PAYLOAD_SECRET` | 32-char random secret for Payload JWT signing |
+| `NEXT_PUBLIC_SITE_URL` | Full production URL (e.g. `https://www.xqubestudio.com`) |
+| `RESEND_API_KEY` | Resend API key — contact form + invite emails |
+| `CONTACT_EMAIL` | Recipient for contact form submissions |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 Measurement ID (`G-XXXXXXXXXX`) |
 | `DO_SPACES_KEY` | DigitalOcean Spaces access key |
 | `DO_SPACES_SECRET` | DigitalOcean Spaces secret key |
 | `DO_SPACES_BUCKET` | Spaces bucket name |
 | `DO_SPACES_REGION` | Spaces region (e.g. `fra1`) |
-| `DO_SPACES_ENDPOINT` | Spaces endpoint URL |
 | `DO_SPACES_CDN_URL` | CDN endpoint URL for public file serving |
 
 ---
 
 ## Local Development
 
-**Prerequisites:** Node.js 20.x, npm
+**Prerequisites:** Node.js 24.x, npm
 
 ```bash
 # 1. Clone the repository
@@ -199,46 +220,45 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)  
+Open [http://localhost:3000](http://localhost:3000)
 Payload admin: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-> **Note:** `push: true` in the postgres adapter is active in development — Payload auto-syncs the schema locally. In production (Vercel), `push` is disabled and `prodMigrations` runs instead.
+> **Note:** `push: true` is active in development — Payload auto-syncs the DB schema locally. In production, `push` is disabled and `prodMigrations` runs instead via `instrumentation.ts`.
 
 ---
 
 ## Deployment
 
-Deployed on **Vercel** (Frankfurt region, Node.js 20.x). All environment variables are set in the Vercel project dashboard.
+Deployed on **Vercel** (Frankfurt region, Node.js 24.x). All environment variables are set in the Vercel project dashboard.
 
 - Every push to `main` triggers an automatic deploy
-- DB migrations run automatically on the next cold start after deploy
-- Media files are served from DigitalOcean Spaces CDN — not stored on Vercel
+- DB migrations run automatically on the next cold start after deploy (no manual step needed)
+- Media files are served from DigitalOcean Spaces CDN — never stored on Vercel
 
-### Important deployment rules
+### Important rules
 - **Never** use `npm audit fix --force` — it would downgrade Next.js to v9
 - **Never** push to `main` without explicit sign-off from the project owner
-- Node.js version is pinned to **20.x** in Vercel project settings — do not add an `engines` field to `package.json`
+- Node.js is pinned to **24.x** in Vercel — do not add an `engines` field to `package.json`
 
 ---
 
 ## Migration Notes
 
-All schema changes go through `prodMigrations` in `payload/payload.config.ts`. Key rules documented in `CLAUDE.md`:
+All schema changes go through `prodMigrations` in `payload/payload.config.ts`. Key rules (full details in `CLAUDE.md`):
 
 - Each DDL statement = its own `await db.execute(sql\`...\`)` call
 - Never use `DO $$ ... $$` dollar-quoting blocks
 - Never use inline `REFERENCES` in `CREATE TABLE`
-- When changing array field subfields on a versioned global, always update both the regular child table **and** the version child table (`_<slug>_v_version_<field>`)
-- Use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for adding columns to existing tables
-- For new empty tables: `DROP TABLE IF EXISTS` then plain `CREATE TABLE`
+- Use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for adding columns
+- For new tables: `DROP TABLE IF EXISTS` then plain `CREATE TABLE`
+- When changing array subfields on a versioned global, update both the regular child table **and** the version child table (`_<slug>_v_version_<field>`)
 
 ---
 
 ## Contact
 
-**XQube Studio GmbH**  
-Rathausstrasse 21/12, 1010 Vienna, Austria  
-info@xqubestudio.com  
-[calendly.com/tanvirkhandlxqsmgs](https://calendly.com/tanvirkhandlxqsmgs)
+**XQUBE Studio GmbH**
+Rathausstrasse 21/12, 1010 Vienna, Austria
+info@xqubestudio.com
 
 [LinkedIn](https://www.linkedin.com/company/xqubestudio) · [ArtStation](https://www.artstation.com/xqubestudio)
