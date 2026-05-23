@@ -18,11 +18,32 @@ export async function register() {
     const { getPayload } = await import('payload')
     const { default: config } = await import('@payload-config')
     const payload = await getPayload({ config })
+
+    // 1. Apply any pending DB migrations
     await payload.db.migrate()
     console.log('[XQUBE] DB migrations applied successfully')
+
+    // 2. Clear stale document locks for the users collection.
+    //    Payload v3 stores locks in `payload_locked_documents`. When a session
+    //    expires or a browser tab is closed without unlocking, the lock record
+    //    persists in the DB and blocks other admins from entering edit mode —
+    //    even after lockDocuments: false is set. Clearing them on startup is
+    //    safe for a small-team admin (nobody edits two user records simultaneously).
+    try {
+      const { sql } = await import('@payloadcms/db-postgres')
+      await (payload.db as any).execute(
+        sql`DELETE FROM payload_locked_documents WHERE id IN (
+          SELECT parent_id FROM payload_locked_documents_rels WHERE collection = 'users'
+        )`
+      )
+      console.log('[XQUBE] Cleared stale user document locks')
+    } catch {
+      // Table may not exist yet (pre-migration) or schema may differ — non-fatal.
+      // The lockDocuments: false config prevents new locks from being created.
+    }
   } catch (err) {
     // Log but do not crash — if migrations already ran, the error is benign.
     // A genuine failure (e.g. broken migration SQL) will surface in the logs.
-    console.error('[XQUBE] DB migration error on startup:', err)
+    console.error('[XQUBE] Startup error:', err)
   }
 }
