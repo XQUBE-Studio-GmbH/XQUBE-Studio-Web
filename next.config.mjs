@@ -13,7 +13,8 @@ const nextConfig = {
     '@payloadcms/db-postgres',
     '@payloadcms/drizzle',
     '@payloadcms/richtext-lexical',
-    '@payloadcms/next',
+    // '@payloadcms/next' intentionally excluded — it imports react-image-crop CSS
+    // which the Node ESM loader cannot handle outside webpack bundling.
     'sharp',
   ],
 
