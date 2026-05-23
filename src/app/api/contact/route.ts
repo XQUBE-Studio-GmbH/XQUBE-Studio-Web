@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { getPayload } from 'payload'
+import config from '../../../../payload/payload.config'
 
 const resend = new Resend(process.env.RESEND_API_KEY ?? 'placeholder')
 
 // ─── Rate limiting (in-memory, per warm serverless instance) ──────────────────
-// Limits to 5 submissions per IP per 10 minutes.
-// Not perfect across multiple Vercel instances but stops the vast majority of abuse.
+// Limits to 2 submissions per IP per 10 minutes.
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 const RATE_LIMIT   = 2
@@ -36,16 +37,22 @@ const MAX = {
   message:     5000,
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function row(label: string, value: string) {
-  if (!value?.trim()) return ''
-  return `<p><strong style="color:#8d95a8;">${label}:</strong> <span style="color:#fff;">${value}</span></p>`
-}
-
 function truncate(value: unknown, max: number): string {
   const str = typeof value === 'string' ? value : ''
   return str.slice(0, max)
+}
+
+// ─── Email helpers ────────────────────────────────────────────────────────────
+
+function detailRow(label: string, value: string): string {
+  if (!value?.trim()) return ''
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom:10px;">
+      <tr>
+        <td width="140" style="font-size:13px;color:#6b7280;font-family:Arial,Helvetica,sans-serif;vertical-align:top;padding-top:2px;">${label}</td>
+        <td style="font-size:13px;color:#ffffff;font-family:Arial,Helvetica,sans-serif;vertical-align:top;">${value}</td>
+      </tr>
+    </table>`
 }
 
 // ─── Route handler ────────────────────────────────────────────────────────────
@@ -90,58 +97,254 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
     }
 
+    // ── Save submission to CMS ────────────────────────────────────────────────
+    try {
+      const payload = await getPayload({ config })
+      await payload.create({
+        collection:     'contact-submissions',
+        overrideAccess: true,
+        data: {
+          name,
+          email,
+          company:     company     || undefined,
+          projectType: projectType || undefined,
+          engine:      engine      || undefined,
+          budget:      budget      || undefined,
+          timeline:    timeline    || undefined,
+          message,
+          status: 'new',
+        },
+      })
+    } catch (dbErr) {
+      // Don't block the user if DB write fails — log and continue to send emails.
+      console.error('[contact] DB write failed:', dbErr)
+    }
+
     // ── Send emails ───────────────────────────────────────────────────────────
     const contactEmail = process.env.CONTACT_EMAIL || 'info@xqubestudio.com'
-    const siteUrl      = process.env.NEXT_PUBLIC_SITE_URL || 'https://xqube-studio-web.vercel.app'
-    const logoUrl      = `${siteUrl}/logo.svg`
+    const siteUrl      = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com'
+    const firstName    = name.split(' ')[0]
 
+    // Internal notification to the team
     await resend.emails.send({
-      from:     'XQube Contact Form <noreply@xqubestudio.com>',
+      from:     'XQUBE Contact Form <noreply@xqubestudio.com>',
       to:       [contactEmail],
       reply_to: email,
       subject:  `New inquiry from ${name}${company ? ` — ${company}` : ''}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:600px;background:#0e0e0e;color:#c4cad8;padding:32px;border-radius:8px;">
-          <img src="${logoUrl}" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
-          <div style="border-left:3px solid #14CB72;padding-left:16px;margin-bottom:24px;">
-            <h2 style="color:#fff;margin:0;">New Project Brief</h2>
-            <p style="color:#8d95a8;margin:4px 0 0;font-size:14px;">via xqubestudio.com</p>
-          </div>
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>New Project Brief — XQUBE Studio</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,Helvetica,sans-serif;">
 
-          ${row('Name', name)}
-          ${row('Email', `<a href="mailto:${email}" style="color:#14CB72;">${email}</a>`)}
-          ${row('Company', company)}
-          ${row('Project Type', projectType)}
-          ${row('Engine / Platform', engine)}
-          ${row('Budget Range', budget)}
-          ${row('Timeline', timeline)}
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0a0a0a;">
+    <tr>
+      <td align="center" style="padding:48px 24px 64px;">
 
-          <div style="margin-top:20px;padding:16px;background:#111;border-radius:4px;border:1px solid #1a1a1a;">
-            <p style="color:#8d95a8;font-size:12px;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.08em;">Project Brief</p>
-            <p style="color:#c4cad8;margin:0;white-space:pre-wrap;">${message}</p>
-          </div>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
 
-          <div style="margin-top:24px;">
-            <a href="mailto:${email}" style="background:#14CB72;color:#000;padding:10px 20px;border-radius:4px;font-weight:600;font-size:14px;text-decoration:none;">Reply to ${name}</a>
-          </div>
-        </div>
-      `,
+          <!-- Logo -->
+          <tr>
+            <td style="padding-bottom:40px;">
+              <span style="font-size:22px;font-weight:900;color:#14CB72;letter-spacing:3px;font-family:Arial,Helvetica,sans-serif;">XQUBE</span><span style="font-size:22px;font-weight:400;color:#ffffff;letter-spacing:3px;font-family:Arial,Helvetica,sans-serif;"> STUDIO</span>
+            </td>
+          </tr>
+
+          <!-- Green accent bar + heading -->
+          <tr>
+            <td style="padding-bottom:32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="3" style="background-color:#14CB72;">&nbsp;</td>
+                  <td style="padding-left:16px;">
+                    <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;font-family:Arial,Helvetica,sans-serif;">New Project Brief</h1>
+                    <p style="margin:4px 0 0;font-size:13px;color:#6b7280;font-family:Arial,Helvetica,sans-serif;">via xqubestudio.com</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Contact details card -->
+          <tr>
+            <td style="padding-bottom:24px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#111111;border:1px solid #2a2a2a;border-radius:8px;">
+                <tr>
+                  <td style="padding:24px;">
+                    <p style="margin:0 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#6b7280;font-family:Arial,Helvetica,sans-serif;">Contact Info</p>
+
+                    ${detailRow('Name', name)}
+                    ${detailRow('Email', `<a href="mailto:${email}" style="color:#14CB72;text-decoration:none;">${email}</a>`)}
+                    ${detailRow('Company', company)}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Project details card -->
+          <tr>
+            <td style="padding-bottom:24px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#111111;border:1px solid #2a2a2a;border-radius:8px;">
+                <tr>
+                  <td style="padding:24px;">
+                    <p style="margin:0 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#6b7280;font-family:Arial,Helvetica,sans-serif;">Project Details</p>
+
+                    ${detailRow('Project Type', projectType)}
+                    ${detailRow('Engine / Platform', engine)}
+                    ${detailRow('Budget Range', budget)}
+                    ${detailRow('Timeline', timeline)}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Brief -->
+          <tr>
+            <td style="padding-bottom:32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#111111;border:1px solid #2a2a2a;border-radius:8px;">
+                <tr>
+                  <td style="padding:24px;">
+                    <p style="margin:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#6b7280;font-family:Arial,Helvetica,sans-serif;">Message / Brief</p>
+                    <p style="margin:0;font-size:14px;color:#e0e6f0;line-height:1.7;font-family:Arial,Helvetica,sans-serif;white-space:pre-wrap;">${message}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding-bottom:48px;">
+              <table role="presentation" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="border-radius:6px;background-color:#14CB72;">
+                    <a href="mailto:${email}" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:700;color:#000000;text-decoration:none;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px;">Reply to ${firstName} &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="border-top:1px solid #1a1a1a;padding-top:24px;">
+              <p style="margin:0;font-size:12px;color:#3d3d3d;font-family:Arial,Helvetica,sans-serif;">
+                XQUBE Studio GmbH &middot; Vienna, Austria &middot; <a href="mailto:info@xqubestudio.com" style="color:#3d3d3d;text-decoration:none;">info@xqubestudio.com</a>
+              </p>
+              <p style="margin:8px 0 0;font-size:11px;color:#2a2a2a;font-family:Arial,Helvetica,sans-serif;">
+                Submission saved to admin panel &middot; <a href="${siteUrl}/admin" style="color:#2a2a2a;text-decoration:none;">View all submissions</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`,
     })
 
+    // Auto-reply to the sender
     await resend.emails.send({
-      from:    'XQube Studio <info@xqubestudio.com>',
+      from:    'XQUBE Studio <info@xqubestudio.com>',
       to:      [email],
-      subject: `Thanks for reaching out, ${name.split(' ')[0]}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:600px;background:#0e0e0e;color:#c4cad8;padding:32px;border-radius:8px;">
-          <img src="${logoUrl}" alt="XQube Studio" width="180" style="display:block;margin-bottom:28px;" />
-          <h2 style="color:#fff;margin:0 0 16px;">We received your brief.</h2>
-          <p style="color:#8d95a8;line-height:1.6;">Hi ${name.split(' ')[0]}, thanks for getting in touch. Our team reviews every inquiry and typically responds within 24–48 hours.</p>
-          <p style="color:#8d95a8;line-height:1.6;margin-top:16px;">Want to speak sooner? Book a call directly:</p>
-          <a href="https://calendly.com/tanvirkhandlxqsmgs" style="display:inline-block;margin-top:16px;background:#14CB72;color:#000;padding:10px 20px;border-radius:4px;font-weight:600;font-size:14px;text-decoration:none;">Book a Call</a>
-          <p style="color:#8d95a8;font-size:13px;margin-top:32px;padding-top:24px;border-top:1px solid #1a1a1a;">XQube Studio GmbH · Vienna, Austria · info@xqubestudio.com</p>
-        </div>
-      `,
+      subject: `We received your brief, ${firstName}`,
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Thanks for reaching out — XQUBE Studio</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,Helvetica,sans-serif;">
+
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0a0a0a;">
+    <tr>
+      <td align="center" style="padding:48px 24px 64px;">
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
+
+          <!-- Logo -->
+          <tr>
+            <td style="padding-bottom:40px;">
+              <span style="font-size:22px;font-weight:900;color:#14CB72;letter-spacing:3px;font-family:Arial,Helvetica,sans-serif;">XQUBE</span><span style="font-size:22px;font-weight:400;color:#ffffff;letter-spacing:3px;font-family:Arial,Helvetica,sans-serif;"> STUDIO</span>
+            </td>
+          </tr>
+
+          <!-- Green accent bar + heading -->
+          <tr>
+            <td style="padding-bottom:32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="3" style="background-color:#14CB72;">&nbsp;</td>
+                  <td style="padding-left:16px;">
+                    <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;line-height:1.3;font-family:Arial,Helvetica,sans-serif;">We received your brief.</h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding-bottom:28px;">
+              <p style="margin:0;font-size:15px;line-height:1.7;color:#b0b8c8;font-family:Arial,Helvetica,sans-serif;">
+                Hi ${firstName}, thanks for getting in touch. Our team reviews every inquiry and typically responds within 24–48 hours.
+              </p>
+            </td>
+          </tr>
+
+          <!-- What to expect card -->
+          <tr>
+            <td style="padding-bottom:32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#14141a;border:1px solid #1e2d1e;border-radius:6px;">
+                <tr>
+                  <td style="padding:14px 16px;">
+                    <p style="margin:0;font-size:13px;color:#86efac;font-family:Arial,Helvetica,sans-serif;">
+                      &#9432;&nbsp; Want to speak sooner? Book a discovery call — we'll scope your project in 30 minutes.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA button -->
+          <tr>
+            <td style="padding-bottom:48px;">
+              <table role="presentation" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="border-radius:6px;background-color:#14CB72;">
+                    <a href="https://calendly.com/tanvirkhandlxqsmgs" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:700;color:#000000;text-decoration:none;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px;">Book a Discovery Call &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="border-top:1px solid #1a1a1a;padding-top:24px;">
+              <p style="margin:0;font-size:12px;color:#3d3d3d;font-family:Arial,Helvetica,sans-serif;">
+                XQUBE Studio GmbH &middot; Vienna, Austria &middot; <a href="mailto:info@xqubestudio.com" style="color:#3d3d3d;text-decoration:none;">info@xqubestudio.com</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`,
     })
 
     return NextResponse.json({ success: true })

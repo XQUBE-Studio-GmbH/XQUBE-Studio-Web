@@ -4,6 +4,19 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   reactStrictMode: true,
 
+  // Tell webpack NOT to bundle these server-only packages — require them at
+  // runtime instead. Prevents "Can't resolve 'crypto'" and similar Node.js
+  // built-in errors that occur when Payload / drizzle / postgres packages
+  // are accidentally pulled into the webpack graph (e.g. via instrumentation.ts).
+  serverExternalPackages: [
+    'payload',
+    '@payloadcms/db-postgres',
+    '@payloadcms/drizzle',
+    '@payloadcms/richtext-lexical',
+    '@payloadcms/next',
+    'sharp',
+  ],
+
   async headers() {
     return [
       {
@@ -25,6 +38,25 @@ const nextConfig = {
         ],
       },
     ]
+  },
+
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Node.js built-ins pulled in by Payload/drizzle/pg packages must not be
+      // bundled for the browser — set them to false (empty module) instead.
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+        fs:     false,
+        path:   false,
+        os:     false,
+        net:    false,
+        tls:    false,
+        dns:    false,
+        child_process: false,
+      }
+    }
+    return config
   },
 
   images: {

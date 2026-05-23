@@ -36,6 +36,7 @@ import * as mediaFoldersMigration               from './migrations/20260522_medi
 import * as seoFieldsMigration                   from './migrations/20260522_seo_fields.ts'
 import * as portfolioToolsHasManyMigration        from './migrations/20260522_portfolio_tools_hasMany.ts'
 import * as usersMustChangePasswordMigration      from './migrations/20260523_users_must_change_password.ts'
+import * as contactSubmissionsMigration           from './migrations/20260523_contact_submissions.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -750,6 +751,45 @@ export default buildConfig({
           ],
         },
         seoGroup,
+      ],
+    },
+
+    // ─── Contact Submissions ─────────────────────────────────
+    {
+      slug:   'contact-submissions',
+      labels: { singular: 'Contact Submission', plural: 'Contact Submissions' },
+      admin: {
+        useAsTitle:     'name',
+        group:          'Inquiries',
+        description:    'Project briefs submitted via the website contact form.',
+        defaultColumns: ['name', 'email', 'company', 'projectType', 'status', 'createdAt'],
+      },
+      access: {
+        read:   isAdminOrAbove,
+        create: isAdminOrAbove, // API uses overrideAccess: true
+        update: isAdminOrAbove,
+        delete: isSuperAdmin,
+      },
+      fields: [
+        { name: 'name',        type: 'text',     required: true },
+        { name: 'email',       type: 'email',    required: true },
+        { name: 'company',     type: 'text',     label: 'Company' },
+        { name: 'projectType', type: 'text',     label: 'Project Type' },
+        { name: 'engine',      type: 'text',     label: 'Engine / Platform' },
+        { name: 'budget',      type: 'text',     label: 'Budget Range' },
+        { name: 'timeline',    type: 'text',     label: 'Timeline' },
+        { name: 'message',     type: 'textarea', required: true, label: 'Message / Brief' },
+        {
+          name:         'status',
+          type:         'select',
+          defaultValue: 'new',
+          options: [
+            { label: 'New',      value: 'new' },
+            { label: 'Reviewed', value: 'reviewed' },
+            { label: 'Replied',  value: 'replied' },
+            { label: 'Closed',   value: 'closed' },
+          ],
+        },
       ],
     },
   ],
@@ -1577,6 +1617,11 @@ export default buildConfig({
         name: '20260523_users_must_change_password',
         up: usersMustChangePasswordMigration.up,
         down: usersMustChangePasswordMigration.down,
+      },
+      {
+        name: '20260523_contact_submissions',
+        up: contactSubmissionsMigration.up,
+        down: contactSubmissionsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
