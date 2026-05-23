@@ -26,6 +26,7 @@ export interface ServiceItem {
   features?:        { id: string; feature: string }[]
   platforms?:       string
   toolsUsed?:       ServiceToolItem[]
+  process?:         { id: string; step: string; description?: string }[]
   seo?: {
     title?:       string | null
     description?: string | null

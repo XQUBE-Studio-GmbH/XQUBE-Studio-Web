@@ -39,6 +39,7 @@ import * as usersMustChangePasswordMigration      from './migrations/20260523_us
 import * as contactSubmissionsMigration           from './migrations/20260523_contact_submissions.ts'
 import * as contactSubmissionsRelsMigration       from './migrations/20260524_contact_submissions_rels.ts'
 import * as servicesToolsRelMigration             from './migrations/20260524_services_tools_rel.ts'
+import * as servicesProcessMigration              from './migrations/20260524_services_process.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -613,6 +614,16 @@ export default buildConfig({
           relationTo: 'tools',
           hasMany: true,
           admin: { description: 'Tools shown with logos on the service detail page. Select from the Tools collection.' },
+        },
+        {
+          name: 'process',
+          label: 'Working Process',
+          type: 'array',
+          admin: { description: 'Step-by-step delivery process shown on the service detail page.' },
+          fields: [
+            { name: 'step', label: 'Step Title', type: 'text', required: true },
+            { name: 'description', label: 'Description', type: 'textarea' },
+          ],
         },
         { name: 'featured', type: 'checkbox', defaultValue: false, admin: { description: 'Show on homepage services section.' } },
         {
@@ -1642,6 +1653,11 @@ export default buildConfig({
         name: '20260524_services_tools_rel',
         up: servicesToolsRelMigration.up,
         down: servicesToolsRelMigration.down,
+      },
+      {
+        name: '20260524_services_process',
+        up: servicesProcessMigration.up,
+        down: servicesProcessMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
