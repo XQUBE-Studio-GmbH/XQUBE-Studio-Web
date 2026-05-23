@@ -8,16 +8,6 @@ const nextConfig = {
   // runtime instead. Prevents "Can't resolve 'crypto'" and similar Node.js
   // built-in errors that occur when Payload / drizzle / postgres packages
   // are accidentally pulled into the webpack graph (e.g. via instrumentation.ts).
-  serverExternalPackages: [
-    'payload',
-    '@payloadcms/db-postgres',
-    '@payloadcms/drizzle',
-    '@payloadcms/richtext-lexical',
-    // '@payloadcms/next' intentionally excluded — it imports react-image-crop CSS
-    // which the Node ESM loader cannot handle outside webpack bundling.
-    'sharp',
-  ],
-
   async headers() {
     return [
       {
