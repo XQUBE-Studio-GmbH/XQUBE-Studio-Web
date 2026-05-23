@@ -7,6 +7,7 @@ import config from '../../../../../payload/payload.config'
 import { serializeLexical } from '@/lib/serializeLexical'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { buildBreadcrumbList, BASE_URL, ORG_REF } from '@/lib/jsonLd'
+import PageHero from '@/components/PageHero'
 import type { ServiceItem, ServiceToolItem } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
@@ -134,42 +135,14 @@ export default async function ServiceDetailPage({ params }: Props) {
         }}
       />
 
-      {/* ── Hero ── */}
-      {service.image?.url ? (
-        <div className="relative w-full h-[45vh] md:h-[60vh] overflow-hidden bg-xq-surface">
-          <Image
-            src={service.image.url}
-            alt={service.image.alt || service.title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 xq-container pb-10">
-            <nav className="flex items-center gap-2 text-xs text-white/50 mb-4">
-              <Link href="/services" className="hover:text-xq-accent transition-colors">Services</Link>
-              <span>/</span>
-              <span className="text-white/80">{service.title}</span>
-            </nav>
-            {service.icon && <div className="text-3xl mb-3">{service.icon}</div>}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
-              {service.title}
-            </h1>
-          </div>
-        </div>
-      ) : (
-        <section className="xq-section border-b border-xq-border">
-          <div className="xq-container">
-            <nav className="flex items-center gap-2 text-sm text-xq-muted mb-8">
-              <Link href="/services" className="hover:text-xq-accent transition-colors">Services</Link>
-              <span>/</span>
-              <span className="text-white">{service.title}</span>
-            </nav>
-            {service.icon && <div className="text-3xl mb-4">{service.icon}</div>}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white">{service.title}</h1>
-          </div>
-        </section>
-      )}
+      {/* ── Hero banner — matches Services / Portfolio / About page style ── */}
+      <PageHero
+        label="Services"
+        heading={service.title}
+        subtitle={service.shortDescription}
+        image={service.image ?? undefined}
+        minHeight="min-h-[45vh]"
+      />
 
       {/* ── Main body ── */}
       <section className="xq-section">
@@ -178,13 +151,6 @@ export default async function ServiceDetailPage({ params }: Props) {
 
             {/* LEFT */}
             <div className="space-y-12">
-
-              {/* Summary */}
-              {service.shortDescription && (
-                <p className="text-xq-muted text-lg leading-relaxed max-w-2xl">
-                  {service.shortDescription}
-                </p>
-              )}
 
               {/* Full richText description */}
               {descriptionHtml && (
