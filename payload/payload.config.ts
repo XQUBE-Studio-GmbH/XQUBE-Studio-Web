@@ -54,6 +54,14 @@ const canUpdateUser = ({ req }: { req: any }) => {
   return { id: { equals: req.user.id } }
 }
 
+// Non-admin roles can read only their own user document (needed for /admin/account).
+// Admins and super-admins can read all users (for the users list).
+const canReadUser = ({ req }: { req: any }) => {
+  if (!req.user) return false
+  if ([ROLES.SUPER_ADMIN, ROLES.ADMIN].includes(req.user.role)) return true
+  return { id: { equals: req.user.id } }
+}
+
 // ─── Shared access for content collections ────────────────────────────────────
 const contentAccess = {
   read:   isLoggedIn,
@@ -211,7 +219,7 @@ export default buildConfig({
         },
       },
       access: {
-        read:   isAdminOrAbove,
+        read:   canReadUser,    // non-admins can read their own doc (required for /admin/account)
         create: isAdminOrAbove,
         update: canUpdateUser,
         delete: isSuperAdmin,
