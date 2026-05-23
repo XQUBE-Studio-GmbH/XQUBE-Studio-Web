@@ -8,6 +8,12 @@ export interface MediaRef { url?: string; alt?: string }
 
 // ─── Collections ──────────────────────────────────────────────────────────────
 
+export interface ServiceToolItem {
+  id:    string | number
+  name:  string
+  logo?: { url?: string; alt?: string } | null
+}
+
 export interface ServiceItem {
   id:               string | number
   title:            string
@@ -19,6 +25,7 @@ export interface ServiceItem {
   image?:           { url?: string; alt?: string; width?: number; height?: number } | null
   features?:        { id: string; feature: string }[]
   platforms?:       string
+  toolsUsed?:       ServiceToolItem[]
   seo?: {
     title?:       string | null
     description?: string | null

@@ -38,6 +38,7 @@ import * as portfolioToolsHasManyMigration        from './migrations/20260522_po
 import * as usersMustChangePasswordMigration      from './migrations/20260523_users_must_change_password.ts'
 import * as contactSubmissionsMigration           from './migrations/20260523_contact_submissions.ts'
 import * as contactSubmissionsRelsMigration       from './migrations/20260524_contact_submissions_rels.ts'
+import * as servicesToolsRelMigration             from './migrations/20260524_services_tools_rel.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -604,6 +605,14 @@ export default buildConfig({
           label: 'Platforms & Engines',
           type: 'text',
           admin: { description: 'e.g. Unreal Engine 5 · Unity · UEFN · Roblox' },
+        },
+        {
+          name: 'toolsUsed',
+          label: 'Tools Used',
+          type: 'relationship',
+          relationTo: 'tools',
+          hasMany: true,
+          admin: { description: 'Tools shown with logos on the service detail page. Select from the Tools collection.' },
         },
         { name: 'featured', type: 'checkbox', defaultValue: false, admin: { description: 'Show on homepage services section.' } },
         {
@@ -1628,6 +1637,11 @@ export default buildConfig({
         name: '20260524_contact_submissions_rels',
         up: contactSubmissionsRelsMigration.up,
         down: contactSubmissionsRelsMigration.down,
+      },
+      {
+        name: '20260524_services_tools_rel',
+        up: servicesToolsRelMigration.up,
+        down: servicesToolsRelMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
