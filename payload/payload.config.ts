@@ -37,6 +37,7 @@ import * as seoFieldsMigration                   from './migrations/20260522_seo
 import * as portfolioToolsHasManyMigration        from './migrations/20260522_portfolio_tools_hasMany.ts'
 import * as usersMustChangePasswordMigration      from './migrations/20260523_users_must_change_password.ts'
 import * as contactSubmissionsMigration           from './migrations/20260523_contact_submissions.ts'
+import * as contactSubmissionsRelsMigration       from './migrations/20260524_contact_submissions_rels.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1622,6 +1623,11 @@ export default buildConfig({
         name: '20260523_contact_submissions',
         up: contactSubmissionsMigration.up,
         down: contactSubmissionsMigration.down,
+      },
+      {
+        name: '20260524_contact_submissions_rels',
+        up: contactSubmissionsRelsMigration.up,
+        down: contactSubmissionsRelsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
