@@ -13,16 +13,29 @@ interface AdminUser {
 // temporary password. Cleared automatically when they save a new password
 // on the /admin/account page (beforeChange hook sets mustChangePassword: false).
 export default function MustChangePasswordGuard({ children }: { children?: React.ReactNode }) {
-  const { user } = useAuth()
+  const { user, refreshCookieAsync } = useAuth()
   const pathname = usePathname()
   const [showOverlay, setShowOverlay] = useState(false)
+  const [ready, setReady] = useState(false)
 
-  // Defer to client only — avoids SSR/hydration mismatch (React error #418)
+  // On mount, refresh the auth cookie from the server before checking
+  // mustChangePassword. This prevents a 1-second false flash caused by the
+  // admin loading with a stale JWT that hasn't caught up to the DB yet
+  // (e.g. immediately after login when Payload's token refresh is in-flight).
   useEffect(() => {
+    refreshCookieAsync()
+      .catch(() => {}) // non-fatal — falls through to the check below
+      .finally(() => setReady(true))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Only evaluate mustChangePassword after we've confirmed the server state.
+  useEffect(() => {
+    if (!ready) return
     const mustChange = (user as AdminUser)?.mustChangePassword === true
     const isAccountPage = pathname?.includes('/account')
     setShowOverlay(mustChange && !isAccountPage)
-  }, [user, pathname])
+  }, [user, pathname, ready])
 
   if (!showOverlay) return <>{children}</>
 
