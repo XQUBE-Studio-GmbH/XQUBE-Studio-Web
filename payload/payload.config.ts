@@ -204,7 +204,7 @@ export default buildConfig({
     // ─── Admin Users ─────────────────────────────────────────
     {
       slug: 'users',
-      auth: true,
+      auth: { maxLoginAttempts: 0 }, // no brute-force lockout for small invited team; removes Force Unlock button from UI
       lockDocuments: false,
       labels: { singular: 'Admin User', plural: 'Admin Users' },
       admin: {
@@ -241,7 +241,16 @@ export default buildConfig({
           label: 'Access Level',
           type: 'select',
           defaultValue: 'viewer',
-          admin: { description: 'Controls what this user can see and edit.' },
+          admin: {
+            description: 'Controls what this user can see and edit.',
+            // Hide from non-admins — they cannot see or change their own role.
+            // Admins and super-admins still see it when editing any user.
+            condition: (_, __, { user }: { user: any }) =>
+              [ROLES.SUPER_ADMIN, ROLES.ADMIN].includes(user?.role),
+          },
+          access: {
+            update: isAdminOrAbove, // belt-and-suspenders: block role changes via REST API too
+          },
           options: [
             { label: 'Super Admin',    value: ROLES.SUPER_ADMIN },
             { label: 'Admin',          value: ROLES.ADMIN },
