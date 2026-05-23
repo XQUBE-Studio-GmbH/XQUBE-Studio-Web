@@ -194,12 +194,6 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
                     ))}
                   </ul>
                 )}
-                {service.platforms && (
-                  <div className="text-xs text-xq-muted border-t border-xq-border pt-4">
-                    <span className="text-xq-accent font-semibold">Platforms & Engines: </span>
-                    {service.platforms}
-                  </div>
-                )}
                 {service.slug && (
                   <div className="pt-4">
                     <Link
