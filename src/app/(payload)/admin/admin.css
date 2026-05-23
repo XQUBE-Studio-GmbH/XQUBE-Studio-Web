@@ -6,6 +6,14 @@
   display: none !important;
 }
 
+/* Exception: when the user clicks "Change Password" on /admin/account, Payload
+   moves the password fields inside .auth-fields__changing-password. Un-hide them
+   there so the inline new-password + confirm-password form actually appears. */
+.collection-edit--users .auth-fields__changing-password .field-type.password,
+.collection-edit--users .auth-fields__changing-password .field-type.confirm-password {
+  display: block !important;
+}
+
 /* Hide the Payload Settings section (Language + Admin Theme) on the account page.
    Class `payload-settings` is defined in @payloadcms/next/dist/views/Account/Settings/index.js.
    Non-admin users don't need locale/theme preferences exposed here. */
