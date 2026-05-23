@@ -201,13 +201,6 @@ export default async function ServiceDetailPage({ params }: Props) {
                 </div>
               )}
 
-              {/* Platforms */}
-              {service.platforms && (
-                <div>
-                  <h2 className="text-sm font-semibold text-xq-muted uppercase tracking-widest mb-3">Platforms &amp; Engines</h2>
-                  <p className="text-xq-accent text-sm font-medium">{service.platforms}</p>
-                </div>
-              )}
             </div>
 
             {/* RIGHT — sticky CTA + other services */}
