@@ -235,7 +235,22 @@ export default buildConfig({
             disableListColumn: true,
           },
         },
-        { name: 'name', type: 'text' },
+        // Override Payload's auto-generated auth email field to prevent non-admins from changing it.
+        // Payload v3 merges this with the built-in auth email field config.
+        {
+          name: 'email',
+          type: 'email',
+          access: {
+            update: isAdminOrAbove, // non-admins cannot change their email address
+          },
+        },
+        {
+          name: 'name',
+          type: 'text',
+          access: {
+            update: isAdminOrAbove, // non-admins cannot change their name
+          },
+        },
         {
           name: 'role',
           label: 'Access Level',

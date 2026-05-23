@@ -5,3 +5,10 @@
 .collection-edit--users .field-type.confirm-password {
   display: none !important;
 }
+
+/* Hide the Payload Settings section (Language + Admin Theme) on the account page.
+   Class `payload-settings` is defined in @payloadcms/next/dist/views/Account/Settings/index.js.
+   Non-admin users don't need locale/theme preferences exposed here. */
+.collection-edit--users .payload-settings {
+  display: none !important;
+}
