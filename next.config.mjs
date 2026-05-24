@@ -8,6 +8,13 @@ const nextConfig = {
   // runtime instead. Prevents "Can't resolve 'crypto'" and similar Node.js
   // built-in errors that occur when Payload / drizzle / postgres packages
   // are accidentally pulled into the webpack graph (e.g. via instrumentation.ts).
+  async redirects() {
+    return [
+      // Google indexed /aboutus — correct URL is /about
+      { source: '/aboutus', destination: '/about', permanent: true },
+    ]
+  },
+
   async headers() {
     return [
       {
