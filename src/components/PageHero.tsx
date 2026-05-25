@@ -56,7 +56,9 @@ export default function PageHero({
       )}
 
       {/* ── Dark overlays ───────────────────────────────────────────────────── */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+      {/* Base tint — ensures image text never bleeds through on busy artwork */}
+      {image?.url && <div className="absolute inset-0 bg-black/30" />}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
 
       {/* ── Text content ────────────────────────────────────────────────────── */}

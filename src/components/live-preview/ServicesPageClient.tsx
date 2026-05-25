@@ -173,7 +173,7 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
             <ScrollReveal key={String(service.id)} delay={i * 80}>
             <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : 'p-5 sm:p-6 md:p-8'}`}>
               {service.image?.url && (
-                <div className="relative aspect-video">
+                <div className="relative aspect-video max-h-64 lg:max-h-72">
                   <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
                 </div>
               )}
