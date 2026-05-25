@@ -300,9 +300,10 @@ export default function HomePageClient({ initialData, services, clients, feature
     featuredWork: hp.sections?.showFeaturedWork ?? true,
     services:     hp.sections?.showServices     ?? true,
     process:      hp.sections?.showProcess      ?? true,
-    showreel:     hp.sections?.showShowreel     ?? false,
-    testimonials: hp.sections?.showTestimonials ?? false,
-    blogPreview:  hp.sections?.showBlogPreview  ?? false,
+    showreel:          hp.sections?.showShowreel          ?? false,
+    engagementModels:  hp.sections?.showEngagementModels  ?? true,
+    testimonials:      hp.sections?.showTestimonials      ?? false,
+    blogPreview:       hp.sections?.showBlogPreview       ?? false,
   }
 
   // Studio intro
@@ -577,6 +578,7 @@ export default function HomePageClient({ initialData, services, clients, feature
       )}
 
       {/* ── 9. Engagement Models ─────────────────────────────────────────────── */}
+      {show.engagementModels && (
       <section className="xq-section border-b border-xq-border bg-xq-bg">
         <div className="xq-container">
           <ScrollReveal className="mb-16">
@@ -624,6 +626,7 @@ export default function HomePageClient({ initialData, services, clients, feature
           </div>
         </div>
       </section>
+      )}
 
       {/* ── 10. Showreel ─────────────────────────────────────────────────────── */}
       {show.showreel && showreel.video?.url && (

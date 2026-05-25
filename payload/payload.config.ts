@@ -40,6 +40,7 @@ import * as contactSubmissionsMigration           from './migrations/20260523_co
 import * as contactSubmissionsRelsMigration       from './migrations/20260524_contact_submissions_rels.ts'
 import * as servicesToolsRelMigration             from './migrations/20260524_services_tools_rel.ts'
 import * as servicesProcessMigration              from './migrations/20260524_services_process.ts'
+import * as homepageEngagementToggleMigration     from './migrations/20260526_homepage_engagement_toggle.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -932,9 +933,10 @@ export default buildConfig({
             { name: 'showFeaturedWork', label: 'Featured Work',         type: 'checkbox', defaultValue: true },
             { name: 'showServices',     label: 'Services',              type: 'checkbox', defaultValue: true },
             { name: 'showProcess',      label: 'Process / How We Work', type: 'checkbox', defaultValue: true },
-            { name: 'showShowreel',     label: 'Showreel',              type: 'checkbox', defaultValue: false },
-            { name: 'showTestimonials', label: 'Testimonials',          type: 'checkbox', defaultValue: false },
-            { name: 'showBlogPreview',  label: 'Blog Preview',          type: 'checkbox', defaultValue: false },
+            { name: 'showShowreel',          label: 'Showreel',              type: 'checkbox', defaultValue: false },
+            { name: 'showEngagementModels', label: 'Engagement Models',    type: 'checkbox', defaultValue: true },
+            { name: 'showTestimonials',     label: 'Testimonials',          type: 'checkbox', defaultValue: false },
+            { name: 'showBlogPreview',      label: 'Blog Preview',          type: 'checkbox', defaultValue: false },
           ],
         },
 
@@ -1658,6 +1660,11 @@ export default buildConfig({
         name: '20260524_services_process',
         up: servicesProcessMigration.up,
         down: servicesProcessMigration.down,
+      },
+      {
+        name: '20260526_homepage_engagement_toggle',
+        up: homepageEngagementToggleMigration.up,
+        down: homepageEngagementToggleMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

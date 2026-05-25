@@ -113,8 +113,9 @@ export interface HomepageGlobal {
     showServices?:     boolean
     showProcess?:      boolean
     showShowreel?:     boolean
-    showTestimonials?: boolean
-    showBlogPreview?:  boolean
+    showTestimonials?:     boolean
+    showBlogPreview?:      boolean
+    showEngagementModels?: boolean
   }
   hero?: {
     mode?:     'slideshow' | 'video'
