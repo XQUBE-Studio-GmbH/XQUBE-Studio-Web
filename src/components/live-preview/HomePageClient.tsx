@@ -576,7 +576,56 @@ export default function HomePageClient({ initialData, services, clients, feature
         </section>
       )}
 
-      {/* ── 9. Showreel ──────────────────────────────────────────────────────── */}
+      {/* ── 9. Engagement Models ─────────────────────────────────────────────── */}
+      <section className="xq-section border-b border-xq-border bg-xq-bg">
+        <div className="xq-container">
+          <ScrollReveal className="mb-16">
+            <div className="xq-label mb-4">How We Engage</div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black text-white max-w-xl">
+              One studio, three ways to work together.
+            </h2>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon:        '📋',
+                title:       'Project-Based',
+                description: 'Fixed scope, fixed delivery. You brief us, we produce and deliver. Ideal for defined asset lists and milestone-based productions.',
+                bestFor:     'Defined pipelines & one-off productions',
+              },
+              {
+                icon:        '🔄',
+                title:       'Monthly Retainer',
+                description: 'Dedicated monthly capacity. Flexible scope, consistent output, and priority access to the team.',
+                bestFor:     'Ongoing studios with regular output needs',
+              },
+              {
+                icon:        '🤝',
+                title:       'Embedded Team',
+                description: 'Our artists in your pipeline. Your tools, your standups, your naming conventions. Scale up or down per sprint.',
+                bestFor:     'Studios that need long-term scale',
+              },
+            ].map((model, i) => (
+              <ScrollReveal key={model.title} delay={i * 100}>
+                <div className="xq-card h-full flex flex-col">
+                  <div className="text-3xl mb-5">{model.icon}</div>
+                  <h3 className="text-xl font-bold text-white mb-3">{model.title}</h3>
+                  <p className="text-xq-muted text-sm leading-relaxed flex-1">{model.description}</p>
+                  <div className="mt-6 pt-5 border-t border-xq-border">
+                    <p className="text-xs text-xq-muted uppercase tracking-widest">Best for</p>
+                    <p className="text-xq-accent text-sm font-medium mt-1">{model.bestFor}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link href="/contact" className="xq-btn-ghost">Discuss Your Project →</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 10. Showreel ─────────────────────────────────────────────────────── */}
       {show.showreel && showreel.video?.url && (
         <section className="border-b border-xq-border bg-black">
           <div className="xq-container py-20">
@@ -614,7 +663,7 @@ export default function HomePageClient({ initialData, services, clients, feature
         </section>
       )}
 
-      {/* ── 10. Testimonials ─────────────────────────────────────────────────── */}
+      {/* ── 11. Testimonials ─────────────────────────────────────────────────── */}
       {show.testimonials && testimonialItems.length > 0 && (
         <section className="xq-section border-b border-xq-border">
           <div className="xq-container">
@@ -649,7 +698,7 @@ export default function HomePageClient({ initialData, services, clients, feature
         </section>
       )}
 
-      {/* ── 11. Blog Preview ─────────────────────────────────────────────────── */}
+      {/* ── 12. Blog Preview ─────────────────────────────────────────────────── */}
       {show.blogPreview && blogPosts.length > 0 && (
         <section className="xq-section border-b border-xq-border bg-xq-surface">
           <div className="xq-container">
@@ -701,7 +750,7 @@ export default function HomePageClient({ initialData, services, clients, feature
         </section>
       )}
 
-      {/* ── 12. Bottom CTA (always visible) ──────────────────────────────────── */}
+      {/* ── 13. Bottom CTA (always visible) ──────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">
         <div className="xq-container">
           <ScrollReveal className="max-w-2xl mx-auto text-center">
