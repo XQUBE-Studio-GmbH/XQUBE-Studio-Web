@@ -10,8 +10,23 @@ const nextConfig = {
   // are accidentally pulled into the webpack graph (e.g. via instrumentation.ts).
   async redirects() {
     return [
+      // ── Canonical domain — non-www → www ─────────────────────────────────
+      // Prevents Google treating xqubestudio.com and www.xqubestudio.com as duplicates.
+      {
+        source:      '/:path*',
+        has:         [{ type: 'host', value: 'xqubestudio.com' }],
+        destination: 'https://www.xqubestudio.com/:path*',
+        permanent:   true,
+      },
+
+      // ── Old Wix pages ─────────────────────────────────────────────────────
       // Google indexed /aboutus — correct URL is /about
-      { source: '/aboutus', destination: '/about', permanent: true },
+      { source: '/aboutus',  destination: '/about', permanent: true },
+      // /xkit — scrapped Wix page, was returning 403; redirect to homepage
+      { source: '/xkit',     destination: '/',      permanent: true },
+      // /blank and /blank-2 — leftover Wix dev pages; redirect to homepage
+      { source: '/blank',    destination: '/',      permanent: true },
+      { source: '/blank-2',  destination: '/',      permanent: true },
     ]
   },
 
