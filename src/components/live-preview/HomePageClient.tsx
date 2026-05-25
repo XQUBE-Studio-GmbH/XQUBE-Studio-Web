@@ -525,7 +525,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                 <ScrollReveal key={String(service.id)} delay={i * 100}>
                   <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : ''}`}>
                     {service.image?.url && (
-                      <div className="relative aspect-video">
+                      <div className="relative h-44">
                         <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
                       </div>
                     )}
