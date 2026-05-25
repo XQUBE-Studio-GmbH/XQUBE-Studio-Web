@@ -169,45 +169,64 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
       {/* Services */}
       <section className="border-t border-xq-border pb-24">
         <div className="xq-container space-y-8 mt-12">
-          {services.map((service, i) => (
-            <ScrollReveal key={String(service.id)} delay={i * 80}>
-            <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : 'p-5 sm:p-6 md:p-8'}`}>
-              {service.image?.url && (
-                <div className="relative h-64 lg:h-72">
-                  <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
-                </div>
-              )}
-              <div className={service.image?.url ? 'p-5 sm:p-6 md:p-8' : ''}>
-                <div className="flex items-start gap-3 mb-3">
-                  {service.icon && <span className="text-2xl shrink-0">{service.icon}</span>}
-                  <h2 className="text-2xl font-black text-white">{service.title}</h2>
-                </div>
-                {service.shortDescription && (
-                  <p className="text-xq-muted leading-relaxed mb-6 max-w-2xl">{service.shortDescription}</p>
-                )}
-                {service.features && service.features.length > 0 && (
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
-                    {service.features.map((f) => (
-                      <li key={f.id} className="flex items-start gap-2 text-sm text-xq-muted">
-                        <span className="text-xq-accent mt-0.5 shrink-0">→</span> {f.feature}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {service.slug && (
-                  <div className="pt-4">
-                    <Link
-                      href={`/services/${service.slug}`}
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-xq-accent hover:underline transition-colors"
-                    >
-                      Learn more →
-                    </Link>
+          {services.map((service, i) => {
+            const inner = (
+              <>
+                {service.image?.url && (
+                  <div className="relative h-64 lg:h-72 overflow-hidden">
+                    <Image
+                      src={service.image.url}
+                      alt={service.image.alt || service.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
                   </div>
                 )}
-              </div>
-            </div>
-            </ScrollReveal>
-          ))}
+                <div className={service.image?.url ? 'p-5 sm:p-6 md:p-8' : ''}>
+                  <div className="flex items-start gap-3 mb-3">
+                    {service.icon && <span className="text-2xl shrink-0">{service.icon}</span>}
+                    <h2 className="text-2xl font-black text-white group-hover:text-xq-accent transition-colors duration-200">{service.title}</h2>
+                  </div>
+                  {service.shortDescription && (
+                    <p className="text-xq-muted leading-relaxed mb-6 max-w-2xl">{service.shortDescription}</p>
+                  )}
+                  {service.features && service.features.length > 0 && (
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
+                      {service.features.map((f) => (
+                        <li key={f.id} className="flex items-start gap-2 text-sm text-xq-muted">
+                          <span className="text-xq-accent mt-0.5 shrink-0">→</span> {f.feature}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {service.slug && (
+                    <div className="pt-4">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-xq-accent group-hover:underline">
+                        Learn more →
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </>
+            )
+
+            return (
+              <ScrollReveal key={String(service.id)} delay={i * 80}>
+                {service.slug ? (
+                  <Link
+                    href={`/services/${service.slug}`}
+                    className={`xq-card group block hover:border-xq-accent/50 transition-colors duration-200 ${service.image?.url ? 'p-0 overflow-hidden' : 'p-5 sm:p-6 md:p-8'}`}
+                  >
+                    {inner}
+                  </Link>
+                ) : (
+                  <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : 'p-5 sm:p-6 md:p-8'}`}>
+                    {inner}
+                  </div>
+                )}
+              </ScrollReveal>
+            )
+          })}
         </div>
       </section>
 
