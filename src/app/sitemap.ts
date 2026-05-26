@@ -57,7 +57,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }))
 
-    return [...staticRoutes, ...portfolioRoutes, ...blogRoutes]
+    // Fetch published services with slugs
+    const servicesRes = await payload.find({
+      collection: 'services',
+      where: { slug: { exists: true } },
+      limit: 100,
+      select: { slug: true, updatedAt: true },
+    })
+
+    const serviceRoutes: MetadataRoute.Sitemap = servicesRes.docs
+      .filter((s) => s.slug)
+      .map((s) => ({
+        url: `${BASE_URL}/services/${s.slug}`,
+        lastModified: s.updatedAt ? new Date(s.updatedAt as string) : new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      }))
+
+    return [...staticRoutes, ...portfolioRoutes, ...blogRoutes, ...serviceRoutes]
   } catch {
     // If DB is unreachable (e.g. during static build), fall back to static routes only
     return staticRoutes
