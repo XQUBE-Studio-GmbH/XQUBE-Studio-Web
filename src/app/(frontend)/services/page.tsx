@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import ServicesPageClient from '@/components/live-preview/ServicesPageClient'
-import type { ServicesPageGlobal, ServiceItem } from '@/types/cms'
+import type { ServiceItem } from '@/types/cms'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { BASE_URL, ORG_REF } from '@/lib/jsonLd'
+import { getServicesListData } from '@/lib/cachedData'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,27 +86,9 @@ const FB_SERVICES: ServiceItem[] = [
   },
 ]
 
-// ─── Data fetcher ────────────────────────────────────────────────────────────
-
-async function getData() {
-  try {
-    const payload = await getPayload({ config })
-    const [servicesRes, sp] = await Promise.all([
-      payload.find({ collection: 'services', sort: 'order', limit: 20, depth: 1 }),
-      payload.findGlobal({ slug: 'services-page' }) as Promise<ServicesPageGlobal>,
-    ])
-    const docs = servicesRes.docs as unknown as ServiceItem[]
-    return {
-      services: docs.length > 0 ? docs : FB_SERVICES,
-      sp,
-    }
-  } catch {
-    return { services: FB_SERVICES, sp: {} as ServicesPageGlobal }
-  }
-}
-
 export default async function ServicesPage() {
-  const { services, sp } = await getData()
+  const { services: rawServices, sp } = await getServicesListData()
+  const services: ServiceItem[] = rawServices.length > 0 ? rawServices : FB_SERVICES
 
   const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 

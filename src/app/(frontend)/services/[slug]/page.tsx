@@ -2,13 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
-import config from '../../../../../payload/payload.config'
 import { serializeLexical } from '@/lib/serializeLexical'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { buildBreadcrumbList, BASE_URL, ORG_REF } from '@/lib/jsonLd'
 import PageHero from '@/components/PageHero'
 import type { ServiceItem, ServiceToolItem } from '@/types/cms'
+import { getServiceBySlug, getRelatedPortfolioForService, getOtherServices } from '@/lib/cachedData'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,31 +62,11 @@ interface PortfolioPreview {
 }
 
 async function getService(slug: string): Promise<ServiceItem | null> {
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'services',
-      where:      { slug: { equals: slug } },
-      limit:      1,
-      depth:      2,
-    })
-    return (res.docs[0] as unknown as ServiceItem) ?? null
-  } catch { return null }
+  return getServiceBySlug(slug) as Promise<ServiceItem | null>
 }
 
 async function getRelatedPortfolio(categories: string[]): Promise<PortfolioPreview[]> {
-  if (categories.length === 0) return []
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'portfolio',
-      where: { and: [{ status: { equals: 'published' } }, { category: { in: categories } }] },
-      sort:  '-createdAt',
-      limit: 6,
-      depth: 1,
-    })
-    return res.docs as unknown as PortfolioPreview[]
-  } catch { return [] }
+  return getRelatedPortfolioForService(categories) as Promise<PortfolioPreview[]>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -311,9 +290,7 @@ export default async function ServiceDetailPage({ params }: Props) {
 
 async function OtherServices({ currentSlug }: { currentSlug: string }) {
   try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({ collection: 'services', sort: 'order', limit: 10, depth: 0 })
-    const others = (res.docs as unknown as ServiceItem[]).filter((s) => s.slug !== currentSlug)
+    const others = await getOtherServices(currentSlug) as ServiceItem[]
     if (others.length === 0) return null
     return (
       <ul className="space-y-2">

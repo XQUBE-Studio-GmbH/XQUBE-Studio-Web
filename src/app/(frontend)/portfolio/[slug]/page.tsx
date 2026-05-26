@@ -2,12 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
-import config from '../../../../../payload/payload.config'
 import { serializeLexical } from '@/lib/serializeLexical'
 import PortfolioGallery from '@/components/PortfolioGallery'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { buildBreadcrumbList, BASE_URL, ORG_REF } from '@/lib/jsonLd'
+import { getPortfolioItemBySlug, getRelatedPortfolioItems } from '@/lib/cachedData'
 
 // force-dynamic: prevents build-time DB calls; rendered at request time instead.
 export const dynamic = 'force-dynamic'
@@ -78,36 +77,11 @@ function getEmbedUrl(url: string): string | null {
 }
 
 async function getItem(slug: string): Promise<PortfolioItem | null> {
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'portfolio',
-      where: { slug: { equals: slug }, status: { equals: 'published' } },
-      limit: 1,
-      depth: 2,
-    })
-    return (res.docs[0] as unknown as PortfolioItem) ?? null
-  } catch {
-    return null
-  }
+  return getPortfolioItemBySlug(slug) as Promise<PortfolioItem | null>
 }
 
 async function getRelated(currentId: string, category?: string): Promise<PortfolioItem[]> {
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'portfolio',
-      where: {
-        status: { equals: 'published' },
-        ...(category ? { category: { equals: category } } : {}),
-      },
-      limit: 4,
-      depth: 1,
-    })
-    return (res.docs as unknown as PortfolioItem[]).filter((d) => d.id !== currentId).slice(0, 3)
-  } catch {
-    return []
-  }
+  return getRelatedPortfolioItems(currentId, category) as Promise<PortfolioItem[]>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

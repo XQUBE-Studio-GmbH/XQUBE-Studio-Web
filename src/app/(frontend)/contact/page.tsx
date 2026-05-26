@@ -5,6 +5,7 @@ import ContactPageClient from '@/components/live-preview/ContactPageClient'
 import type { ContactPageGlobal } from '@/types/cms'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { BASE_URL, LOGO_URL } from '@/lib/jsonLd'
+import { getContactData } from '@/lib/cachedData'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,17 +21,6 @@ export async function generateMetadata(): Promise<Metadata> {
     })
   } catch {
     return { title: 'Contact', description: "Get in touch with XQube Studio. Book a discovery call or send us a message — we respond within 24–48 hours." }
-  }
-}
-
-interface SiteSettings {
-  contact?: {
-    email?: string
-    phone?: string
-    address?: string
-    calendly?: string
-    linkedin?: string
-    artstation?: string
   }
 }
 
@@ -70,11 +60,7 @@ const FALLBACK_COPY: ContactPageCopy = {
 
 async function getData(): Promise<{ contactInfo: ContactInfo; pageCopy: ContactPageCopy }> {
   try {
-    const payload = await getPayload({ config })
-    const [settings, cp] = await Promise.all([
-      payload.findGlobal({ slug: 'site-settings' }) as Promise<SiteSettings>,
-      payload.findGlobal({ slug: 'contact-page' })  as Promise<ContactPageGlobal>,
-    ])
+    const { settings, cp } = await getContactData()
     const c = settings.contact ?? {}
     const h = cp.hero ?? {}
     return {

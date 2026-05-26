@@ -1,41 +1,12 @@
 import '../globals.css'
-import { getPayload } from 'payload'
-import config from '../../../payload/payload.config'
 import NavbarClient from '@/components/live-preview/NavbarClient'
 import FooterClient from '@/components/live-preview/FooterClient'
 import CookieBanner from '@/components/CookieBanner'
-import type { NavLink, CtaButton } from '@/components/Navbar'
-import type { SiteSettingsGlobal } from '@/components/Footer'
+import { getLayoutData } from '@/lib/cachedData'
 
 // force-dynamic required because this layout fetches from Payload on every request
 // to always reflect the latest published draft of navigation and site-settings.
 export const dynamic = 'force-dynamic'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface NavigationGlobal {
-  mainNav?:   NavLink[]
-  ctaButton?: CtaButton
-}
-
-// ─── Data fetchers ────────────────────────────────────────────────────────────
-
-async function getLayoutData(): Promise<{
-  nav:      NavigationGlobal
-  settings: SiteSettingsGlobal
-}> {
-  try {
-    const payload = await getPayload({ config })
-    const [nav, settings] = await Promise.all([
-      payload.findGlobal({ slug: 'navigation' })                    as Promise<NavigationGlobal>,
-      payload.findGlobal({ slug: 'site-settings', depth: 1 })      as Promise<SiteSettingsGlobal>,
-    ])
-    return { nav, settings }
-  } catch {
-    // Graceful fallback — components have their own hardcoded defaults
-    return { nav: {}, settings: {} }
-  }
-}
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 

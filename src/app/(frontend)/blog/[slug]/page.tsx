@@ -2,10 +2,9 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
-import config from '../../../../../payload/payload.config'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { buildBreadcrumbList, BASE_URL, LOGO_URL, ORG_REF } from '@/lib/jsonLd'
+import { getBlogPostBySlug } from '@/lib/cachedData'
 
 // force-dynamic: prevents build-time DB calls; rendered at request time instead.
 export const dynamic = 'force-dynamic'
@@ -33,18 +32,7 @@ interface BlogPost {
 }
 
 async function getPost(slug: string): Promise<BlogPost | null> {
-  try {
-    const payload = await getPayload({ config })
-    const res = await payload.find({
-      collection: 'blog-posts',
-      where: { slug: { equals: slug }, status: { equals: 'published' } },
-      limit: 1,
-      depth: 1,
-    })
-    return (res.docs[0] as unknown as BlogPost) ?? null
-  } catch {
-    return null
-  }
+  return getBlogPostBySlug(slug) as Promise<BlogPost | null>
 }
 
 function formatDate(dateStr?: string) {
