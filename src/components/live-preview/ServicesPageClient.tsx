@@ -94,7 +94,7 @@ function PipelineCard({ pipeline, index }: { pipeline: Pipeline; index: number }
         {/* Optional image — only shown if one is uploaded */}
         {pipeline.image?.url && (
           <div className="relative aspect-video rounded-lg overflow-hidden mb-5 border border-xq-border">
-            <Image src={pipeline.image.url} alt={pipeline.image.alt || pipeline.title} fill className="object-cover" />
+            <Image src={pipeline.image.url} alt={pipeline.image.alt || pipeline.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
           </div>
         )}
 
@@ -178,6 +178,7 @@ export default function ServicesPageClient({ initialData, services, serverURL }:
                       src={service.image.url}
                       alt={service.image.alt || service.title}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) calc(100vw - 4rem), 1280px"
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>

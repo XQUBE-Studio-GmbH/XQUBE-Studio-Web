@@ -109,7 +109,7 @@ export default function ContactForm({ contactInfo: ci, pageCopy: pc }: { contact
 
             {pc.image?.url && (
               <div className="relative aspect-video rounded-lg overflow-hidden border border-xq-border mb-10">
-                <Image src={pc.image.url} alt={pc.image.alt || 'XQube Studio'} fill className="object-cover" />
+                <Image src={pc.image.url} alt={pc.image.alt || 'XQube Studio'} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
               </div>
             )}
 

@@ -146,7 +146,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
               <Image
                 src={slide.image.url}
                 alt={slide.image.alt || slide.title || 'XQube Studio'}
-                fill className="object-cover"
+                fill sizes="100vw" className="object-cover"
                 priority={i === 0}
               />
             </div>
@@ -412,7 +412,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border">
                     <Image
                       src={si.image.url} alt={si.image.alt || 'XQube Studio'}
-                      fill className="object-cover"
+                      fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                   </div>
@@ -477,6 +477,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                   <div className={`relative overflow-hidden ${i === 0 ? 'aspect-[4/3] md:aspect-auto md:h-full min-h-[300px]' : 'aspect-video'}`}>
                     {item.heroImage?.url ? (
                       <Image src={item.heroImage.url} alt={item.heroImage.alt || item.title} fill
+                        sizes={i === 0 ? '(max-width: 768px) 100vw, 66vw' : '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'}
                         className="object-cover group-hover:scale-[1.04] transition-transform duration-700" />
                     ) : (
                       <div className="absolute inset-0 bg-xq-surface flex items-center justify-center">
@@ -526,7 +527,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                   <div className={`xq-card ${service.image?.url ? 'p-0 overflow-hidden' : ''}`}>
                     {service.image?.url && (
                       <div className="relative h-44">
-                        <Image src={service.image.url} alt={service.image.alt || service.title} fill className="object-cover" />
+                        <Image src={service.image.url} alt={service.image.alt || service.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
                       </div>
                     )}
                     <div className={service.image?.url ? 'p-6' : ''}>
@@ -685,7 +686,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                     <div className="flex items-center gap-3 pt-5 border-t border-xq-border">
                       {t.avatar?.url && (
                         <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-xq-border">
-                          <Image src={t.avatar.url} alt={t.name} fill className="object-cover" />
+                          <Image src={t.avatar.url} alt={t.name} fill sizes="40px" className="object-cover" />
                         </div>
                       )}
                       <div>
@@ -724,6 +725,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                       <div className="relative aspect-video overflow-hidden shrink-0">
                         <Image
                           src={post.coverImage.url} alt={post.coverImage.alt || post.title} fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>

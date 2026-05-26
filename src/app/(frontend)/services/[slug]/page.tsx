@@ -290,7 +290,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                 <Link key={item.id} href={`/portfolio/${item.slug}`} className="group block">
                   <div className="relative aspect-video rounded-lg overflow-hidden border border-xq-border bg-xq-surface mb-3">
                     {item.heroImage?.url ? (
-                      <Image src={item.heroImage.url} alt={item.heroImage.alt || item.title} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                      <Image src={item.heroImage.url} alt={item.heroImage.alt || item.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center text-xq-muted text-xs">No image</div>
                     )}

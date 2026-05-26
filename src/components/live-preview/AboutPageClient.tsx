@@ -87,7 +87,7 @@ export default function AboutPageClient({ initialData, teamMembers, serverURL }:
                 <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
               </div>
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border">
-                <Image src={introImage.url} alt={introImage.alt || 'XQube Studio'} fill className="object-cover" />
+                <Image src={introImage.url} alt={introImage.alt || 'XQube Studio'} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
               </div>
             </div>
           ) : (
@@ -125,7 +125,7 @@ export default function AboutPageClient({ initialData, teamMembers, serverURL }:
               <div className="xq-card overflow-hidden">
                 {hub.image?.url && (
                   <div className="relative aspect-video -mx-6 -mt-6 mb-6">
-                    <Image src={hub.image.url} alt={hub.image.alt || hub.city} fill className="object-cover" />
+                    <Image src={hub.image.url} alt={hub.image.alt || hub.city} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
                   </div>
                 )}
                 {hub.flag && !hub.image?.url && <div className="text-4xl mb-4">{hub.flag}</div>}
@@ -151,7 +151,7 @@ export default function AboutPageClient({ initialData, teamMembers, serverURL }:
                 <div className="xq-card text-center">
                   <div className="relative w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-2 border-xq-border bg-xq-surface">
                     {member.photo?.url ? (
-                      <Image src={member.photo.url} alt={member.photo.alt || member.name} fill className="object-cover" />
+                      <Image src={member.photo.url} alt={member.photo.alt || member.name} fill sizes="128px" className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xq-accent font-black text-3xl">
                         {member.name.charAt(0).toUpperCase()}

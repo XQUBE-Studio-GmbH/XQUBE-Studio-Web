@@ -51,7 +51,7 @@ export default function PageHero({
           className="absolute inset-0"
           style={{ transform: `scale(1.12) translateY(${parallaxOffset}px)`, willChange: 'transform' }}
         >
-          <Image src={image.url} alt={image.alt || heading} fill className="object-cover" priority />
+          <Image src={image.url} alt={image.alt || heading} fill sizes="100vw" className="object-cover" priority />
         </div>
       )}
 

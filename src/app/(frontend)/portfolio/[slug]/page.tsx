@@ -175,6 +175,7 @@ export default async function PortfolioItemPage({ params }: Props) {
             src={item.heroImage.url}
             alt={item.heroImage.alt || item.title}
             fill
+            sizes="100vw"
             className="object-cover"
             priority
           />
@@ -388,6 +389,7 @@ export default async function PortfolioItemPage({ params }: Props) {
                         src={r.heroImage.url}
                         alt={r.heroImage.alt || r.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
                       />
                     ) : (
