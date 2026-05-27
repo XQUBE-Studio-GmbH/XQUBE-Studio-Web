@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '../../../../payload/payload.config'
 import ServicesPageClient from '@/components/live-preview/ServicesPageClient'
-import type { ServiceItem } from '@/types/cms'
+import type { ServiceItem, ServicesPageGlobal } from '@/types/cms'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { BASE_URL, ORG_REF } from '@/lib/jsonLd'
 import { getServicesListData } from '@/lib/cachedData'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config })
-    const page = await payload.findGlobal({ slug: 'services-page', depth: 1 }) as any
+    const page = await payload.findGlobal({ slug: 'services-page', depth: 1 }) as ServicesPageGlobal
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'Services',

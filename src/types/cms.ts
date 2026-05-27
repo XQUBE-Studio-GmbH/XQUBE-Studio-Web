@@ -6,6 +6,14 @@
 
 export interface MediaRef { url?: string; alt?: string }
 
+// Shared SEO meta shape — used by all page globals and collections
+export interface SeoMeta {
+  title?:       string | null
+  description?: string | null
+  image?:       { url?: string } | null
+  noIndex?:     boolean | null
+}
+
 // ─── Collections ──────────────────────────────────────────────────────────────
 
 export interface ServiceToolItem {
@@ -106,6 +114,7 @@ export interface Testimonial {
 }
 
 export interface HomepageGlobal {
+  seo?: SeoMeta
   sections?: {
     showStudioIntro?:  boolean
     showEngineBadges?: boolean
@@ -178,6 +187,7 @@ export interface Hub {
 export interface WhyCard { id?: string; title: string; body: string }
 
 export interface AboutGlobal {
+  seo?:         SeoMeta
   hero?:        { label?: string; heading?: string; subtitle?: string; image?: MediaRef | null }
   intro?:       { body1?: string; body2?: string; image?: MediaRef | null }
   credentials?: Credential[]
@@ -203,6 +213,7 @@ export interface Pipeline {
 }
 
 export interface ServicesPageGlobal {
+  seo?:  SeoMeta
   hero?:      { label?: string; heading?: string; subtitle?: string; image?: MediaRef | null }
   cta?:       { heading?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string }
   pipelines?: Pipeline[]
@@ -216,6 +227,7 @@ export interface PortfolioOrderRow {
 }
 
 export interface PortfolioPageGlobal {
+  seo?:  SeoMeta
   hero?: {
     label?:    string
     heading?:  string
@@ -230,12 +242,14 @@ export interface PortfolioPageGlobal {
 // ─── Page Global: Blog ────────────────────────────────────────────────────────
 
 export interface BlogPageGlobal {
+  seo?:  SeoMeta
   hero?: { label?: string; heading?: string; subtitle?: string; image?: MediaRef | null }
 }
 
 // ─── Page Global: Contact ─────────────────────────────────────────────────────
 
 export interface ContactPageGlobal {
+  seo?:  SeoMeta
   hero?: {
     label?:         string
     heading?:       string

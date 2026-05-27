@@ -31,7 +31,7 @@ export async function register() {
     //    safe for a small-team admin (nobody edits two user records simultaneously).
     try {
       const { sql } = await import('@payloadcms/db-postgres')
-      await (payload.db as any).execute(
+      await (payload.db as { execute: (query: unknown) => Promise<unknown> }).execute(
         sql`DELETE FROM payload_locked_documents WHERE id IN (
           SELECT parent_id FROM payload_locked_documents_rels WHERE collection = 'users'
         )`

@@ -4,6 +4,7 @@ import config from '../../../../payload/payload.config'
 import BlogPageClient from '@/components/live-preview/BlogPageClient'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { getBlogListData } from '@/lib/cachedData'
+import type { BlogPageGlobal } from '@/types/cms'
 
 // force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
 export const dynamic = 'force-dynamic'
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config })
-    const page = await payload.findGlobal({ slug: 'blog-page', depth: 1 }) as any
+    const page = await payload.findGlobal({ slug: 'blog-page', depth: 1 }) as BlogPageGlobal
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'Blog & Insights',

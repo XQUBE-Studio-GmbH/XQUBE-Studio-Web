@@ -4,6 +4,7 @@ import config from '../../../../payload/payload.config'
 import PortfolioPageClient from '@/components/live-preview/PortfolioPageClient'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { getPortfolioListData } from '@/lib/cachedData'
+import type { PortfolioPageGlobal } from '@/types/cms'
 
 // force-dynamic: Vercel build runners can't reliably reach Supabase pooler.
 export const dynamic = 'force-dynamic'
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config })
-    const page = await payload.findGlobal({ slug: 'portfolio-page', depth: 1 }) as any
+    const page = await payload.findGlobal({ slug: 'portfolio-page', depth: 1 }) as PortfolioPageGlobal
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'Portfolio',

@@ -4,13 +4,14 @@ import config from '../../../payload/payload.config'
 import HomePageClient from '@/components/live-preview/HomePageClient'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { getHomeData } from '@/lib/cachedData'
+import type { HomepageGlobal } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config })
-    const page = await payload.findGlobal({ slug: 'home-page', depth: 1 }) as any
+    const page = await payload.findGlobal({ slug: 'home-page', depth: 1 }) as HomepageGlobal
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'XQube Studio | AAA Game Art & XR Production',

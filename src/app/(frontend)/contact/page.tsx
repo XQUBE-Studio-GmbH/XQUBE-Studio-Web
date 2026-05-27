@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config })
-    const page = await payload.findGlobal({ slug: 'contact-page', depth: 1 }) as any
+    const page = await payload.findGlobal({ slug: 'contact-page', depth: 1 }) as ContactPageGlobal
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'Contact',

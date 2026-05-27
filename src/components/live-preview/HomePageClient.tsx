@@ -560,7 +560,7 @@ export default function HomePageClient({ initialData, services, clients, feature
             </ScrollReveal>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {processSteps.map((step, i) => (
-                <ScrollReveal key={(step as any).id || i} delay={i * 100}>
+                <ScrollReveal key={step.id || i} delay={i * 100}>
                   <div className="xq-card h-full flex flex-col">
                     <div className="flex items-center gap-3 mb-5">
                       <span className="text-2xl">{step.icon || ''}</span>
@@ -679,7 +679,7 @@ export default function HomePageClient({ initialData, services, clients, feature
             </ScrollReveal>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {testimonialItems.map((t, i) => (
-                <ScrollReveal key={(t as any).id || i} delay={i * 100}>
+                <ScrollReveal key={t.id || i} delay={i * 100}>
                   <div className="xq-card h-full flex flex-col">
                     <div className="text-xq-accent text-4xl leading-none mb-4 font-serif">&ldquo;</div>
                     <p className="text-xq-muted leading-relaxed flex-1 mb-6 italic text-sm">{t.quote}</p>

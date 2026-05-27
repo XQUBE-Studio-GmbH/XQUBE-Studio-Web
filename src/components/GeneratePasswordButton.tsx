@@ -43,7 +43,7 @@ export default function GeneratePasswordButton() {
   // On create: dispatch to form so it's saved with the user.
   // On edit:   just display it — admin must click Reset & Send to apply it.
   useEffect(() => {
-    const isOwnProfile = user && id && String((user as any).id) === String(id)
+    const isOwnProfile = user && id && String((user as { id?: string | number }).id) === String(id)
     if (isOwnProfile) return
     const p = generatePassword()
     setPassword(p)
@@ -54,7 +54,7 @@ export default function GeneratePasswordButton() {
 
   // Hide on /admin/account and when any user edits their own profile.
   // The built-in "Change Password" button handles self-service password changes.
-  const isOwnProfile = user && id && String((user as any).id) === String(id)
+  const isOwnProfile = user && id && String((user as { id?: string | number }).id) === String(id)
   if (isOwnProfile) return null
 
   if (!mounted) return null

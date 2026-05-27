@@ -5,13 +5,14 @@ import AboutPageClient from '@/components/live-preview/AboutPageClient'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { BASE_URL, LOGO_URL } from '@/lib/jsonLd'
 import { getAboutData } from '@/lib/cachedData'
+import type { AboutGlobal } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config })
-    const page = await payload.findGlobal({ slug: 'about-page', depth: 1 }) as any
+    const page = await payload.findGlobal({ slug: 'about-page', depth: 1 }) as AboutGlobal
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'About',
