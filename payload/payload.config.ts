@@ -788,7 +788,7 @@ export default buildConfig({
       },
       access: {
         read:   isAdminOrAbove,
-        create: isAdminOrAbove, // API uses overrideAccess: true
+        create: () => false,    // form API uses overrideAccess: true — no manual creation
         update: isAdminOrAbove,
         delete: isSuperAdmin,
       },
