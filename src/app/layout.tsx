@@ -1,4 +1,16 @@
 import type { Metadata } from 'next'
+import { Urbanist } from 'next/font/google'
+
+// Self-host Urbanist via next/font — no external Google Fonts request at runtime.
+// This eliminates the render-blocking @import that was in globals.css and saves
+// ~1,880ms on FCP/LCP (mobile Lighthouse). The CSS variable --font-urbanist is set
+// on <html> so globals.css can reference it without any client-side JS.
+const urbanist = Urbanist({
+  subsets:  ['latin'],
+  weight:   ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-urbanist',
+  display:  'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com'),
@@ -28,7 +40,7 @@ export const metadata: Metadata = {
 // lives in (frontend)/layout.tsx so it never leaks into the admin panel.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={urbanist.variable}>
       <body suppressHydrationWarning>{children}</body>
     </html>
   )

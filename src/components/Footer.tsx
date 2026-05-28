@@ -107,7 +107,7 @@ export default function Footer({ settings, navLinks: propNavLinks }: Props) {
 
           {/* Navigation */}
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Navigation</h4>
+            <p className="text-white font-semibold text-sm mb-4">Navigation</p>
             <ul className="space-y-3">
               {visibleNavLinks.map((link) => (
                 <li key={link.url}>
@@ -121,7 +121,7 @@ export default function Footer({ settings, navLinks: propNavLinks }: Props) {
 
           {/* Contact */}
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4">Get in Touch</h4>
+            <p className="text-white font-semibold text-sm mb-4">Get in Touch</p>
             <ul className="space-y-3">
               <li>
                 <a href={`mailto:${email}`} className="text-sm text-xq-muted hover:text-xq-accent transition-colors break-all">

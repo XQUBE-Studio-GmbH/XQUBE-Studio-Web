@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&display=swap');
+/* Google Fonts @import removed — Urbanist is now self-hosted via next/font/google
+   in src/app/layout.tsx, which sets the --font-urbanist CSS variable on <html>.
+   This eliminates the render-blocking external request (was ~1,880ms on mobile). */
 
 @tailwind base;
 @tailwind components;
@@ -21,7 +23,7 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 body {
   background-color: var(--bg);
   color: var(--light);
-  font-family: 'Urbanist', sans-serif;
+  font-family: var(--font-urbanist), sans-serif;
   overflow-x: hidden;
 }
 
@@ -32,7 +34,7 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Urbanist', sans-serif;
+  font-family: var(--font-urbanist), sans-serif;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.1;
