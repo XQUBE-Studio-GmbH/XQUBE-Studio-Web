@@ -86,9 +86,18 @@ async function main() {
   console.log(`Bucket : ${BUCKET}`)
   console.log(`Region : ${REGION}\n`)
 
+  // Parse the URL manually and pass individual params to pg.
+  // pg's own URL parser mis-handles Supabase's newer username format
+  // (postgres.PROJECT_REF contains a dot) and tries to resolve the username
+  // as a hostname. Node's built-in URL class parses it correctly.
+  const dbUrl = new URL(cleanDatabaseUrl(DATABASE_URI!))
   const db = new Client({
-    connectionString: cleanDatabaseUrl(DATABASE_URI!),
-    ssl: { rejectUnauthorized: false },
+    host:     dbUrl.hostname,
+    port:     parseInt(dbUrl.port || '6543'),
+    database: dbUrl.pathname.replace(/^\//, ''),
+    user:     dbUrl.username,
+    password: dbUrl.password,
+    ssl:      { rejectUnauthorized: false },
   })
   await db.connect()
 
