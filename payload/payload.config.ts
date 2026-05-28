@@ -327,6 +327,14 @@ export default buildConfig({
           'video/webm',
           'video/quicktime', // .mov
         ],
+        // Convert every uploaded image to WebP at source.
+        // sharp handles this at upload time so DO Spaces only ever receives WebP files.
+        // Videos bypass sharp entirely and are stored unchanged.
+        // Existing uploads are unaffected — only new uploads going forward are converted.
+        formatOptions: {
+          format: 'webp' as const,
+          options: { quality: 85 },
+        },
         imageSizes: [
           {
             name: 'thumbnail', width: 400,  height: 300,  position: 'centre',
