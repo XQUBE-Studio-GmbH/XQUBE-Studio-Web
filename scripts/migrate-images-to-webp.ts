@@ -54,8 +54,15 @@ const s3 = new S3Client({
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function cleanDatabaseUrl(url: string): string {
-  // Strip doubled prefix that sometimes appears in Supabase pooler URLs
-  return url.replace(/^postgresqlpostgresql:\/\//, 'postgresql://')
+  return url
+    // Strip doubled prefix that sometimes appears in Supabase pooler URLs
+    .replace(/^postgresqlpostgresql:\/\//, 'postgresql://')
+    // Strip ?pgbouncer=true — it is a Drizzle/postgres.js hint, not a valid
+    // PostgreSQL connection parameter. The raw pg client rejects it and
+    // mis-parses the URL, causing ENOTFOUND on the username as if it were a hostname.
+    .replace(/[?&]pgbouncer=true/gi, '')
+    // Clean up any trailing ? left after stripping
+    .replace(/\?$/, '')
 }
 
 async function streamToBuffer(stream: Readable): Promise<Buffer> {
