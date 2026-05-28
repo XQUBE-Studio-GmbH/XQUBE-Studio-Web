@@ -41,6 +41,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={urbanist.variable}>
+      <head>
+        {/* Warm up the DO Spaces CDN connection before any media requests fire.
+            preconnect handles DNS + TCP + TLS in parallel with page parsing,
+            reducing LCP latency for hero images and other above-the-fold media. */}
+        <link rel="preconnect" href="https://xqube-web-media.fra1.cdn.digitaloceanspaces.com" />
+        <link rel="dns-prefetch" href="https://xqube-web-media.fra1.cdn.digitaloceanspaces.com" />
+      </head>
       <body suppressHydrationWarning>{children}</body>
     </html>
   )

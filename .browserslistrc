@@ -1,0 +1,10 @@
+# Modern browsers only — eliminates polyfills for Array.prototype.at,
+# Object.hasOwn, Array.prototype.flat/flatMap, Object.fromEntries,
+# String.prototype.trimEnd/trimStart (all baseline by 2021).
+# Game studio clients use current tools and current browsers.
+# This matches ~96% of global users per caniuse.com (Dec 2024).
+chrome >= 92
+firefox >= 93
+safari >= 15
+edge >= 92
+not dead
