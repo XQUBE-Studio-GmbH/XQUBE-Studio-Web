@@ -57,14 +57,15 @@ function cleanDatabaseUrl(url: string): string {
   return url
     // Strip doubled prefix that sometimes appears in Supabase pooler URLs
     .replace(/^postgresqlpostgresql:\/\//, 'postgresql://')
-    // Strip ?pgbouncer=true — it is a Drizzle/postgres.js hint, not valid for pg
+    // Strip ?pgbouncer=true — it is a Drizzle/postgres.js hint, not valid for raw pg
     .replace(/[?&]pgbouncer=true/gi, '')
     // Clean up any trailing ? left after stripping
     .replace(/\?$/, '')
-    // Switch from transaction pooler (6543) to session pooler (5432).
-    // Port 6543 rejects connections from local machines (PgBouncer tenant lookup
-    // behaves differently outside Vercel's network). Port 5432 works fine for a
-    // local script running a single connection — no serverless limits apply here.
+    // Switch transaction pooler (6543) → session pooler (5432).
+    // Port 6543 (transaction pooler) is for serverless functions on Vercel.
+    // Port 5432 (session pooler) works from a local machine on an IPv4 network.
+    // Direct connections (db.PROJECT.supabase.co) are IPv6-only and won't resolve
+    // on typical home/office IPv4 networks.
     .replace(/:6543\//, ':5432/')
 }
 
@@ -93,13 +94,24 @@ async function main() {
   // pg's own URL parser mis-handles Supabase's newer username format
   // (postgres.PROJECT_REF contains a dot) and tries to resolve the username
   // as a hostname. Node's built-in URL class parses it correctly.
-  const dbUrl = new URL(cleanDatabaseUrl(DATABASE_URI!))
+  const cleanedUrl = cleanDatabaseUrl(DATABASE_URI!)
+  const dbUrl = new URL(cleanedUrl)
+
+  // ── Diagnostic output (safe — password is masked) ────────────────────────
+  console.log('🔌  DB Connection params:')
+  console.log(`    host     : ${dbUrl.hostname}`)
+  console.log(`    port     : ${dbUrl.port || '5432 (default)'}`)
+  console.log(`    user     : ${dbUrl.username}`)
+  console.log(`    database : ${dbUrl.pathname.replace(/^\//, '')}`)
+  console.log(`    password : ${'*'.repeat(Math.min(dbUrl.password.length, 8))} (masked)`)
+  console.log(`    cleaned  : ${cleanedUrl.replace(/:([^:@]+)@/, ':****@')}\n`)
+
   const db = new Client({
     host:     dbUrl.hostname,
-    port:     parseInt(dbUrl.port || '6543'),
+    port:     parseInt(dbUrl.port || '5432'),
     database: dbUrl.pathname.replace(/^\//, ''),
-    user:     dbUrl.username,
-    password: dbUrl.password,
+    user:     decodeURIComponent(dbUrl.username),
+    password: decodeURIComponent(dbUrl.password),
     ssl:      { rejectUnauthorized: false },
   })
   await db.connect()
@@ -112,7 +124,7 @@ async function main() {
     filesize: number
     prefix: string | null
   }>(`
-    SELECT id, filename, mime_type, filesize, prefix
+    SELECT id, filename, mime_type, filesize, NULL AS prefix
     FROM   media
     WHERE  mime_type LIKE 'image/%'
       AND  mime_type NOT IN ('image/webp', 'image/svg+xml', 'image/gif')
