@@ -57,12 +57,15 @@ function cleanDatabaseUrl(url: string): string {
   return url
     // Strip doubled prefix that sometimes appears in Supabase pooler URLs
     .replace(/^postgresqlpostgresql:\/\//, 'postgresql://')
-    // Strip ?pgbouncer=true — it is a Drizzle/postgres.js hint, not a valid
-    // PostgreSQL connection parameter. The raw pg client rejects it and
-    // mis-parses the URL, causing ENOTFOUND on the username as if it were a hostname.
+    // Strip ?pgbouncer=true — it is a Drizzle/postgres.js hint, not valid for pg
     .replace(/[?&]pgbouncer=true/gi, '')
     // Clean up any trailing ? left after stripping
     .replace(/\?$/, '')
+    // Switch from transaction pooler (6543) to session pooler (5432).
+    // Port 6543 rejects connections from local machines (PgBouncer tenant lookup
+    // behaves differently outside Vercel's network). Port 5432 works fine for a
+    // local script running a single connection — no serverless limits apply here.
+    .replace(/:6543\//, ':5432/')
 }
 
 async function streamToBuffer(stream: Readable): Promise<Buffer> {
