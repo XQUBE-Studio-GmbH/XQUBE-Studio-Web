@@ -126,9 +126,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
         style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
 
       {mode === 'video' && videoUrl && (
-        {/* preload="none" stops the browser from eagerly downloading the full
-            video file before the page renders. autoPlay still kicks in once the
-            component mounts — the browser fetches it then, not during initial load. */}
+        // preload="none" stops eager download of the full video file before first paint
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src={videoUrl}
