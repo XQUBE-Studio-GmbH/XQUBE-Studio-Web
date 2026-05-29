@@ -87,6 +87,16 @@ function CinematicHero({ mode, videoUrl, slides }: {
   const [animSeed,   setAnimSeed]   = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Don't load the hero video on mobile — a 3–4 MB webm on a small screen
+  // kills LCP and wastes mobile data. Only enable after mount so SSR output
+  // is consistent (avoids hydration mismatch).
+  const [showVideo, setShowVideo] = useState(false)
+  useEffect(() => {
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      setShowVideo(true)
+    }
+  }, [])
+
   const count = slides.length
 
   const goTo = useCallback((next: number) => {
@@ -125,8 +135,10 @@ function CinematicHero({ mode, videoUrl, slides }: {
       <div className="absolute inset-0 opacity-10"
         style={{ backgroundImage: 'linear-gradient(rgba(20,203,114,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(20,203,114,0.08) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
 
-      {mode === 'video' && videoUrl && (
-        // preload="none" stops eager download of the full video file before first paint
+      {mode === 'video' && videoUrl && showVideo && (
+        // Only rendered on desktop (≥768px) — see showVideo state above.
+        // autoPlay would cause mobile browsers to buffer the full file
+        // despite preload="none", wasting ~3.6 MB on small screens.
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src={videoUrl}
