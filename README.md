@@ -198,7 +198,7 @@ Admin panel at `/admin`. All DB schema changes are managed via `prodMigrations` 
 - **Invite flow** — Admins generate a password and send an invitation email in one click. New users must change their password on first login (`MustChangePasswordGuard` blocks the panel until they do)
 - **Instant cache revalidation** — Every `afterChange` and `afterDelete` hook calls `revalidateTag()` automatically. Changes made in the admin panel are live on the frontend within seconds — no 5-minute wait
 - **SEO fields** — Every portfolio item, blog post, service, and page global has Meta Title, Meta Description, OG Image, and noIndex toggle
-- **WebP auto-conversion** — Images uploaded via the media library are automatically converted to WebP (quality 85) before being saved to DigitalOcean Spaces. No manual conversion needed
+- **WebP auto-conversion** — Images uploaded via the media library are automatically converted to WebP (quality 85) by a `beforeOperation` hook before the S3 plugin saves them to DigitalOcean Spaces. No manual conversion needed
 - **Contact submissions inbox** — Every contact form submission is saved to the `contact-submissions` CMS collection in addition to being emailed via Resend. Browse and filter submissions in the admin panel
 - **JSON-LD structured data** — Organization, WebSite, BlogPosting, Service/ItemList, CreativeWork, and BreadcrumbList schemas emitted on every relevant page. Helps Google Knowledge Panel and LLM crawlers identify the studio
 - **Media folders** — Visual folder tree in the Media library for organising uploads
@@ -233,7 +233,11 @@ Builder utilities live in `src/lib/jsonLd.ts`. Organization and social links are
 All media is stored on **DigitalOcean Spaces** (Frankfurt CDN).
 
 ### WebP auto-conversion (upload time)
-Images uploaded through the Payload admin are intercepted by an `afterRead` hook that converts them to WebP at quality 85 using `sharp` before storing. Metadata (width, height, filesize, mime type) is updated in the DB automatically.
+Images uploaded through the Payload admin are intercepted by a `beforeOperation` hook in `payload.config.ts` that converts them to WebP at quality 85 using `sharp` before the file reaches the S3 storage plugin. The filename, mime type, and filesize are all updated so the DB record reflects the converted file.
+
+> **Note:** Payload's built-in `formatOptions` upload config only works with local disk storage — it is bypassed by `@payloadcms/storage-s3`, which uploads the original file before Payload's sharp processing runs. The `beforeOperation` hook approach works at a lower level and guarantees conversion regardless of storage backend.
+
+SVGs, GIFs, videos, and already-WebP files are skipped automatically. If sharp fails for any reason, the original file is saved as a fallback rather than blocking the upload.
 
 ### Bulk migration script
 A one-time migration script converts existing JPG/PNG images to WebP in-place:
