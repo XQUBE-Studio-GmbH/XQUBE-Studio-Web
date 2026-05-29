@@ -13,7 +13,7 @@
  *   portfolio        → 300 s
  *   blog             → 300 s
  *
- * Cache tags (for future revalidateTag() support):
+ * Cache tags — revalidated automatically by afterChange/afterDelete hooks in payload.config.ts:
  *   layout, home, services, about, contact, portfolio, blog
  */
 

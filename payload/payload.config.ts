@@ -3,6 +3,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { resendAdapter } from '@payloadcms/email-resend'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { revalidateTag } from 'next/cache'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -74,6 +75,23 @@ const contentAccess = {
   update: isEditorOrAbove,
   delete: isAdminOrAbove,
 }
+
+// ─── Cache revalidation helpers ──────────────────────────────────────────────
+// Called from afterChange / afterDelete hooks on every collection and global.
+// revalidateTag() is a no-op outside of Next.js server context (e.g. CLI scripts),
+// so we wrap in try/catch to keep the admin functional even if it ever throws.
+
+function revalidateTags(...tags: string[]) {
+  try {
+    tags.forEach((tag) => revalidateTag(tag))
+  } catch {
+    // Outside Next.js request context — safe to ignore
+  }
+}
+
+// Hook factories — return Payload hook functions for each content area
+const revalidateCollection = (...tags: string[]) => () => { revalidateTags(...tags) }
+const revalidateGlobal     = (...tags: string[]) => () => { revalidateTags(...tags) }
 
 // ─── Shared SEO group ─────────────────────────────────────────────────────────
 const seoGroup = {
@@ -317,6 +335,7 @@ export default buildConfig({
     // ─── Media Library ───────────────────────────────────────
     {
       slug: 'media',
+      hooks: { afterChange: [revalidateCollection('home', 'about', 'services', 'portfolio', 'blog', 'layout', 'contact')], afterDelete: [revalidateCollection('home', 'about', 'services', 'portfolio', 'blog', 'layout', 'contact')] },
       folders: true,
       upload: {
         // Accept images and common video formats. Videos are stored as-is (no transcoding).
@@ -377,6 +396,7 @@ export default buildConfig({
     {
       slug: 'tools',
       labels: { singular: 'Tool', plural: 'Tools' },
+      hooks: { afterChange: [revalidateCollection('portfolio', 'services', 'home')], afterDelete: [revalidateCollection('portfolio', 'services', 'home')] },
       admin: {
         useAsTitle: 'name',
         description: 'Software and tools used in production. Add tools here first, then assign them to portfolio items.',
@@ -430,6 +450,7 @@ export default buildConfig({
     {
       slug: 'portfolio',
       labels: { singular: 'Portfolio Item', plural: 'Portfolio Items' },
+      hooks: { afterChange: [revalidateCollection('portfolio', 'home')], afterDelete: [revalidateCollection('portfolio', 'home')] },
       admin: {
         useAsTitle: 'title',
         group: 'Portfolio',
@@ -548,6 +569,7 @@ export default buildConfig({
     // ─── Services ────────────────────────────────────────────
     {
       slug: 'services',
+      hooks: { afterChange: [revalidateCollection('services', 'home')], afterDelete: [revalidateCollection('services', 'home')] },
       admin: {
         useAsTitle: 'title',
         group: 'Services',
@@ -649,6 +671,7 @@ export default buildConfig({
     {
       slug: 'team-members',
       labels: { singular: 'Team Member', plural: 'Team Members' },
+      hooks: { afterChange: [revalidateCollection('about')], afterDelete: [revalidateCollection('about')] },
       admin: {
         useAsTitle: 'name',
         group: 'Pages',
@@ -675,6 +698,7 @@ export default buildConfig({
     {
       slug: 'clients',
       labels: { singular: 'Client Logo', plural: 'Client Logos' },
+      hooks: { afterChange: [revalidateCollection('home')], afterDelete: [revalidateCollection('home')] },
       admin: {
         useAsTitle: 'name',
         hidden: true,
@@ -718,6 +742,7 @@ export default buildConfig({
     {
       slug: 'blog-posts',
       labels: { singular: 'Blog Post', plural: 'Blog Posts' },
+      hooks: { afterChange: [revalidateCollection('blog', 'home')], afterDelete: [revalidateCollection('blog', 'home')] },
       admin: {
         useAsTitle: 'title',
         group: 'Blog',
@@ -829,6 +854,7 @@ export default buildConfig({
     {
       slug: 'site-settings',
       label: 'Site Settings',
+      hooks: { afterChange: [revalidateGlobal('layout', 'home', 'contact')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Settings',
@@ -921,6 +947,7 @@ export default buildConfig({
     {
       slug: 'home-page',
       label: 'Homepage',
+      hooks: { afterChange: [revalidateGlobal('home')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Pages',
@@ -1157,6 +1184,7 @@ export default buildConfig({
     {
       slug: 'about-page',
       label: 'About Page',
+      hooks: { afterChange: [revalidateGlobal('about')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Pages',
@@ -1248,6 +1276,7 @@ export default buildConfig({
     {
       slug: 'contact-page',
       label: 'Contact Page',
+      hooks: { afterChange: [revalidateGlobal('contact')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Pages',
@@ -1282,6 +1311,7 @@ export default buildConfig({
     {
       slug: 'services-page',
       label: 'Services Page',
+      hooks: { afterChange: [revalidateGlobal('services')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Services',
@@ -1367,6 +1397,7 @@ export default buildConfig({
     {
       slug: 'portfolio-page',
       label: 'Portfolio Page',
+      hooks: { afterChange: [revalidateGlobal('portfolio')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Portfolio',
@@ -1420,6 +1451,7 @@ export default buildConfig({
     {
       slug: 'blog-page',
       label: 'Blog Page',
+      hooks: { afterChange: [revalidateGlobal('blog')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Blog',
@@ -1453,6 +1485,7 @@ export default buildConfig({
     {
       slug: 'navigation',
       label: 'Navigation',
+      hooks: { afterChange: [revalidateGlobal('layout')] },
       versions: { drafts: { autosave: { interval: 800 } } },
       admin: {
         group: 'Settings',
