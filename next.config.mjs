@@ -73,6 +73,10 @@ const nextConfig = {
   },
 
   images: {
+    // Bypass /_next/image — images are already WebP on DO Spaces CDN.
+    // Vercel free plan quota (~1,000 unique source URLs/month) was exceeded
+    // after migrating 199 images to .webp URLs, causing HTTP 402 errors.
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: '**.artstation.com' },
       { protocol: 'https', hostname: 'drive.google.com' },
