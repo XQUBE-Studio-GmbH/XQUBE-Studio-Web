@@ -127,6 +127,12 @@ function CinematicHero({ mode, videoUrl, slides }: {
   const current = slides[activeIdx] ?? slides[0]
   const { rest, accent } = splitHeadline(current?.title)
 
+  // On the very first paint (animSeed === 0) skip the fade-up animation so the
+  // h1 is immediately visible. This is the LCP element — starting at opacity:0
+  // and waiting for the CSS + 0.5s animation was causing a ~2.5s LCP delay.
+  // Subsequent slide changes (animSeed > 0) still animate in normally.
+  const isFirstPaint = animSeed === 0
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
 
@@ -174,25 +180,25 @@ function CinematicHero({ mode, videoUrl, slides }: {
       <div className="xq-container relative z-10 w-full">
         <div className="max-w-3xl">
           {current?.eyebrow && (
-            <div className="xq-label mb-6 animate-[fadeIn_0.5s_ease]" key={`eyebrow-${activeIdx}`}>
+            <div className={`xq-label mb-6 ${isFirstPaint ? '' : 'animate-[fadeIn_0.5s_ease]'}`} key={`eyebrow-${activeIdx}`}>
               {current.eyebrow}
             </div>
           )}
           <h1
             key={`title-${activeIdx}`}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05] animate-[fadeUp_0.5s_ease] drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]"
+            className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05] drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] ${isFirstPaint ? '' : 'animate-[fadeUp_0.5s_ease]'}`}
           >
             {rest} <span className="text-xq-accent">{accent}</span>
           </h1>
           {current?.subtitle && (
             <p
               key={`sub-${activeIdx}`}
-              className="text-base sm:text-lg md:text-xl text-white/75 max-w-2xl mb-10 leading-relaxed animate-[fadeUp_0.6s_ease] drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]"
+              className={`text-base sm:text-lg md:text-xl text-white/75 max-w-2xl mb-10 leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)] ${isFirstPaint ? '' : 'animate-[fadeUp_0.6s_ease]'}`}
             >
               {current.subtitle}
             </p>
           )}
-          <div key={`cta-${activeIdx}`} className="flex flex-wrap gap-4 animate-[fadeUp_0.7s_ease]">
+          <div key={`cta-${activeIdx}`} className={`flex flex-wrap gap-4 ${isFirstPaint ? '' : 'animate-[fadeUp_0.7s_ease]'}`}>
             {current?.primaryCtaLabel && current?.primaryCtaUrl && (
               <Link
                 href={current.primaryCtaUrl}
