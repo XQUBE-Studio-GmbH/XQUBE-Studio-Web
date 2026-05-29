@@ -4,6 +4,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { resendAdapter } from '@payloadcms/email-resend'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { revalidateTag } from 'next/cache'
+import sharp from 'sharp'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -92,6 +93,40 @@ function revalidateTags(...tags: string[]) {
 // Hook factories — return Payload hook functions for each content area
 const revalidateCollection = (...tags: string[]) => () => { revalidateTags(...tags) }
 const revalidateGlobal     = (...tags: string[]) => () => { revalidateTags(...tags) }
+
+// ─── WebP conversion hook ─────────────────────────────────────────────────────
+// Payload's `formatOptions` in the upload config works for local storage but is
+// bypassed by @payloadcms/storage-s3 — the S3 plugin uploads the original file
+// before Payload's sharp processing runs. This beforeOperation hook intercepts
+// the file on req before S3 ever sees it, guaranteeing WebP conversion on upload.
+async function convertToWebP({ operation, req }: { operation: string; req: any }) {
+  if (operation !== 'create' && operation !== 'update') return
+  const file = req?.file
+  if (!file?.data) return
+
+  const mime: string = file.mimetype ?? ''
+  // Skip non-images, already-WebP, SVGs, GIFs, and videos
+  if (
+    !mime.startsWith('image/') ||
+    mime === 'image/webp' ||
+    mime === 'image/svg+xml' ||
+    mime === 'image/gif'
+  ) return
+
+  try {
+    const webpBuffer = await sharp(file.data as Buffer).webp({ quality: 85 }).toBuffer()
+    const newName = (file.name as string).replace(/\.(jpe?g|png|tiff?|bmp|avif|heic|heif)$/i, '.webp')
+
+    // Mutate req.file in-place — Payload and the S3 plugin both read from this object
+    file.data     = webpBuffer
+    file.name     = newName
+    file.mimetype = 'image/webp'
+    file.size     = webpBuffer.byteLength
+  } catch (err) {
+    // Log but don't block the upload — the original file will still be saved
+    console.error('[convertToWebP] sharp conversion failed:', (err as Error).message)
+  }
+}
 
 // ─── Shared SEO group ─────────────────────────────────────────────────────────
 const seoGroup = {
@@ -335,7 +370,11 @@ export default buildConfig({
     // ─── Media Library ───────────────────────────────────────
     {
       slug: 'media',
-      hooks: { afterChange: [revalidateCollection('home', 'about', 'services', 'portfolio', 'blog', 'layout', 'contact')], afterDelete: [revalidateCollection('home', 'about', 'services', 'portfolio', 'blog', 'layout', 'contact')] },
+      hooks: {
+        beforeOperation: [convertToWebP],
+        afterChange:  [revalidateCollection('home', 'about', 'services', 'portfolio', 'blog', 'layout', 'contact')],
+        afterDelete:  [revalidateCollection('home', 'about', 'services', 'portfolio', 'blog', 'layout', 'contact')],
+      },
       folders: true,
       upload: {
         // Accept images and common video formats. Videos are stored as-is (no transcoding).
