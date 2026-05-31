@@ -43,6 +43,7 @@ import * as contactSubmissionsRelsMigration       from './migrations/20260524_co
 import * as servicesToolsRelMigration             from './migrations/20260524_services_tools_rel.ts'
 import * as servicesProcessMigration              from './migrations/20260524_services_process.ts'
 import * as homepageEngagementToggleMigration     from './migrations/20260526_homepage_engagement_toggle.ts'
+import * as scopeFieldsMigration                  from './migrations/20260531_scope_fields.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -848,41 +849,95 @@ export default buildConfig({
       ],
     },
 
-    // ─── Contact Submissions ─────────────────────────────────
+    // ─── Contact Submissions & Project Briefs ────────────────
     {
       slug:   'contact-submissions',
-      labels: { singular: 'Contact Submission', plural: 'Contact Submissions' },
+      labels: { singular: 'Inquiry', plural: 'Inquiries' },
       admin: {
         useAsTitle:     'name',
         group:          'Inquiries',
-        description:    'Project briefs submitted via the website contact form.',
-        defaultColumns: ['name', 'email', 'company', 'projectType', 'status', 'createdAt'],
+        description:    'Project briefs from the contact form and the scoping tool.',
+        defaultColumns: ['name', 'email', 'briefSource', 'status', 'createdAt'],
       },
       access: {
         read:   isAdminOrAbove,
-        create: () => false,    // form API uses overrideAccess: true — no manual creation
+        create: () => false,    // form APIs use overrideAccess: true
         update: isAdminOrAbove,
         delete: isSuperAdmin,
       },
       fields: [
-        { name: 'name',        type: 'text',     required: true },
-        { name: 'email',       type: 'email',    required: true },
-        { name: 'company',     type: 'text',     label: 'Company' },
-        { name: 'projectType', type: 'text',     label: 'Project Type' },
-        { name: 'engine',      type: 'text',     label: 'Engine / Platform' },
-        { name: 'budget',      type: 'text',     label: 'Budget Range' },
-        { name: 'timeline',    type: 'text',     label: 'Timeline' },
-        { name: 'message',     type: 'textarea', required: true, label: 'Message / Brief' },
+        // ── Contact info ──────────────────────────────────────
+        { name: 'name',    type: 'text',  required: true },
+        { name: 'email',   type: 'email', required: true },
+        { name: 'company', type: 'text',  label: 'Company' },
+
+        // ── Source & status ───────────────────────────────────
+        {
+          name:         'briefSource',
+          label:        'Source',
+          type:         'select',
+          defaultValue: 'contact-form',
+          options: [
+            { label: 'Contact Form',  value: 'contact-form' },
+            { label: 'Scoping Tool',  value: 'scoping-tool' },
+          ],
+        },
         {
           name:         'status',
           type:         'select',
           defaultValue: 'new',
           options: [
-            { label: 'New',      value: 'new' },
-            { label: 'Reviewed', value: 'reviewed' },
-            { label: 'Replied',  value: 'replied' },
-            { label: 'Closed',   value: 'closed' },
+            { label: 'New',                          value: 'new' },
+            { label: 'Brief Submitted — Call Pending', value: 'brief-submitted' },
+            { label: 'Reviewed',                     value: 'reviewed' },
+            { label: 'Replied',                      value: 'replied' },
+            { label: 'Closed',                       value: 'closed' },
           ],
+        },
+
+        // ── Scoping tool fields ───────────────────────────────
+        {
+          name:  'assetTypes',
+          label: 'Asset Types',
+          type:  'array',
+          admin: { description: 'Asset types and quantities from the scoping tool.' },
+          fields: [
+            {
+              name:    'assetType',
+              label:   'Asset Type',
+              type:    'text',
+            },
+            {
+              name:    'quantity',
+              label:   'Quantity',
+              type:    'number',
+              min:     1,
+              max:     999,
+            },
+          ],
+        },
+
+        // ── Contact form / legacy fields ──────────────────────
+        { name: 'projectType',      type: 'text',     label: 'Project Type' },
+        { name: 'engine',           type: 'text',     label: 'Engine / Platform' },
+        { name: 'budget',           type: 'text',     label: 'Budget Range' },
+        { name: 'timeline',         type: 'text',     label: 'Timeline' },
+        { name: 'referenceGame',    type: 'text',     label: 'Art Style Reference' },
+        { name: 'additionalContext', type: 'textarea', label: 'Additional Context' },
+        { name: 'message',          type: 'textarea', label: 'Message / Brief' },
+
+        // ── Call tracking ─────────────────────────────────────
+        {
+          name:         'callBooked',
+          label:        'Call Booked',
+          type:         'checkbox',
+          defaultValue: false,
+        },
+        {
+          name:  'callDateTime',
+          label: 'Call Date & Time',
+          type:  'date',
+          admin: { date: { pickerAppearance: 'dayAndTime' } },
         },
       ],
     },
@@ -1559,8 +1614,8 @@ export default buildConfig({
           label: 'Call-to-Action Button',
           type: 'group',
           fields: [
-            { name: 'label', type: 'text', defaultValue: 'Book a Call' },
-            { name: 'url',   type: 'text', defaultValue: 'https://calendly.com/tanvirkhandlxqsmgs' },
+            { name: 'label', type: 'text', defaultValue: 'Start a Project' },
+            { name: 'url',   type: 'text', defaultValue: '/scope' },
           ],
         },
       ],
@@ -1745,6 +1800,11 @@ export default buildConfig({
         name: '20260526_homepage_engagement_toggle',
         up: homepageEngagementToggleMigration.up,
         down: homepageEngagementToggleMigration.down,
+      },
+      {
+        name: '20260531_scope_fields',
+        up: scopeFieldsMigration.up,
+        down: scopeFieldsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
