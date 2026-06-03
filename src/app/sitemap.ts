@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
-import { getPayload } from 'payload'
+import { getPayload, type Where } from 'payload'
 import config from '../../payload/payload.config'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com'
@@ -39,7 +39,7 @@ const staticRoutes: MetadataRoute.Sitemap = STATIC_PAGES.map(({ path, priority, 
 const CMS_COLLECTIONS: Array<{
   collection:  string
   pathPrefix:  string
-  filter?:     Record<string, unknown>
+  filter?:     Where
   priority:    number
   freq:        MetadataRoute.Sitemap[number]['changeFrequency']
 }> = [
