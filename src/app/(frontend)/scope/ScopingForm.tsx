@@ -90,7 +90,8 @@ const ASSET_TYPES = [
   },
 ]
 
-const ENGINES = [
+// All possible engine options in display order
+const ALL_ENGINES = [
   'Unreal Engine 5',
   'Unity',
   'UEFN / Fortnite Creative',
@@ -99,6 +100,47 @@ const ENGINES = [
   'Engine Agnostic',
   'Not Sure Yet',
 ]
+
+// Asset types that are platform-neutral (can target any engine)
+const GENERAL_ASSET_TYPES = ['Weapons', 'Vehicles', 'Environments', 'Props']
+
+// Returns the subset of engines relevant to the selected asset types.
+// Rules:
+//   General assets (Weapons/Vehicles/Environments/Props) → unlock ALL engines
+//   VR Assets   → UE5 + Unity + Meta Quest/PSVR2 + Not Sure Yet
+//   Fortnite    → UEFN/Fortnite Creative + Not Sure Yet
+//   Roblox      → Roblox Studio + Not Sure Yet
+//   Engine Agnostic appears only when at least one general asset type is selected
+//   Not Sure Yet always appears
+//   Union logic for mixed selections
+function getFilteredEngines(assetTypes: string[]): string[] {
+  if (assetTypes.length === 0) return ALL_ENGINES
+
+  const hasGeneral  = assetTypes.some((t) => GENERAL_ASSET_TYPES.includes(t))
+  const hasVR       = assetTypes.includes('VR Assets')
+  const hasFortnite = assetTypes.includes('Fortnite / UEFN')
+  const hasRoblox   = assetTypes.includes('Roblox')
+
+  if (hasGeneral) return ALL_ENGINES   // general assets unlock everything
+
+  const relevant = new Set<string>()
+  if (hasVR) {
+    relevant.add('Unreal Engine 5')
+    relevant.add('Unity')
+    relevant.add('Meta Quest / PSVR2')
+  }
+  if (hasFortnite) relevant.add('UEFN / Fortnite Creative')
+  if (hasRoblox)   relevant.add('Roblox Studio')
+  relevant.add('Not Sure Yet')         // always present
+
+  return ALL_ENGINES.filter((e) => relevant.has(e))
+}
+
+// If only one real platform exists (excluding "Not Sure Yet"), return it for auto-selection.
+function getAutoEngine(filtered: string[]): string {
+  const real = filtered.filter((e) => e !== 'Not Sure Yet')
+  return real.length === 1 ? real[0] : ''
+}
 
 const TIMELINES = [
   'Under 1 month',
@@ -207,7 +249,19 @@ export default function ScopingForm() {
     const errs = validateStep(step)
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS))
+
+    const nextStep = Math.min(step + 1, TOTAL_STEPS)
+
+    // Auto-select engine when entering step 3 if exactly one real option exists
+    if (nextStep === 3) {
+      const filtered = getFilteredEngines(formData.assetTypes)
+      const auto     = getAutoEngine(filtered)
+      if (auto && formData.engine !== auto) {
+        setFormData((p) => ({ ...p, engine: auto }))
+      }
+    }
+
+    setStep(nextStep)
   }
 
   function handleBack() {
@@ -228,7 +282,11 @@ export default function ScopingForm() {
       if (!selected.includes(type)) delete quantities[type]
       else if (!quantities[type])   quantities[type] = 1
 
-      return { ...prev, assetTypes: selected, quantities }
+      // Clear engine selection if it's no longer valid for the new asset type set
+      const newFiltered = getFilteredEngines(selected)
+      const engine = newFiltered.includes(prev.engine) ? prev.engine : ''
+
+      return { ...prev, assetTypes: selected, quantities, engine }
     })
     setErrors((e) => { const n = { ...e }; delete n.assetTypes; return n })
   }
@@ -402,7 +460,7 @@ export default function ScopingForm() {
               <StepSubtitle>This helps us deliver assets in the right format and quality tier.</StepSubtitle>
 
               <div className="space-y-2">
-                {ENGINES.map((eng) => {
+                {getFilteredEngines(formData.assetTypes).map((eng) => {
                   const selected = formData.engine === eng
                   return (
                     <button
