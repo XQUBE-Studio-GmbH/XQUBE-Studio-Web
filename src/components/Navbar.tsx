@@ -20,8 +20,8 @@ const DEFAULT_NAV_LINKS: NavLink[] = [
   { label: 'Contact',   url: '/contact' },
 ]
 const DEFAULT_CTA: CtaButton = {
-  label: 'Book a Call',
-  url:   'https://calendly.com/tanvirkhandlxqsmgs',
+  label: 'Start a Project',
+  url:   '/scope',
 }
 
 interface Props {
