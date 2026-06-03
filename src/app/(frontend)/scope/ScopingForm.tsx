@@ -90,6 +90,9 @@ const ASSET_TYPES = [
   },
 ]
 
+// Selecting either of these clears all other picks (and vice versa)
+const MUTEX_ENGINES = ['Engine Agnostic', 'Not Sure Yet']
+
 // All possible engine options in display order
 const ALL_ENGINES = [
   'Unreal Engine 5',
@@ -157,7 +160,7 @@ const TOTAL_STEPS = 6
 interface FormData {
   assetTypes:         string[]
   quantities:         Record<string, number>
-  engine:             string
+  engines:            string[]   // multi-select
   timeline:           string
   referenceGame:      string
   additionalContext:  string
@@ -202,7 +205,7 @@ export default function ScopingForm() {
   const [formData, setFormData] = useState<FormData>({
     assetTypes:        [],
     quantities:        {},
-    engine:            '',
+    engines:           [],
     timeline:          '',
     referenceGame:     '',
     additionalContext: '',
@@ -230,7 +233,7 @@ export default function ScopingForm() {
       })
     }
     if (s === 3) {
-      if (!formData.engine) errs.engine = 'Please select an engine or platform.'
+      if (formData.engines.length === 0) errs.engines = 'Please select at least one engine or platform.'
     }
     if (s === 4) {
       if (!formData.timeline) errs.timeline = 'Please select a timeline.'
@@ -256,8 +259,8 @@ export default function ScopingForm() {
     if (nextStep === 3) {
       const filtered = getFilteredEngines(formData.assetTypes)
       const auto     = getAutoEngine(filtered)
-      if (auto && formData.engine !== auto) {
-        setFormData((p) => ({ ...p, engine: auto }))
+      if (auto && !formData.engines.includes(auto)) {
+        setFormData((p) => ({ ...p, engines: [auto] }))
       }
     }
 
@@ -282,13 +285,33 @@ export default function ScopingForm() {
       if (!selected.includes(type)) delete quantities[type]
       else if (!quantities[type])   quantities[type] = 1
 
-      // Clear engine selection if it's no longer valid for the new asset type set
+      // Keep only engines that are still valid for the new asset type set
       const newFiltered = getFilteredEngines(selected)
-      const engine = newFiltered.includes(prev.engine) ? prev.engine : ''
+      const engines = prev.engines.filter((e) => newFiltered.includes(e))
 
-      return { ...prev, assetTypes: selected, quantities, engine }
+      return { ...prev, assetTypes: selected, quantities, engines }
     })
     setErrors((e) => { const n = { ...e }; delete n.assetTypes; return n })
+  }
+
+  // ── Engine toggle (multi-select with mutex for Agnostic/Not Sure Yet) ────────
+
+  function toggleEngine(eng: string) {
+    setFormData((prev) => {
+      let next: string[]
+      if (prev.engines.includes(eng)) {
+        // Deselect
+        next = prev.engines.filter((e) => e !== eng)
+      } else if (MUTEX_ENGINES.includes(eng)) {
+        // Mutex option selected — replace everything with just this
+        next = [eng]
+      } else {
+        // Real platform selected — remove any mutex options, add this one
+        next = [...prev.engines.filter((e) => !MUTEX_ENGINES.includes(e)), eng]
+      }
+      return { ...prev, engines: next }
+    })
+    setErrors((e) => { const n = { ...e }; delete n.engines; return n })
   }
 
   // ── Quantity change ─────────────────────────────────────────────────────────
@@ -313,7 +336,7 @@ export default function ScopingForm() {
         assetType: type,
         quantity:  formData.quantities[type] ?? 1,
       })),
-      engine:            formData.engine,
+      engines:           formData.engines,
       timeline:          formData.timeline,
       referenceGame:     formData.referenceGame,
       additionalContext: formData.additionalContext,
@@ -465,38 +488,43 @@ export default function ScopingForm() {
             <div>
               <StepLabel>Step 3</StepLabel>
               <StepTitle>Which engine or platform?</StepTitle>
-              <StepSubtitle>This helps us deliver assets in the right format and quality tier.</StepSubtitle>
+              <StepSubtitle>Select all that apply — we'll deliver in the right format for each.</StepSubtitle>
 
               <div className="space-y-2">
                 {getFilteredEngines(formData.assetTypes).map((eng) => {
-                  const selected = formData.engine === eng
+                  const selected = formData.engines.includes(eng)
+                  const isMutex  = MUTEX_ENGINES.includes(eng)
                   return (
                     <button
                       key={eng}
                       type="button"
-                      onClick={() => {
-                        setFormData((p) => ({ ...p, engine: eng }))
-                        setErrors((e) => { const n = { ...e }; delete n.engine; return n })
-                      }}
+                      onClick={() => toggleEngine(eng)}
                       className={`w-full flex items-center justify-between px-5 py-4 rounded-lg border text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-xq-accent ${
                         selected
-                          ? 'bg-[#0a1f14] border-xq-accent text-white'
+                          ? isMutex
+                            ? 'bg-[#111820] border-xq-accent/60 text-xq-muted'
+                            : 'bg-[#0a1f14] border-xq-accent text-white'
                           : 'bg-xq-card border-xq-border text-xq-muted hover:border-xq-accent/50 hover:text-xq-light'
                       }`}
                     >
                       <span className="font-semibold text-sm">{eng}</span>
+                      {/* Square checkbox (not circle — signals multi-select) */}
                       <span
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                        className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
                           selected ? 'border-xq-accent bg-xq-accent' : 'border-xq-border'
                         }`}
                       >
-                        {selected && <span className="w-1.5 h-1.5 rounded-full bg-black" />}
+                        {selected && (
+                          <svg viewBox="0 0 10 8" fill="none" className="w-2.5 h-2">
+                            <path d="M1 4l2.5 2.5L9 1" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
                       </span>
                     </button>
                   )
                 })}
               </div>
-              <FieldError message={errors.engine} />
+              <FieldError message={errors.engines} />
             </div>
           )}
 

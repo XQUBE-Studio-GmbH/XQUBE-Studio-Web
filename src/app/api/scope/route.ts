@@ -71,7 +71,10 @@ export async function POST(req: NextRequest) {
         }))
       : []
 
-    const engine            = truncate(body.engine,            150)
+    const engines: string[] = Array.isArray(body.engines)
+      ? body.engines.map((e: unknown) => truncate(e, 100)).filter(Boolean)
+      : body.engine ? [truncate(body.engine, 100)] : []  // backwards-compat fallback
+    const engine            = engines.join(', ')           // stored as text in DB
     const timeline          = truncate(body.timeline,          100)
     const referenceGame     = truncate(body.referenceGame,     300)
     const additionalContext = truncate(body.additionalContext, 3000)
@@ -88,7 +91,7 @@ export async function POST(req: NextRequest) {
     if (assetTypes.length === 0) {
       return NextResponse.json({ error: 'At least one asset type is required.' }, { status: 400 })
     }
-    if (!engine.trim()) {
+    if (engines.length === 0) {
       return NextResponse.json({ error: 'Engine / Platform is required.' }, { status: 400 })
     }
     if (!timeline.trim()) {
@@ -173,7 +176,7 @@ export async function POST(req: NextRequest) {
             <tr><td style="padding:24px;">
               <p style="margin:0 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#6b7280;font-family:Arial,Helvetica,sans-serif;">Project Scope</p>
               ${detailRow('Asset Types', assetSummary)}
-              ${detailRow('Engine / Platform', engine)}
+              ${detailRow('Engine / Platform', engines.length > 1 ? engines.join(', ') : engine)}
               ${detailRow('Timeline', timeline)}
               ${detailRow('Art Style Reference', referenceGame)}
             </td></tr>
