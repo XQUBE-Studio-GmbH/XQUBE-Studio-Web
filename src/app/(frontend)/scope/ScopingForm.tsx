@@ -399,8 +399,8 @@ export default function ScopingForm() {
           {step === 1 && (
             <div>
               <StepLabel>Step 1</StepLabel>
-              <StepTitle>What are you building?</StepTitle>
-              <StepSubtitle>Select all asset types you need. You can pick more than one.</StepSubtitle>
+              <StepTitle>What assets do you need?</StepTitle>
+              <StepSubtitle>Select all that apply.</StepSubtitle>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-2">
                 {ASSET_TYPES.map(({ id, label, icon }) => {
