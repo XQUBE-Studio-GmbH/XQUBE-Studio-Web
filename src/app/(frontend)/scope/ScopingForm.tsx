@@ -424,8 +424,16 @@ export default function ScopingForm() {
           {step === 2 && (
             <div>
               <StepLabel>Step 2</StepLabel>
-              <StepTitle>How many of each?</StepTitle>
-              <StepSubtitle>Enter the approximate quantity for each asset type.</StepSubtitle>
+              <StepTitle>
+                {formData.assetTypes.length === 1
+                  ? 'How many do you need?'
+                  : 'How many of each?'}
+              </StepTitle>
+              <StepSubtitle>
+                {formData.assetTypes.length === 1
+                  ? 'Enter the approximate quantity you need.'
+                  : 'Enter the approximate quantity for each asset type.'}
+              </StepSubtitle>
 
               <div className="space-y-4">
                 {formData.assetTypes.map((type) => (
