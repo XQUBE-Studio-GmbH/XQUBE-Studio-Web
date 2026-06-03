@@ -403,14 +403,17 @@ export default function ScopingForm() {
               <StepSubtitle>Select all that apply.</StepSubtitle>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-2">
-                {ASSET_TYPES.map(({ id, label, icon }) => {
-                  const selected = formData.assetTypes.includes(id)
+                {ASSET_TYPES.map(({ id, label, icon }, index) => {
+                  const selected   = formData.assetTypes.includes(id)
+                  const isLastOdd  = index === ASSET_TYPES.length - 1 && ASSET_TYPES.length % 2 !== 0
                   return (
                     <button
                       key={id}
                       type="button"
                       onClick={() => toggleAssetType(id)}
                       className={`relative flex flex-col items-center gap-3 p-4 rounded-lg border text-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-xq-accent ${
+                        isLastOdd ? 'col-span-2 sm:col-span-1' : ''
+                      } ${
                         selected
                           ? 'bg-[#0a1f14] border-xq-accent text-white'
                           : 'bg-xq-card border-xq-border text-xq-muted hover:border-xq-accent/50 hover:text-xq-light'
