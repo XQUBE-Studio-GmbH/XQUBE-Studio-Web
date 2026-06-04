@@ -82,8 +82,12 @@ export default function GeneratePasswordButton() {
     setErrorMsg('')
     try {
       // 1. Create the user via Payload REST API
+      // credentials: 'include' is required — without it the session cookie is not sent,
+      // Payload treats the request as unauthenticated, and the mustChangePassword field
+      // (access.create: isAdminOrAbove) is silently dropped, leaving it as false.
       const createRes = await fetch('/api/users', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, confirmPassword: password, role, mustChangePassword: true }),
       })
@@ -121,6 +125,7 @@ export default function GeneratePasswordButton() {
     try {
       const resetRes = await fetch(`/api/users/${id}`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password, confirmPassword: password, mustChangePassword: true }),
       })
