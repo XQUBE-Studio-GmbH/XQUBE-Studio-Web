@@ -619,6 +619,32 @@ await db.execute(sql`CREATE TABLE "_home_page_v_version_engine_badges" ("_order"
 
 ---
 
+### ERROR 26 — `mustChangePassword` silently dropped on invite, forced-change overlay never shown
+**Where:** `src/components/GeneratePasswordButton.tsx` — `createAndSendInvite` and `resetAndSendInvite`
+**Symptom:** New users invited via the admin panel were never shown the 🔒 forced-password-change overlay. They logged in with the temporary password and had full access immediately.
+**Root cause:** The `fetch` calls to `/api/users` (POST) and `/api/users/:id` (PATCH) were missing `credentials: 'include'`. Without it, the browser does not send the session cookie, so Payload treats the request as **unauthenticated**. The `mustChangePassword` field has `access: { create: isAdminOrAbove, update: isAdminOrAbove }`. Since `req.user` is null for unauthenticated requests, `isAdminOrAbove` returns `false` and Payload **silently drops** the `mustChangePassword: true` field. The user is created with the default `mustChangePassword: false`.
+**Fix:** Add `credentials: 'include'` to every `fetch` call that hits a Payload REST endpoint from inside the admin UI:
+```ts
+// CORRECT
+const res = await fetch('/api/users', {
+  method: 'POST',
+  credentials: 'include',   // ← required — sends the session cookie
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ ..., mustChangePassword: true }),
+})
+
+// WRONG — cookie not sent, Payload sees unauthenticated request,
+// field-level access.create: isAdminOrAbove fails silently, field is dropped
+const res = await fetch('/api/users', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ ..., mustChangePassword: true }),
+})
+```
+**Rule:** Any `fetch` call made from within the Payload admin UI (client components) that targets a Payload REST API endpoint MUST include `credentials: 'include'`. Without it, field-level `access.create` / `access.update` checks that require `req.user` will silently fail and the field will be dropped from the operation.
+
+---
+
 ## Git Rule
 **Never push to git unless the user explicitly asks.** Always commit locally first,
 show what was changed, then wait for "push" confirmation.
