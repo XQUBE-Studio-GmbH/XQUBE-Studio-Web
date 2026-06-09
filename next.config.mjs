@@ -9,20 +9,25 @@ const nextConfig = {
   // built-in errors that occur when Payload / drizzle / postgres packages
   // are accidentally pulled into the webpack graph (e.g. via instrumentation.ts).
   async rewrites() {
-    // When a client sends Accept: text/markdown, rewrite the request to the
-    // corresponding /path/index.md route handler which returns Content-Type:
-    // text/markdown explicitly. This satisfies [C1] content negotiation.
-    // Rewrites run at Next.js routing level — more reliable than middleware for
-    // header-based routing, and does not change the URL seen by the client.
+    // When a client sends Accept: text/markdown, rewrite to the corresponding
+    // /path/index.md App Router route handler (which explicitly returns
+    // Content-Type: text/markdown) before Next.js matches the page route.
+    //
+    // IMPORTANT: Must use `beforeFiles` — a flat array is `afterFiles` which
+    // only runs after existing pages are matched, so it never fires for /, /about etc.
+    // `beforeFiles` runs BEFORE the filesystem/pages check, intercepting
+    // the request before the HTML page is served.
     const mdAccept = [{ type: 'header', key: 'accept', value: '(.*text/markdown.*)' }]
-    return [
-      { source: '/',          has: mdAccept, destination: '/index.md' },
-      { source: '/about',     has: mdAccept, destination: '/about/index.md' },
-      { source: '/services',  has: mdAccept, destination: '/services/index.md' },
-      { source: '/portfolio', has: mdAccept, destination: '/portfolio/index.md' },
-      { source: '/contact',   has: mdAccept, destination: '/contact/index.md' },
-      { source: '/blog',      has: mdAccept, destination: '/blog/index.md' },
-    ]
+    return {
+      beforeFiles: [
+        { source: '/',          has: mdAccept, destination: '/index.md' },
+        { source: '/about',     has: mdAccept, destination: '/about/index.md' },
+        { source: '/services',  has: mdAccept, destination: '/services/index.md' },
+        { source: '/portfolio', has: mdAccept, destination: '/portfolio/index.md' },
+        { source: '/contact',   has: mdAccept, destination: '/contact/index.md' },
+        { source: '/blog',      has: mdAccept, destination: '/blog/index.md' },
+      ],
+    }
   },
 
   async redirects() {
