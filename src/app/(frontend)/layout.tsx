@@ -50,6 +50,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
             '@context': 'https://schema.org',
             '@type': 'Organization',
             name: 'XQUBE Studio GmbH',
+            alternateName: ['XQUBE Studio', 'XQube Studio', 'xqube'],
             url: serverURL,
             logo: `${serverURL}/logo.svg`,
             description: 'AAA game art and XR production studio. Vienna · Dubai · Dhaka.',
