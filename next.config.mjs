@@ -48,6 +48,15 @@ const nextConfig = {
               process.env.NEXT_PUBLIC_SITE_URL,
             ].filter(Boolean).join(' '),
           },
+          {
+            // D3: Link header for AI/agent discovery (AIScan rubric)
+            // rel=api-catalog points to RFC 9727 catalog; rel=describedby points to llms.txt
+            key: 'Link',
+            value: [
+              '</.well-known/api-catalog>; rel="api-catalog"',
+              '</llms.txt>; rel="describedby"; type="text/markdown"',
+            ].join(', '),
+          },
         ],
       },
     ]
