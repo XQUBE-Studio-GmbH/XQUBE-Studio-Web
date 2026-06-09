@@ -1,0 +1,31 @@
+# XQUBE Studio
+
+> AAA game art and XR production studio. Vienna · Dubai · Dhaka.
+
+XQUBE Studio GmbH delivers production-grade 3D game assets for PC, console, mobile, and VR. Specialists in environments, props, weapons, vehicles, VR assets, and platform-native experiences on UEFN and Roblox. 15+ years of AAA pipeline experience working with studios worldwide.
+
+## Services
+
+- [Environments](https://www.xqubestudio.com/services/environments): Modular level art, biomes, and interior sets built to engine spec — from a single interior to a full game world.
+- [Props](https://www.xqubestudio.com/services/props): Hero interactive objects to full background dressing libraries, produced at scale without sacrificing quality.
+- [Weapons](https://www.xqubestudio.com/services/weapons): Firearms, melee, sci-fi, and fantasy weapons built to AAA spec — full pipeline from high poly to in-engine integration.
+- [Hard Surfaces](https://www.xqubestudio.com/services/hard-surfaces): Vehicles, aircraft, spacecraft, and heavy machinery with structural accuracy and full LOD chains.
+- [VR Assets](https://www.xqubestudio.com/services/vr-assets): VR-native asset production optimised for Meta Quest, PSVR2, and PC VR from day one.
+- [UEFN & Roblox](https://www.xqubestudio.com/services/uefn-roblox): End-to-end island and experience production — scripting, art, QA, and publish. Shipped a live Fortnite island with Fresh TV.
+
+## Portfolio
+
+- [Portfolio](https://www.xqubestudio.com/portfolio): AAA game art portfolio spanning environments, props, weapons, vehicles, and VR assets for PC, console, and mobile.
+
+## Company
+
+- [About](https://www.xqubestudio.com/about): Studio story, team bios, and hub locations — Vienna, Dubai, Dhaka.
+- [Blog](https://www.xqubestudio.com/blog): Game art production insights, pipeline breakdowns, and studio news.
+- [Contact](https://www.xqubestudio.com/contact): Book a discovery call or send a message — we respond within 24 hours.
+- [Get a Quote](https://www.xqubestudio.com/scope): Submit your asset brief and receive a detailed quote within 24 hours.
+
+## Discovery
+
+- [Sitemap](https://www.xqubestudio.com/sitemap.xml): Full site URL list in XML format.
+- [robots.txt](https://www.xqubestudio.com/robots.txt): Crawl rules including explicit per-agent AI bot rules.
+- [API Catalog](https://www.xqubestudio.com/.well-known/api-catalog): Machine-readable site description per RFC 9727.
