@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
-  description: 'Cookie Policy for XQube Studio GmbH — what cookies we use and how to manage them.',
+  description: 'Cookie Policy for XQUBE Studio GmbH — what cookies we use and how to manage them.',
   robots: { index: false, follow: false },
 }
 
@@ -54,7 +54,7 @@ export default function CookiePolicyPage() {
                     </tr>
                     <tr>
                       <td className="py-3 pr-4">xq-cookie-consent</td>
-                      <td className="py-3 pr-4">XQube Studio</td>
+                      <td className="py-3 pr-4">XQUBE Studio</td>
                       <td className="py-3 pr-4">Stores your cookie preference</td>
                       <td className="py-3">1 year</td>
                     </tr>

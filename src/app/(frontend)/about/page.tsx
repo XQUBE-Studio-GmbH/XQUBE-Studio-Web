@@ -16,12 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'About',
-      defaultDescription: 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria, with production hubs in Dubai and Dhaka. 15+ years experience, 80+ clients worldwide.',
+      defaultDescription: 'XQUBE Studio GmbH is a game art and XR production studio registered in Vienna, Austria, with production hubs in Dubai and Dhaka. 15+ years experience, 80+ clients worldwide.',
       url: 'https://www.xqubestudio.com/about',
-      ogTitle: 'About XQube Studio | A Studio Built for Precision',
+      ogTitle: 'About XQUBE Studio | A Studio Built for Precision',
     })
   } catch {
-    return { title: 'About', description: 'XQube Studio GmbH — Vienna · Dubai · Dhaka.' }
+    return { title: 'About', description: 'XQUBE Studio GmbH — Vienna · Dubai · Dhaka.' }
   }
 }
 

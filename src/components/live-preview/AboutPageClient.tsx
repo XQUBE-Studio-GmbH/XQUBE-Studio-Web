@@ -14,7 +14,7 @@ import type { AboutGlobal, TeamMember, MediaRef, Credential, Hub, WhyCard } from
 const FB_HERO = {
   label:    'About Us',
   heading:  'A studio built for precision',
-  subtitle: 'XQube Studio GmbH — Vienna · Dubai · Dhaka. 15+ years delivering AAA-quality game art and XR production for studios worldwide.',
+  subtitle: 'XQUBE Studio GmbH — Vienna · Dubai · Dhaka. 15+ years delivering AAA-quality game art and XR production for studios worldwide.',
 }
 
 const FB_CREDENTIALS: Credential[] = [
@@ -58,7 +58,7 @@ export default function AboutPageClient({ initialData, teamMembers, serverURL }:
   const heroSubtitle = ap.hero?.subtitle ?? FB_HERO.subtitle
   const heroImage    = ap.hero?.image as MediaRef | null | undefined
 
-  const introBody1  = ap.intro?.body1 ?? 'XQube Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.'
+  const introBody1  = ap.intro?.body1 ?? 'XQUBE Studio GmbH is a game art and XR production studio registered in Vienna, Austria. With 15+ years of hands-on delivery across gaming, XR, simulation, and AI — we work with studios worldwide to deliver AAA-quality assets at scale.'
   const introBody2  = ap.intro?.body2 ?? 'Our three-hub model combines European business standards with world-class production capability — giving clients the reliability of a Vienna GmbH with the speed and depth of a Dhaka production team.'
   const introImage  = ap.intro?.image as MediaRef | null | undefined
   const credentials = ap.credentials && ap.credentials.length > 0 ? ap.credentials : FB_CREDENTIALS
@@ -87,7 +87,7 @@ export default function AboutPageClient({ initialData, teamMembers, serverURL }:
                 <p className="text-xq-muted text-lg leading-relaxed">{introBody2}</p>
               </div>
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border">
-                <Image src={introImage.url} alt={introImage.alt || 'XQube Studio'} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+                <Image src={introImage.url} alt={introImage.alt || 'XQUBE Studio'} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
               </div>
             </div>
           ) : (

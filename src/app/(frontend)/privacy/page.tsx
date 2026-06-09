@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy Policy for XQube Studio GmbH — how we collect, use, and protect your personal data in compliance with GDPR.',
+  description: 'Privacy Policy for XQUBE Studio GmbH — how we collect, use, and protect your personal data in compliance with GDPR.',
   robots: { index: false, follow: false },
 }
 
@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-xl font-bold text-white mb-3">1. Controller</h2>
               <p className="text-xq-muted leading-relaxed">
-                XQube Studio GmbH<br />
+                XQUBE Studio GmbH<br />
                 Rathausstrasse 21/12, 1010 Vienna, Austria<br />
                 Email: info@xqubestudio.com<br />
                 Phone: +43 650 5207329

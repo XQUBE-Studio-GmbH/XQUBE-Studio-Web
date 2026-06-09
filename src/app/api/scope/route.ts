@@ -219,9 +219,9 @@ export async function POST(req: NextRequest) {
 
     // ── Auto-reply to client ───────────────────────────────────────────────────
     await resend.emails.send({
-      from:    'XQube Studio <info@xqubestudio.com>',
+      from:    'XQUBE Studio <info@xqubestudio.com>',
       to:      [email],
-      subject: 'Got your brief — XQube Studio',
+      subject: 'Got your brief — XQUBE Studio',
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>

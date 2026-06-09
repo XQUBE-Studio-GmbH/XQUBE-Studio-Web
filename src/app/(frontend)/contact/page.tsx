@@ -16,11 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'Contact',
-      defaultDescription: "Get in touch with XQube Studio. Book a discovery call or send us a message — we respond within 24–48 hours.",
+      defaultDescription: "Get in touch with XQUBE Studio. Book a discovery call or send us a message — we respond within 24–48 hours.",
       url: 'https://www.xqubestudio.com/contact',
     })
   } catch {
-    return { title: 'Contact', description: "Get in touch with XQube Studio. Book a discovery call or send us a message — we respond within 24–48 hours." }
+    return { title: 'Contact', description: "Get in touch with XQUBE Studio. Book a discovery call or send us a message — we respond within 24–48 hours." }
   }
 }
 

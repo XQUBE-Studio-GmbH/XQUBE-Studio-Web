@@ -18,7 +18,7 @@ const FB_SLIDES: HeroSlide[] = [
   {
     eyebrow:           'Vienna · Dubai · Dhaka',
     title:             'Where Art Meets Precision',
-    subtitle:          'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
+    subtitle:          'XQUBE Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
     primaryCtaLabel:   'Book a Call',
     primaryCtaUrl:     'https://calendly.com/tanvirkhandlxqsmgs',
     secondaryCtaLabel: 'View Portfolio',
@@ -164,7 +164,7 @@ function CinematicHero({ mode, videoUrl, slides }: {
             >
               <Image
                 src={slide.image.url}
-                alt={slide.image.alt || slide.title || 'XQube Studio'}
+                alt={slide.image.alt || slide.title || 'XQUBE Studio'}
                 fill sizes="100vw" className="object-cover"
                 priority={i === 0}
               />
@@ -430,7 +430,7 @@ export default function HomePageClient({ initialData, services, clients, feature
                 <ScrollReveal delay={200}>
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-xq-border">
                     <Image
-                      src={si.image.url} alt={si.image.alt || 'XQube Studio'}
+                      src={si.image.url} alt={si.image.alt || 'XQUBE Studio'}
                       fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />

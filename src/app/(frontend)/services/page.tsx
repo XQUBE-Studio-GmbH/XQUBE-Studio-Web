@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
       defaultTitle: 'Services',
       defaultDescription: 'Game art production, VR game assets, interactive development for UEFN and Roblox, and staff augmentation for game studios worldwide.',
       url: 'https://www.xqubestudio.com/services',
-      ogTitle: 'Services | XQube Studio',
+      ogTitle: 'Services | XQUBE Studio',
     })
   } catch {
     return { title: 'Services', description: 'Game art production, VR game assets, interactive development for UEFN and Roblox, and staff augmentation for game studios worldwide.' }

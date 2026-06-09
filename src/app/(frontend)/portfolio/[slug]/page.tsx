@@ -90,8 +90,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!item) return { title: 'Not Found' }
   return buildPageMetadata({
     seo: item.seo,
-    defaultTitle: `${item.title} | XQube Studio Portfolio`,
-    defaultDescription: item.shortDescription || `${item.title} — AAA game art by XQube Studio.`,
+    defaultTitle: `${item.title} | XQUBE Studio Portfolio`,
+    defaultDescription: item.shortDescription || `${item.title} — AAA game art by XQUBE Studio.`,
     url: `https://www.xqubestudio.com/portfolio/${slug}`,
     ogImage: item.heroImage?.url || item.gallery?.[0]?.image?.url,
   })

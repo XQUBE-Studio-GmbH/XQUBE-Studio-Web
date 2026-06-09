@@ -14,14 +14,14 @@ export async function generateMetadata(): Promise<Metadata> {
     const page = await payload.findGlobal({ slug: 'home-page', depth: 1 }) as HomepageGlobal
     return buildPageMetadata({
       seo: page?.seo,
-      defaultTitle: 'XQube Studio | AAA Game Art & XR Production',
-      defaultDescription: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
+      defaultTitle: 'XQUBE Studio | AAA Game Art & XR Production',
+      defaultDescription: 'XQUBE Studio delivers AAA-quality game art and XR production for studios worldwide. GmbH registered in Vienna. GDPR compliant. IP ownership clear.',
       url: 'https://www.xqubestudio.com',
     })
   } catch {
     return {
-      title: 'XQube Studio | AAA Game Art & XR Production',
-      description: 'XQube Studio delivers AAA-quality game art and XR production for studios worldwide.',
+      title: 'XQUBE Studio | AAA Game Art & XR Production',
+      description: 'XQUBE Studio delivers AAA-quality game art and XR production for studios worldwide.',
     }
   }
 }

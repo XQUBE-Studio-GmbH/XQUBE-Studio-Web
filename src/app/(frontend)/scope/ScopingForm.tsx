@@ -678,7 +678,7 @@ export default function ScopingForm() {
                       )}
                     </button>
                     <span className="text-sm text-xq-muted leading-relaxed">
-                      I agree to XQube Studio&apos;s{' '}
+                      I agree to XQUBE Studio&apos;s{' '}
                       <Link href="/privacy" target="_blank" className="text-xq-accent hover:underline">
                         Privacy Policy
                       </Link>

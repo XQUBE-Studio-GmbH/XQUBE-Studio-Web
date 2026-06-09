@@ -16,11 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'Blog & Insights',
-      defaultDescription: 'Insights on game art production, XR development, and studio operations from XQube Studio.',
+      defaultDescription: 'Insights on game art production, XR development, and studio operations from XQUBE Studio.',
       url: 'https://www.xqubestudio.com/blog',
     })
   } catch {
-    return { title: 'Blog & Insights', description: 'Insights on game art production, XR development, and studio operations from XQube Studio.' }
+    return { title: 'Blog & Insights', description: 'Insights on game art production, XR development, and studio operations from XQUBE Studio.' }
   }
 }
 

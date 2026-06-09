@@ -85,7 +85,7 @@ export default function Footer({ settings, navLinks: propNavLinks }: Props) {
   const socialLinks = settings?.contact?.socialLinks?.length
     ? settings.contact.socialLinks
     : DEFAULT_SOCIAL_LINKS
-  const footerCopy  = settings?.footerCopy          ?? `© ${new Date().getFullYear()} XQube Studio GmbH. All rights reserved.`
+  const footerCopy  = settings?.footerCopy          ?? `© ${new Date().getFullYear()} XQUBE Studio GmbH. All rights reserved.`
   const legalNote   = settings?.legalNote           ?? 'GmbH registered in Vienna, Austria. GDPR compliant.'
 
   const visibleNavLinks = (propNavLinks && propNavLinks.length > 0 ? propNavLinks : DEFAULT_NAV_LINKS)
@@ -100,7 +100,7 @@ export default function Footer({ settings, navLinks: propNavLinks }: Props) {
           {/* Brand block */}
           <div className="col-span-2">
             <Link href="/" className="inline-block mb-4">
-              <Image src="/logo.svg" alt="XQube Studio" width={120} height={69} className="h-14 w-auto" />
+              <Image src="/logo.svg" alt="XQUBE Studio" width={120} height={69} className="h-14 w-auto" />
             </Link>
             <p className="text-xq-muted text-sm leading-relaxed max-w-xs mt-4">
               {tagline}

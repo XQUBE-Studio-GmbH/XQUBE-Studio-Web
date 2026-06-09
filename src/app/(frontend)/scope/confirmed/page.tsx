@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import CalendlyEmbed from './CalendlyEmbed'
 
 export const metadata: Metadata = {
-  title:  'Brief Received — XQube Studio',
+  title:  'Brief Received — XQUBE Studio',
   robots: { index: false },
 }
 

@@ -111,7 +111,7 @@ export default function Navbar({ navLinks: propLinks, ctaButton: propCta, social
             <Link href="/" className="flex items-center shrink-0" onClick={() => setOpen(false)}>
               <Image
                 src="/logo.svg"
-                alt="XQube Studio"
+                alt="XQUBE Studio"
                 width={120}
                 height={69}
                 priority

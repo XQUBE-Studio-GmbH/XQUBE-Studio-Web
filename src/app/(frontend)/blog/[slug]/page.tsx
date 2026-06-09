@@ -46,10 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return { title: 'Not Found' }
   return buildPageMetadata({
     seo: post.seo,
-    defaultTitle: `${post.title} | XQube Studio Blog`,
-    defaultDescription: post.excerpt || `${post.title} — insights from XQube Studio.`,
+    defaultTitle: `${post.title} | XQUBE Studio Blog`,
+    defaultDescription: post.excerpt || `${post.title} — insights from XQUBE Studio.`,
     url: `https://www.xqubestudio.com/blog/${slug}`,
-    ogTitle: `${post.title} | XQube Studio Blog`,
+    ogTitle: `${post.title} | XQUBE Studio Blog`,
     ogImage: post.coverImage?.url || undefined,
     ogType: 'article',
   })

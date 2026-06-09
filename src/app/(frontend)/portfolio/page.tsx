@@ -16,11 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
     return buildPageMetadata({
       seo: page?.seo,
       defaultTitle: 'Portfolio',
-      defaultDescription: "Browse XQube Studio's portfolio of AAA game art — characters, weapons, vehicles, environments, props, and VR assets.",
+      defaultDescription: "Browse XQUBE Studio's portfolio of AAA game art — characters, weapons, vehicles, environments, props, and VR assets.",
       url: 'https://www.xqubestudio.com/portfolio',
     })
   } catch {
-    return { title: 'Portfolio', description: "Browse XQube Studio's portfolio of AAA game art." }
+    return { title: 'Portfolio', description: "Browse XQUBE Studio's portfolio of AAA game art." }
   }
 }
 

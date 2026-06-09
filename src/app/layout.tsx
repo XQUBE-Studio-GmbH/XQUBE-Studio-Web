@@ -15,14 +15,14 @@ const urbanist = Urbanist({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xqubestudio.com'),
   title: {
-    default: 'XQube Studio | AAA Game Art & XR Production',
-    template: '%s | XQube Studio',
+    default: 'XQUBE Studio | AAA Game Art & XR Production',
+    template: '%s | XQUBE Studio',
   },
-  description: 'XQube Studio is a GmbH-registered game art and XR production studio with hubs in Vienna, Dubai, and Dhaka. Delivering AAA-quality assets for game studios worldwide.',
+  description: 'XQUBE Studio is a GmbH-registered game art and XR production studio with hubs in Vienna, Dubai, and Dhaka. Delivering AAA-quality assets for game studios worldwide.',
   keywords: ['game art studio', 'outsource game art', 'AAA game assets', 'character art', 'environment art', 'VR assets', 'UEFN Fortnite', 'Vienna game studio'],
   openGraph: {
     type: 'website',
-    siteName: 'XQube Studio',
+    siteName: 'XQUBE Studio',
     locale: 'en_US',
   },
   twitter: { card: 'summary_large_image' },

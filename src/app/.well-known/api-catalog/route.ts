@@ -21,8 +21,18 @@ export function GET() {
             type: 'application/xml',
             title: 'XML sitemap',
           },
+          {
+            href: 'https://www.xqubestudio.com/.well-known/ai-plugin.json',
+            type: 'application/json',
+            title: 'ChatGPT / GPT Action plugin manifest',
+          },
         ],
         'service-desc': [
+          {
+            href: 'https://www.xqubestudio.com/.well-known/openapi.json',
+            type: 'application/json',
+            title: 'OpenAPI 3.1.0 spec — contact and project brief endpoints',
+          },
           {
             href: 'https://www.xqubestudio.com/robots.txt',
             type: 'text/plain',

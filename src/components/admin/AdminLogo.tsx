@@ -18,7 +18,7 @@ export default function AdminLogo() {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
       <Image
         src={isDark ? '/xqube-logo.svg' : '/xqube-logo-light.svg'}
-        alt="XQube Studio"
+        alt="XQUBE Studio"
         width={320}
         height={183}
         priority
