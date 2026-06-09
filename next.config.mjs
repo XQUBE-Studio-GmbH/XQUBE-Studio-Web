@@ -8,6 +8,23 @@ const nextConfig = {
   // runtime instead. Prevents "Can't resolve 'crypto'" and similar Node.js
   // built-in errors that occur when Payload / drizzle / postgres packages
   // are accidentally pulled into the webpack graph (e.g. via instrumentation.ts).
+  async rewrites() {
+    // When a client sends Accept: text/markdown, rewrite the request to the
+    // corresponding /path/index.md route handler which returns Content-Type:
+    // text/markdown explicitly. This satisfies [C1] content negotiation.
+    // Rewrites run at Next.js routing level — more reliable than middleware for
+    // header-based routing, and does not change the URL seen by the client.
+    const mdAccept = [{ type: 'header', key: 'accept', value: '(.*text/markdown.*)' }]
+    return [
+      { source: '/',          has: mdAccept, destination: '/index.md' },
+      { source: '/about',     has: mdAccept, destination: '/about/index.md' },
+      { source: '/services',  has: mdAccept, destination: '/services/index.md' },
+      { source: '/portfolio', has: mdAccept, destination: '/portfolio/index.md' },
+      { source: '/contact',   has: mdAccept, destination: '/contact/index.md' },
+      { source: '/blog',      has: mdAccept, destination: '/blog/index.md' },
+    ]
+  },
+
   async redirects() {
     return [
       // ── Canonical domain — non-www → www ─────────────────────────────────
