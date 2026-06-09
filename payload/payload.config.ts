@@ -46,6 +46,7 @@ import * as homepageEngagementToggleMigration     from './migrations/20260526_ho
 import * as scopeFieldsMigration                  from './migrations/20260531_scope_fields.ts'
 import * as faqsCollectionMigration               from './migrations/20260610_faqs_collection.ts'
 import * as seedFaqsMigration                    from './migrations/20260610_seed_faqs.ts'
+import * as reseedFaqsMigration                  from './migrations/20260611_reseed_faqs.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1907,6 +1908,11 @@ export default buildConfig({
         name: '20260610_seed_faqs',
         up: seedFaqsMigration.up,
         down: seedFaqsMigration.down,
+      },
+      {
+        name: '20260611_reseed_faqs',
+        up: reseedFaqsMigration.up,
+        down: reseedFaqsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
