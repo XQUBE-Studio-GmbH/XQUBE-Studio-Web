@@ -33,6 +33,16 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Serve .md files with the correct MIME type so AI crawlers receive
+        // text/markdown (not text/plain or application/octet-stream).
+        // Applies to /index.md, /about/index.md, /services/index.md, etc.
+        // Regex pattern is unambiguous for files with extensions.
+        source: '/(.*\\.md)',
+        headers: [
+          { key: 'Content-Type', value: 'text/markdown; charset=utf-8' },
+        ],
+      },
+      {
         // Allow Payload admin (on any domain/origin) to embed frontend pages in the live-preview iframe.
         // CSP frame-ancestors supersedes X-Frame-Options in modern browsers.
         // 'self' covers same-origin access; the two explicit origins cover cross-domain admin access.

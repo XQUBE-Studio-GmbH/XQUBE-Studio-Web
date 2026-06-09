@@ -1,0 +1,40 @@
+/**
+ * GET /contact/index.md
+ *
+ * Markdown summary of the Contact page for AI crawlers and agents.
+ * Satisfies the [C1] AIScan "expose /path/index.md" requirement.
+ */
+
+const MARKDOWN = `# Contact XQUBE Studio
+
+Get in touch — we respond within 24 hours.
+
+## Contact Details
+
+- **Email**: info@xqubestudio.com
+- **Phone**: +43 650 5207329
+- **Address**: Rathausstrasse 21/12, 1010 Vienna, Austria
+
+## Book a Call
+
+Schedule a 30-minute discovery call: https://www.xqubestudio.com/contact
+
+## Submit a Brief
+
+Start a project: https://www.xqubestudio.com/scope
+
+## Links
+
+- [Home](/)
+- [Services](/services)
+- [Portfolio](/portfolio)
+`
+
+export function GET() {
+  return new Response(MARKDOWN, {
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+    },
+  })
+}

@@ -177,18 +177,22 @@ Full blog: https://www.xqubestudio.com/blog
 
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
-  const accept = request.headers.get('accept') ?? ''
+  // Lowercase before checking — MIME types are case-insensitive per RFC 7231.
+  const accept = (request.headers.get('accept') ?? '').toLowerCase()
   const wantsMarkdown =
     accept.includes('text/markdown') || searchParams.get('format') === 'md'
 
   if (wantsMarkdown) {
     const content = MD_CONTENT[pathname]
     if (content) {
-      return new NextResponse(content, {
+      // Use the standard Web API Response (not NextResponse) to ensure
+      // Next.js does not post-process or override our Content-Type header.
+      return new Response(content, {
         status: 200,
         headers: {
           'Content-Type': 'text/markdown; charset=utf-8',
           'Vary': 'Accept',
+          'Cache-Control': 'no-store',
         },
       })
     }
@@ -198,7 +202,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Only run on the pages that have corresponding markdown content.
-  // Excludes /admin, /api, /_next, and static assets automatically.
+  // Matches: /  /about  /services  /portfolio  /contact  /blog (exact paths only)
+  // Excludes: /admin, /api, /_next, static assets automatically.
   matcher: ['/', '/about', '/services', '/portfolio', '/contact', '/blog'],
 }
