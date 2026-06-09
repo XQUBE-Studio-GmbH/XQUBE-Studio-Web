@@ -7,7 +7,8 @@ import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { buildBreadcrumbList, BASE_URL, ORG_REF } from '@/lib/jsonLd'
 import PageHero from '@/components/PageHero'
 import type { ServiceItem, ServiceToolItem } from '@/types/cms'
-import { getServiceBySlug, getRelatedPortfolioForService, getOtherServices } from '@/lib/cachedData'
+import FAQAccordion from '@/components/ui/FAQAccordion'
+import { getServiceBySlug, getRelatedPortfolioForService, getOtherServices, getServiceFAQs } from '@/lib/cachedData'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,9 +89,10 @@ export default async function ServiceDetailPage({ params }: Props) {
   if (!service) notFound()
 
   const categories = SERVICE_CATEGORIES[slug] ?? []
-  const [descriptionHtml, relatedWork] = await Promise.all([
+  const [descriptionHtml, relatedWork, faqs] = await Promise.all([
     Promise.resolve(service.description ? serializeLexical(service.description) : ''),
     getRelatedPortfolio(categories),
+    getServiceFAQs(String(service.id)),
   ])
 
   const serviceUrl = `${BASE_URL}/services/${slug}`
@@ -112,6 +114,17 @@ export default async function ServiceDetailPage({ params }: Props) {
           { name: service.title, url: serviceUrl },
         ])
       )}} />
+      {faqs.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type':    'FAQPage',
+          mainEntity: faqs.map((faq) => ({
+            '@type': 'Question',
+            name:    faq.question,
+            acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+          })),
+        })}} />
+      )}
 
       {/* Hero */}
       <PageHero
@@ -252,6 +265,19 @@ export default async function ServiceDetailPage({ params }: Props) {
           </div>
         </div>
       </section>
+
+      {/* FAQ section */}
+      {faqs.length > 0 && (
+        <section className="xq-section border-t border-xq-border">
+          <div className="xq-container">
+            <div className="max-w-3xl">
+              <div className="xq-label mb-3">FREQUENTLY ASKED</div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white mb-10">Questions about {service.title}</h2>
+              <FAQAccordion faqs={faqs} grouped={false} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Related portfolio */}
       {relatedWork.length > 0 && (

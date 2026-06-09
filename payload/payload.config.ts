@@ -44,6 +44,8 @@ import * as servicesToolsRelMigration             from './migrations/20260524_se
 import * as servicesProcessMigration              from './migrations/20260524_services_process.ts'
 import * as homepageEngagementToggleMigration     from './migrations/20260526_homepage_engagement_toggle.ts'
 import * as scopeFieldsMigration                  from './migrations/20260531_scope_fields.ts'
+import * as faqsCollectionMigration               from './migrations/20260610_faqs_collection.ts'
+import * as seedFaqsMigration                    from './migrations/20260610_seed_faqs.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -703,6 +705,96 @@ export default buildConfig({
           type: 'number',
           defaultValue: 0,
           admin: { description: 'Lower number appears first.' },
+        },
+      ],
+    },
+
+    // ─── FAQs ────────────────────────────────────────────────
+    {
+      slug: 'faqs',
+      admin: {
+        useAsTitle: 'question',
+        group: 'Content',
+        defaultColumns: ['question', 'category', 'service', 'order'],
+        description: 'Manage FAQs for the About page and individual service pages.',
+        hideAPIURL: true,
+      },
+      access: contentAccess,
+      hooks: {
+        afterChange: [
+          ({ doc }: { doc: any }) => {
+            if (doc.category === 'general') {
+              revalidateTags('about')
+            } else {
+              revalidateTags('services')
+            }
+          },
+        ],
+        afterDelete: [
+          ({ doc }: { doc: any }) => {
+            if (doc.category === 'general') {
+              revalidateTags('about')
+            } else {
+              revalidateTags('services')
+            }
+          },
+        ],
+      },
+      fields: [
+        {
+          name: 'question',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'answer',
+          type: 'textarea',
+          required: true,
+        },
+        {
+          name: 'category',
+          type: 'select',
+          required: true,
+          options: [
+            { label: 'General (About page)',          value: 'general' },
+            { label: 'Service-Specific (Service page)', value: 'service-specific' },
+          ],
+          admin: {
+            description: 'General FAQs appear on the About page. Service-Specific FAQs appear on the selected service page.',
+          },
+        },
+        {
+          name: 'service',
+          type: 'relationship',
+          relationTo: 'services',
+          admin: {
+            description: 'Required for Service-Specific FAQs. Leave empty for General FAQs.',
+            condition: (data: any) => data.category === 'service-specific',
+          },
+        },
+        {
+          name: 'faqGroup',
+          label: 'Group',
+          type: 'select',
+          options: [
+            { label: 'What We Do',       value: 'what-we-do' },
+            { label: 'Our Work',         value: 'our-work' },
+            { label: 'Working Together', value: 'working-together' },
+            { label: 'Getting Started',  value: 'getting-started' },
+            { label: 'None',             value: 'none' },
+          ],
+          defaultValue: 'none',
+          admin: {
+            description: 'Group heading for General FAQs on the About page. Set to None for Service-Specific FAQs.',
+          },
+        },
+        {
+          name: 'order',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            description: 'Display order within the group. Lower number = appears first.',
+          },
         },
       ],
     },
@@ -1805,6 +1897,16 @@ export default buildConfig({
         name: '20260531_scope_fields',
         up: scopeFieldsMigration.up,
         down: scopeFieldsMigration.down,
+      },
+      {
+        name: '20260610_faqs_collection',
+        up: faqsCollectionMigration.up,
+        down: faqsCollectionMigration.down,
+      },
+      {
+        name: '20260610_seed_faqs',
+        up: seedFaqsMigration.up,
+        down: seedFaqsMigration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

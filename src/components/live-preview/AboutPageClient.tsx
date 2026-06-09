@@ -7,7 +7,8 @@ import ScrollReveal from '@/components/ScrollReveal'
 import PageHero from '@/components/PageHero'
 import SectionHeader from '@/components/SectionHeader'
 import { getLivePreviewServerURL } from '@/lib/livePreview'
-import type { AboutGlobal, TeamMember, MediaRef, Credential, Hub, WhyCard } from '@/types/cms'
+import FAQAccordion from '@/components/ui/FAQAccordion'
+import type { AboutGlobal, TeamMember, MediaRef, Credential, Hub, WhyCard, FAQItem } from '@/types/cms'
 
 // ─── Fallbacks ────────────────────────────────────────────────────────────────
 
@@ -41,12 +42,13 @@ const FB_WHY: WhyCard[] = [
 interface Props {
   initialData: AboutGlobal
   teamMembers: TeamMember[]
+  faqs:        FAQItem[]
   serverURL:   string
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function AboutPageClient({ initialData, teamMembers, serverURL }: Props) {
+export default function AboutPageClient({ initialData, teamMembers, faqs, serverURL }: Props) {
   const { data: ap } = useLivePreview<AboutGlobal>({
     initialData,
     serverURL: getLivePreviewServerURL(serverURL),
@@ -185,6 +187,19 @@ export default function AboutPageClient({ initialData, teamMembers, serverURL }:
           </div>
         </div>
       </section>
+
+      {/* ── FAQs ─────────────────────────────────────────────── */}
+      {faqs.length > 0 && (
+        <section className="xq-section border-t border-xq-border">
+          <div className="xq-container">
+            <div className="max-w-3xl mx-auto">
+              <div className="xq-label mb-3">GOT QUESTIONS</div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white mb-10">Everything you need to know</h2>
+              <FAQAccordion faqs={faqs} grouped />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section className="xq-section border-t border-xq-border bg-xq-surface">

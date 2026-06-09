@@ -35,6 +35,7 @@ import type {
   ServicesPageGlobal,
   BlogPageGlobal,
   ContactPageGlobal,
+  FAQItem,
 } from '@/types/cms'
 
 // ─── Local type: NavigationGlobal (mirrors layout.tsx local interface) ─────────
@@ -500,3 +501,52 @@ export const getContactData = unstable_cache(
   ['contact'],
   { revalidate: 600, tags: ['contact'] },
 )
+
+// ─── FAQs ─────────────────────────────────────────────────────────────────────
+
+async function _fetchGeneralFAQs(): Promise<FAQItem[]> {
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'faqs',
+      where: { category: { equals: 'general' } },
+      sort: 'order',
+      limit: 100,
+      depth: 0,
+    })
+    return res.docs as unknown as FAQItem[]
+  } catch { return [] }
+}
+
+export const getGeneralFAQs = () =>
+  unstable_cache(
+    () => _fetchGeneralFAQs(),
+    ['faqs-general'],
+    { revalidate: 600, tags: ['faqs', 'about'] },
+  )()
+
+async function _fetchServiceFAQs(serviceId: string): Promise<FAQItem[]> {
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'faqs',
+      where: {
+        and: [
+          { category: { equals: 'service-specific' } },
+          { service: { equals: serviceId } },
+        ],
+      },
+      sort: 'order',
+      limit: 50,
+      depth: 0,
+    })
+    return res.docs as unknown as FAQItem[]
+  } catch { return [] }
+}
+
+export const getServiceFAQs = (serviceId: string) =>
+  unstable_cache(
+    () => _fetchServiceFAQs(serviceId),
+    ['faqs-service', serviceId],
+    { revalidate: 600, tags: ['faqs', 'services'] },
+  )()

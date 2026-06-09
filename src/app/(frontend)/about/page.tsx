@@ -4,7 +4,7 @@ import config from '../../../../payload/payload.config'
 import AboutPageClient from '@/components/live-preview/AboutPageClient'
 import { buildPageMetadata } from '@/lib/buildPageMetadata'
 import { BASE_URL, LOGO_URL } from '@/lib/jsonLd'
-import { getAboutData } from '@/lib/cachedData'
+import { getAboutData, getGeneralFAQs } from '@/lib/cachedData'
 import type { AboutGlobal } from '@/types/cms'
 
 export const dynamic = 'force-dynamic'
@@ -28,7 +28,10 @@ export async function generateMetadata(): Promise<Metadata> {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function AboutPage() {
-  const { ap, teamMembers } = await getAboutData()
+  const [{ ap, teamMembers }, faqs] = await Promise.all([
+    getAboutData(),
+    getGeneralFAQs(),
+  ])
 
   const serverURL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
@@ -59,9 +62,32 @@ export default async function AboutPage() {
           }),
         }}
       />
+
+      {/* FAQPage structured data — only rendered when FAQs exist */}
+      {faqs.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type':    'FAQPage',
+              mainEntity: faqs.map((faq) => ({
+                '@type': 'Question',
+                name:    faq.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text:    faq.answer,
+                },
+              })),
+            }),
+          }}
+        />
+      )}
+
       <AboutPageClient
         initialData={ap}
         teamMembers={teamMembers}
+        faqs={faqs}
         serverURL={serverURL}
       />
     </>

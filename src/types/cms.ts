@@ -43,6 +43,16 @@ export interface ServiceItem {
   } | null
 }
 
+export interface FAQItem {
+  id:        string
+  question:  string
+  answer:    string
+  category:  'general' | 'service-specific'
+  service?:  string | ServiceItem | null
+  faqGroup?: 'what-we-do' | 'our-work' | 'working-together' | 'getting-started' | 'none' | null
+  order:     number
+}
+
 export interface ClientItem {
   id:      string | number
   name:    string
