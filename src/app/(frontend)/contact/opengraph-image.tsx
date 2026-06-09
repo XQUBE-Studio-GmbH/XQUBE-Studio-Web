@@ -1,5 +1,6 @@
 import { generateOGImage, ogSize, ogContentType } from '@/lib/og'
 
+export const dynamic     = 'force-static'
 export const size        = ogSize
 export const contentType = ogContentType
 
