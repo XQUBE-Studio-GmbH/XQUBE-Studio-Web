@@ -219,8 +219,12 @@ async function _fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
       limit:      1,
       depth:      2,
     })
+    console.log('[cachedData] fetchServiceBySlug', slug, 'totalDocs:', res.totalDocs)
     return (res.docs[0] as unknown as ServiceItem) ?? null
-  } catch { return null }
+  } catch (e) {
+    console.error('[cachedData] fetchServiceBySlug error:', slug, e)
+    return null
+  }
 }
 
 export const getServiceBySlug = (slug: string) =>
