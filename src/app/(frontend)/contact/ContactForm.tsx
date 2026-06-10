@@ -8,7 +8,6 @@ const PROJECT_TYPES = [
   { value: '', label: 'Select project type' },
   { value: 'game-art-production', label: 'Game Art Production' },
   { value: 'vr-xr-assets',        label: 'VR / XR Assets' },
-  { value: 'interactive-dev',      label: 'Interactive Development' },
   { value: 'staff-augmentation',   label: 'Staff Augmentation' },
   { value: 'full-game-production', label: 'Full Game Production' },
   { value: 'other',                label: 'Other / Not Sure Yet' },
