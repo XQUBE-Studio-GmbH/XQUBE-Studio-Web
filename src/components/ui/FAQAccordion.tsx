@@ -28,7 +28,7 @@ const GROUP_ORDER = ['what-we-do', 'our-work', 'working-together', 'getting-star
 // ─── Link parser ─────────────────────────────────────────────────────────────
 // Scans answer text for known URLs/emails and renders them as clickable links.
 
-const LINK_PATTERN = /((?:https?:\/\/(?:www\.)?xqubestudio\.com)?\/scope)|((?:https?:\/\/(?:www\.)?xqubestudio\.com)?\/services)|((?:https?:\/\/(?:www\.)?)?artstation\.com\/xqubestudio)|((?:https?:\/\/(?:www\.)?)?calendly\.com\/tanvirkhandlxqsmgs)|(info@xqubestudio\.com)/gi
+const LINK_PATTERN = /((?:(?:https?:\/\/(?:www\.)?)?xqubestudio\.com)?\/scope)|((?:(?:https?:\/\/(?:www\.)?)?xqubestudio\.com)?\/services)|((?:https?:\/\/(?:www\.)?)?artstation\.com\/xqubestudio)|((?:https?:\/\/(?:www\.)?)?calendly\.com\/tanvirkhandlxqsmgs)|(info@xqubestudio\.com)/gi
 
 function parseLinks(text: string): React.ReactNode {
   const parts: React.ReactNode[] = []

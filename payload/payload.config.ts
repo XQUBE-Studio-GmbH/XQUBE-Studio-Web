@@ -47,6 +47,7 @@ import * as scopeFieldsMigration                  from './migrations/20260531_sc
 import * as faqsCollectionMigration               from './migrations/20260610_faqs_collection.ts'
 import * as seedFaqsMigration                    from './migrations/20260610_seed_faqs.ts'
 import * as reseedFaqsMigration                  from './migrations/20260611_reseed_faqs.ts'
+import * as reseedFaqsV2Migration                from './migrations/20260612_reseed_faqs_v2.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1913,6 +1914,11 @@ export default buildConfig({
         name: '20260611_reseed_faqs',
         up: reseedFaqsMigration.up,
         down: reseedFaqsMigration.down,
+      },
+      {
+        name: '20260612_reseed_faqs_v2',
+        up: reseedFaqsV2Migration.up,
+        down: reseedFaqsV2Migration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),

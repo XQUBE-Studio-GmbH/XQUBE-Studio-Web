@@ -193,7 +193,7 @@ export default function AboutPageClient({ initialData, teamMembers, faqs, server
         <section className="xq-section border-t border-xq-border">
           <div className="xq-container">
             <div className="max-w-3xl mx-auto">
-              <div className="xq-label mb-3">GOT QUESTIONS</div>
+              <div className="xq-label mb-3">WORKING WITH XQUBE</div>
               <h2 className="text-2xl sm:text-3xl font-black text-white mb-10">Everything you need to know</h2>
               <FAQAccordion faqs={faqs} grouped />
             </div>
