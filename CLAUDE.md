@@ -661,6 +661,18 @@ await db.execute(sql`CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_f
 ```
 **Rule:** Whenever a new collection is added via a hand-written migration, ALWAYS also add `{slug}_id integer` to `payload_locked_documents_rels` in the same migration. The column type is `integer` for collections with serial PKs (the default). Forgetting this column crashes the entire admin — not just the new collection's list view — because the locked-documents lateral join runs on every admin page load.
 
+### ERROR 28 — Service detail pages return 404, ServiceDetailPage never runs
+**Where:** Runtime — all `/services/[slug]` URLs return 404 despite correct DB data
+**Root cause:** Static route directories (`services/uefn-roblox/`, `services/vr-assets/`, etc.) existed inside the Next.js app directory for AI-crawler markdown routes (`/services/uefn-roblox/index.md`). In Next.js App Router, **static segments take priority over dynamic segments** (`[slug]`). The static directories had no `page.tsx`, so Next.js 404'd without ever invoking `ServiceDetailPage`. The function did run (visible as a Function Invocation in Vercel logs at ~267ms) but it rendered the root `not-found.tsx`, not the page component.
+**Misdiagnoses to avoid (in order tried):**
+1. `unstable_cache` stale null — was real but downstream; fixed with React `cache()`, didn't unblock pages
+2. Vercel CDN caching the 404 — was real but downstream; fixed with `Cache-Control: no-store` in `next.config.mjs`, still didn't unblock pages
+3. Missing `revalidateTag` — was real but downstream; `revalidatePath` still served the CDN-cached 404
+4. DB data missing — was NOT the issue; `/api/debug-service` proved `totalDocs: 1` all along
+**Diagnostic clue:** "No logs found for this request" in Vercel even after adding `console.log` to the page component — means the page component never ran.
+**Fix:** Consolidate per-slug markdown route handlers into `services/[slug]/index.md/route.ts`. Delete the static slug directories.
+**Rule:** Never put static named directories inside a route group that also has a `[slug]` dynamic segment. Even if those directories have no `page.tsx` (only nested `route.ts` handlers), they shadow the dynamic route for the parent URL. Always use the dynamic segment (`[slug]`) for nested route handlers if the parent URL must also be served by the dynamic page.
+
 ---
 
 ## Git Rule
