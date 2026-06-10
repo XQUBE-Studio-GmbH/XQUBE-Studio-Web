@@ -55,6 +55,15 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Prevent Vercel's edge CDN from caching service detail pages.
+        // notFound() renders the root not-found.tsx (static/cacheable) — without
+        // this header the CDN caches the 404 and the function never runs again.
+        source: '/services/:slug',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+      {
         // Serve .md files with the correct MIME type so AI crawlers receive
         // text/markdown (not text/plain or application/octet-stream).
         // Applies to /index.md, /about/index.md, /services/index.md, etc.
