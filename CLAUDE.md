@@ -645,6 +645,24 @@ const res = await fetch('/api/users', {
 
 ---
 
+### ERROR 27 — Admin 500 on every request after adding a new collection
+**Error digest:** `4123269238`
+**Error message:** `column payload_locked_documents__rels.faqs_id does not exist`
+**Where:** Runtime — every GET `/admin` request; Vercel logs show `Error: Failed query: select "payload_locked_documents"."id" ... "payload_locked_documents__rels"."faqs_id" ...`
+**Root cause:** When a new collection is added, Payload queries `payload_locked_documents_rels` for a `{slug}_id` column on every admin page load (powers document locking / edit-conflict detection). The migration that created the `faqs` table (`20260610_faqs_collection`) never added `faqs_id` to `payload_locked_documents_rels`. Every admin load hit the missing column and returned 500.
+**Misdiagnosis to avoid:** The error log shows the word "faqs" in the query which tempted diagnosis of a `faqs.id` type mismatch. The actual cause was the missing column in the rels table — a completely different table. Always read the full `[cause]:` line in the error, not just the outer query string.
+**Wrong fixes tried:**
+- Replacing the `fix_faq_ids` migration (targeted race-condition fix) — did not touch the rels table
+- Rebuilding `faqs` with `serial` PK — addressed a secondary issue but not the crash
+**Fix:**
+```ts
+await db.execute(sql`ALTER TABLE "payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "faqs_id" integer;`)
+await db.execute(sql`CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_faqs_id_idx" ON "payload_locked_documents_rels" ("faqs_id");`)
+```
+**Rule:** Whenever a new collection is added via a hand-written migration, ALWAYS also add `{slug}_id integer` to `payload_locked_documents_rels` in the same migration. The column type is `integer` for collections with serial PKs (the default). Forgetting this column crashes the entire admin — not just the new collection's list view — because the locked-documents lateral join runs on every admin page load.
+
+---
+
 ## Git Rule
 **Never push to git unless the user explicitly asks.** Always commit locally first,
 show what was changed, then wait for "push" confirmation.
