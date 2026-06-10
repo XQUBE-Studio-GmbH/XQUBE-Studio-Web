@@ -65,7 +65,8 @@ async function _fetchLayoutData(): Promise<LayoutData> {
       payload.findGlobal({ slug: 'site-settings', depth: 1 }) as Promise<SiteSettingsGlobal>,
     ])
     return { nav, settings }
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchLayoutData error:', e)
     return { nav: {}, settings: {} }
   }
 }
@@ -126,7 +127,8 @@ async function _fetchHomeData(): Promise<HomeData> {
       featured,
       blogPosts: blogRes.docs as unknown as BlogPost[],
     }
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchHomeData error:', e)
     return { hp: {} as HomepageGlobal, services: [], clients: [], featured: [], blogPosts: [] }
   }
 }
@@ -155,7 +157,8 @@ async function _fetchAboutData(): Promise<AboutData> {
       ap:          ap as AboutGlobal,
       teamMembers: teamRes.docs as unknown as TeamMember[],
     }
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchAboutData error:', e)
     return { ap: {} as AboutGlobal, teamMembers: [] }
   }
 }
@@ -184,7 +187,8 @@ async function _fetchServicesListData(): Promise<ServicesListData> {
       services: servicesRes.docs as unknown as ServiceItem[],
       sp,
     }
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchServicesListData error:', e)
     return { services: [], sp: {} as ServicesPageGlobal }
   }
 }
@@ -221,7 +225,8 @@ async function _fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
       depth:      2,
     })
     return (res.docs[0] as unknown as ServiceItem) ?? null
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchServiceBySlug error:', slug, e)
     return null
   }
 }
@@ -242,7 +247,10 @@ async function _fetchRelatedPortfolio(categories: string[]): Promise<RelatedPort
       depth: 1,
     })
     return res.docs as unknown as RelatedPortfolioData['relatedWork']
-  } catch { return [] }
+  } catch (e) {
+    console.error('[cachedData] _fetchRelatedPortfolio error:', categories, e)
+    return []
+  }
 }
 
 export const getRelatedPortfolioForService = (categories: string[]) =>
@@ -257,7 +265,10 @@ async function _fetchOtherServices(currentSlug: string): Promise<ServiceItem[]> 
     const payload = await getPayload({ config })
     const res = await payload.find({ collection: 'services', sort: 'order', limit: 10, depth: 0 })
     return (res.docs as unknown as ServiceItem[]).filter((s) => s.slug !== currentSlug)
-  } catch { return [] }
+  } catch (e) {
+    console.error('[cachedData] _fetchOtherServices error:', currentSlug, e)
+    return []
+  }
 }
 
 export const getOtherServices = (currentSlug: string) =>
@@ -304,7 +315,8 @@ async function _fetchPortfolioListData(): Promise<PortfolioListData> {
     }
 
     return { items, pp }
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchPortfolioListData error:', e)
     return { items: [] as PortfolioItem[], pp: {} as PortfolioPageGlobal }
   }
 }
@@ -353,7 +365,8 @@ async function _fetchPortfolioItemBySlug(slug: string): Promise<PortfolioSlugIte
       depth: 2,
     })
     return (res.docs[0] as unknown as PortfolioSlugItem) ?? null
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchPortfolioItemBySlug error:', slug, e)
     return null
   }
 }
@@ -378,7 +391,8 @@ async function _fetchRelatedPortfolioItems(currentId: string, category?: string)
       depth: 1,
     })
     return (res.docs as unknown as PortfolioSlugItem[]).filter((d) => d.id !== currentId).slice(0, 3)
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchRelatedPortfolioItems error:', currentId, e)
     return []
   }
 }
@@ -414,7 +428,8 @@ async function _fetchBlogListData(): Promise<BlogListData> {
       posts: postsRes.docs as unknown as BlogPost[],
       bp,
     }
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchBlogListData error:', e)
     return { posts: [] as BlogPost[], bp: {} as BlogPageGlobal }
   }
 }
@@ -455,7 +470,8 @@ async function _fetchBlogPostBySlug(slug: string): Promise<BlogSlugPost | null> 
       depth: 1,
     })
     return (res.docs[0] as unknown as BlogSlugPost) ?? null
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchBlogPostBySlug error:', slug, e)
     return null
   }
 }
@@ -491,7 +507,8 @@ async function _fetchContactData(): Promise<ContactRawData> {
       payload.findGlobal({ slug: 'contact-page' })  as Promise<ContactPageGlobal>,
     ])
     return { settings, cp }
-  } catch {
+  } catch (e) {
+    console.error('[cachedData] _fetchContactData error:', e)
     return { settings: {}, cp: {} as ContactPageGlobal }
   }
 }
@@ -515,7 +532,10 @@ async function _fetchGeneralFAQs(): Promise<FAQItem[]> {
       depth: 0,
     })
     return res.docs as unknown as FAQItem[]
-  } catch { return [] }
+  } catch (e) {
+    console.error('[cachedData] _fetchGeneralFAQs error:', e)
+    return []
+  }
 }
 
 export const getGeneralFAQs = () =>
@@ -541,7 +561,10 @@ async function _fetchServiceFAQs(serviceId: string): Promise<FAQItem[]> {
       depth: 0,
     })
     return res.docs as unknown as FAQItem[]
-  } catch { return [] }
+  } catch (e) {
+    console.error('[cachedData] _fetchServiceFAQs error:', serviceId, e)
+    return []
+  }
 }
 
 export const getServiceFAQs = (serviceId: string) =>
