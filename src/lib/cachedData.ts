@@ -220,10 +220,8 @@ async function _fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
       limit:      1,
       depth:      2,
     })
-    console.log('[svc] slug:', slug, 'totalDocs:', res.totalDocs)
     return (res.docs[0] as unknown as ServiceItem) ?? null
-  } catch (e) {
-    console.error('[svc] error:', slug, String(e))
+  } catch {
     return null
   }
 }
