@@ -48,25 +48,29 @@ Component classes: `.xq-container`, `.xq-section`, `.xq-card`, `.xq-btn-primary`
 ```
 xqube-web/
 ├── public/
-│   └── logo.svg
+│   ├── logo.svg
+│   └── llms.txt                           # LLM discovery file (llmstxt.org spec)
 ├── scripts/
 │   ├── migrate-images-to-webp.ts  # One-time JPG/PNG → WebP bulk migration
 │   ├── run-seo-migration.ts       # One-time SEO fields backfill
 │   ├── seed-services.ts           # Seed script — service records via REST API
 │   └── seed.ts                    # Seed script — general CMS data
 ├── src/
+│   ├── middleware.ts                      # Markdown content negotiation (Accept: text/markdown)
 │   ├── app/
 │   │   ├── layout.tsx                     # Root layout — minimal shell
 │   │   ├── globals.css                    # Design system tokens & component classes
-│   │   ├── robots.ts
-│   │   ├── sitemap.ts                     # Build-phase guarded sitemap
+│   │   ├── robots.ts                      # Sitemap pointer + explicit AI bot allow rules
+│   │   ├── sitemap.ts                     # Dynamic sitemap — STATIC_PAGES + CMS_COLLECTIONS
 │   │   ├── (frontend)/                    # Marketing site route group
 │   │   │   ├── layout.tsx                 # Navbar + Footer + GA4 + cookie consent + JSON-LD
 │   │   │   ├── page.tsx                   # Home
 │   │   │   ├── about/page.tsx
 │   │   │   ├── services/
 │   │   │   │   ├── page.tsx               # Services listing with pipeline tabs
-│   │   │   │   └── [slug]/page.tsx        # Service detail — tools, related portfolio
+│   │   │   │   └── [slug]/
+│   │   │   │       ├── page.tsx           # Service detail — tools, related portfolio, FAQs
+│   │   │   │       └── index.md/route.ts  # Markdown version for AI crawlers (all slugs)
 │   │   │   ├── portfolio/
 │   │   │   │   ├── page.tsx               # Portfolio grid with category filter
 │   │   │   │   └── [slug]/page.tsx        # Portfolio detail — gallery, video, tools
@@ -74,6 +78,10 @@ xqube-web/
 │   │   │   │   ├── page.tsx
 │   │   │   │   └── [slug]/page.tsx        # Blog article with Lexical rich-text
 │   │   │   ├── contact/page.tsx           # Contact form → Resend + CMS save
+│   │   │   ├── scope/
+│   │   │   │   ├── page.tsx               # Project scoping tool — multi-step quote form
+│   │   │   │   ├── ScopingForm.tsx
+│   │   │   │   └── confirmed/page.tsx     # Post-submit confirmation with Calendly embed
 │   │   │   ├── privacy/page.tsx
 │   │   │   ├── cookies/page.tsx
 │   │   │   └── dev/email-preview/page.tsx # Dev-only email template preview
@@ -82,8 +90,15 @@ xqube-web/
 │   │   │   │   ├── admin.css              # Custom admin overrides
 │   │   │   │   └── importMap.ts           # Manually maintained import map
 │   │   │   └── api/                       # Payload REST API
+│   │   ├── .well-known/
+│   │   │   ├── ai-plugin.json/route.ts    # OpenAI plugin manifest
+│   │   │   ├── openapi.json/route.ts      # OpenAPI 3.1 spec for AI tool use
+│   │   │   ├── api-catalog/route.ts       # RFC 9727 API catalog
+│   │   │   ├── oauth-authorization-server/route.ts
+│   │   │   └── oauth-protected-resource/route.ts
 │   │   └── api/
 │   │       ├── contact/route.ts           # Contact form → Resend + saves to CMS
+│   │       ├── scope/route.ts             # Scope form submission handler
 │   │       └── invite-user/route.ts       # Admin invite → Resend
 │   ├── components/
 │   │   ├── Navbar.tsx
@@ -141,15 +156,22 @@ xqube-web/
 | `/` | Home — hero slideshow, stats, client strip, engine badges, featured work, services, process, engagement models, CTA |
 | `/about` | About — intro, credentials, hubs, team, why XQUBE, CTA |
 | `/services` | Services listing with pipeline tabs |
-| `/services/[slug]` | Service detail — description, tools, related portfolio work |
+| `/services/[slug]` | Service detail — description, tools, related portfolio work, FAQ accordion |
+| `/services/[slug]/index.md` | Markdown version of service detail for AI crawlers |
 | `/portfolio` | Portfolio grid with category filter |
 | `/portfolio/[slug]` | Portfolio detail — gallery lightbox, video embed, tools used, related work |
 | `/blog` | Blog listing |
 | `/blog/[slug]` | Blog article — Lexical rich-text, cover image, SEO meta |
 | `/contact` | Contact form (sends via Resend + saves to CMS) |
+| `/scope` | Project scoping tool — multi-step quote form, saves brief to CMS |
+| `/scope/confirmed` | Post-submit confirmation with Calendly embed |
 | `/privacy` | Privacy Policy |
 | `/cookies` | Cookie Policy |
 | `/admin` | Payload CMS admin panel |
+| `/llms.txt` | LLM discovery file — services, portfolio, team, contact info |
+| `/.well-known/ai-plugin.json` | OpenAI plugin manifest |
+| `/.well-known/openapi.json` | OpenAPI 3.1 spec |
+| `/.well-known/api-catalog` | RFC 9727 API catalog |
 
 ---
 
@@ -177,6 +199,7 @@ Admin panel at `/admin`. All DB schema changes are managed via `prodMigrations` 
 | `team-members` | Team profiles with photo, role, bio |
 | `blog-posts` | Blog articles with Lexical rich-text, cover image, SEO fields |
 | `contact-submissions` | All contact form submissions saved to CMS — name, email, company, message, timestamp |
+| `faqs` | FAQ entries with category (`general` or `service-specific`), linked service, question, answer, and sort order — rendered as accordions with `FAQPage` JSON-LD |
 | `clients` | Client logos — managed inline via Homepage → Client Logo Strip (hidden from sidebar) |
 | `tools` | Software/tool library (name, logo, category) — referenced by Portfolio and Homepage Engine Badges (hidden from sidebar) |
 
@@ -199,8 +222,11 @@ Admin panel at `/admin`. All DB schema changes are managed via `prodMigrations` 
 - **Instant cache revalidation** — Every `afterChange` and `afterDelete` hook calls `revalidateTag()` automatically. Changes made in the admin panel are live on the frontend within seconds — no 5-minute wait
 - **SEO fields** — Every portfolio item, blog post, service, and page global has Meta Title, Meta Description, OG Image, and noIndex toggle
 - **WebP auto-conversion** — Images uploaded via the media library are automatically converted to WebP (quality 85) by a `beforeOperation` hook before the S3 plugin saves them to DigitalOcean Spaces. No manual conversion needed
+- **Dynamic sitemap** — `sitemap.ts` generates entries from `STATIC_PAGES` (hardcoded routes) and `CMS_COLLECTIONS` (queries Payload for all published portfolio items, services, and blog posts). Add new static routes or CMS-driven collections in one place
 - **Contact submissions inbox** — Every contact form submission is saved to the `contact-submissions` CMS collection in addition to being emailed via Resend. Browse and filter submissions in the admin panel
-- **JSON-LD structured data** — Organization, WebSite, BlogPosting, Service/ItemList, CreativeWork, and BreadcrumbList schemas emitted on every relevant page. Helps Google Knowledge Panel and LLM crawlers identify the studio
+- **JSON-LD structured data** — Organization, WebSite, BlogPosting, Service/ItemList, CreativeWork, FAQPage, and BreadcrumbList schemas emitted on every relevant page. Helps Google Knowledge Panel and LLM crawlers identify the studio
+- **FAQ system** — `faqs` CMS collection with category (`general` or `service-specific`) and per-service linking. Accordions auto-render on service detail pages and the about page. `FAQPage` JSON-LD emitted per page. 38 entries auto-seeded across 7 pages via production migrations. No manual entry needed to launch
+- **Project scoping tool** — `/scope` multi-step quote form. Submits to `/api/scope`, saves a structured brief to the `contact-submissions` collection, then redirects to `/scope/confirmed` which embeds the Calendly booking widget
 - **Media folders** — Visual folder tree in the Media library for organising uploads
 - **Drag-to-reorder** — Client Logo Strip and Engine Badges on the Homepage global; Portfolio display order on the Portfolio Page global
 - **Nav visibility** — Each nav link has a Visible toggle; uncheck to hide without deleting
@@ -217,14 +243,37 @@ JSON-LD schemas are emitted via inline `<script type="application/ld+json">` tag
 
 | Page | Schemas |
 |---|---|
-| All pages (layout) | `Organization`, `WebSite` (with `SearchAction`) |
+| All pages (layout) | `Organization` (with `alternateName`), `WebSite` (with `SearchAction`) |
 | `/blog/[slug]` | `BlogPosting`, `BreadcrumbList` |
 | `/services` | `ItemList` of `Service` |
+| `/services/[slug]` | `Service`, `FAQPage` |
 | `/portfolio/[slug]` | `CreativeWork`, `BreadcrumbList` |
 | `/contact` | `LocalBusiness` |
-| `/about` | `Organization` with `Person[]` team members |
+| `/about` | `Organization` with `Person[]` team members, `FAQPage` |
 
 Builder utilities live in `src/lib/jsonLd.ts`. Organization and social links are pulled from the `site-settings` global so they stay in sync with CMS data.
+
+`Organization` includes `alternateName` fields (`"XQUBE"`, `"XQube"`, `"XQube Studio"`) to help LLM entity resolution link the studio's mentions across the web.
+
+---
+
+## AI & LLM Discoverability
+
+The site implements a full LLM discoverability stack so AI assistants (ChatGPT, Perplexity, Gemini, Claude, Grok) can accurately describe the studio when users ask about game art studios.
+
+| Mechanism | Path | Purpose |
+|---|---|---|
+| **llms.txt** | `/llms.txt` | Plain-text studio summary per [llmstxt.org](https://llmstxt.org) spec — services, portfolio, contact, team |
+| **AI bot allow rules** | `/robots.txt` | Explicit `Allow: /` for GPTBot, Claude-Web, PerplexityBot, Googlebot-Extended, and other LLM crawlers |
+| **Markdown content negotiation** | `src/middleware.ts` | Rewrites requests with `Accept: text/markdown` to `/index.md` handlers — serves structured Markdown instead of HTML |
+| **Per-service Markdown** | `/services/[slug]/index.md` | Consolidated `[slug]/index.md/route.ts` serves Markdown summaries for all 6 service pages. Accessible by AI crawlers that prefer Markdown |
+| **OpenAPI spec** | `/.well-known/openapi.json` | OpenAPI 3.1 spec describing available endpoints |
+| **AI plugin manifest** | `/.well-known/ai-plugin.json` | OpenAI plugin manifest for tool-use integrations |
+| **API catalog** | `/.well-known/api-catalog` | RFC 9727 API catalog — links to OpenAPI spec and plugin manifest |
+| **`Link` headers** | All responses | `rel=api-catalog` and `rel=describedby` headers on every page response |
+| **alternateName in JSON-LD** | Layout | `Organization` schema includes alternate brand spellings for entity resolution |
+
+> **Architectural note:** The per-service Markdown routes live under `[slug]/index.md/route.ts` (a single consolidated handler), **not** as static directories like `uefn-roblox/index.md/route.ts`. Static named directories inside a route group that also has a `[slug]/page.tsx` will shadow the dynamic route and cause 404s for the matching slugs — Next.js static segments take priority over `[slug]`. See CLAUDE.md ERROR 28.
 
 ---
 
@@ -270,8 +319,17 @@ All data fetchers in `src/lib/cachedData.ts` use `unstable_cache` with tag-based
 | `blog` | `blog-page` global, `blog-posts` collection |
 | `contact` | `contact-page` global, `site-settings` global |
 | `layout` | `navigation` global, `site-settings` global, `media` collection |
+| `faqs` | `faqs` collection, `about`, `services` |
 
 Default TTL: 300–600 seconds (fallback for changes outside the CMS).
+
+### `getServiceBySlug` — React `cache()` instead of `unstable_cache`
+
+`getServiceBySlug` is wrapped with React's `cache()` rather than `unstable_cache`. This deduplicates the DB query within a single request (e.g. `generateMetadata` + page component both calling it) without persisting `null` across requests. `unstable_cache` would permanently cache a `null` return from the first cold-start request if the seed migrations hadn't run yet — React `cache()` avoids this because it never survives beyond the current request.
+
+### Vercel CDN — `Cache-Control: no-store` for service pages
+
+`next.config.mjs` sets `Cache-Control: no-store` on `/services/:slug` responses. This prevents the Vercel edge CDN from caching 404 responses that were generated before content was seeded — without it, a CDN-cached 404 will continue serving even after the page starts returning 200.
 
 ---
 
@@ -293,6 +351,7 @@ Current PageSpeed Insights scores (mobile):
 - **WebP images** — All 199 media library images migrated to WebP (50–70% smaller than JPEG)
 - **Self-hosted font** — Urbanist loaded via `next/font/google` (self-hosted, no render-blocking third-party request)
 - **Legacy polyfill removal** — Removed `@babel/polyfill` and similar unused legacy bundles
+- **OG image quota fix** — `next.config.mjs` rewrites OG image requests to bypass Vercel's `/_next/image` optimisation pipeline. Without this, auto-generated OG images hit the monthly image transformation quota on the free plan
 - **CDN preconnect** — `<link rel="preconnect">` to DO Spaces CDN added in layout
 - **Image `sizes` props** — All `fill`-mode `<Image>` components have correct `sizes` props for accurate browser hint selection
 
@@ -362,6 +421,7 @@ Deployed on **Vercel** (Frankfurt region, Node.js 20.x). All environment variabl
 - **Never** push to `main` without explicit sign-off from the project owner
 - Node.js is pinned to **20.x** in Vercel — do not add an `engines` field to `package.json` and do not change to 22.x or 24.x (breaks `@payloadcms/storage-s3` import resolution — see CLAUDE.md ERROR 14)
 - **Never remove `unoptimized: true`** from `next.config.mjs` without first upgrading Vercel to Pro or provisioning an alternative image resizer — removing it on the free plan will immediately cause HTTP 402 errors on all images once the monthly quota is exceeded
+- **Never create static named directories inside a route group that also has a `[slug]/page.tsx`** — e.g. adding `services/uefn-roblox/` will shadow the `[slug]` dynamic route and cause 404s for that slug. Next.js resolves static segments before dynamic ones. If you need sub-routes under a specific slug, create them under `[slug]/` (e.g. `[slug]/index.md/route.ts`). See CLAUDE.md ERROR 28
 
 ---
 
