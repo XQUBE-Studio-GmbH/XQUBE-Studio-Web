@@ -18,6 +18,7 @@
  */
 
 import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
 import { getPayload } from 'payload'
 import config from '../../payload/payload.config'
 import type { NavLink, CtaButton } from '@/components/Navbar'
@@ -219,20 +220,15 @@ async function _fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
       limit:      1,
       depth:      2,
     })
-    console.log('[cachedData] fetchServiceBySlug', slug, 'totalDocs:', res.totalDocs)
     return (res.docs[0] as unknown as ServiceItem) ?? null
-  } catch (e) {
-    console.error('[cachedData] fetchServiceBySlug error:', slug, e)
+  } catch {
     return null
   }
 }
 
-export const getServiceBySlug = (slug: string) =>
-  unstable_cache(
-    () => _fetchServiceBySlug(slug),
-    ['service', slug],
-    { revalidate: 600, tags: ['services'] },
-  )()
+// React cache() deduplicates within a single request (generateMetadata + page component)
+// without persisting null across requests — avoids stale-null from unstable_cache.
+export const getServiceBySlug = cache((slug: string) => _fetchServiceBySlug(slug))
 
 async function _fetchRelatedPortfolio(categories: string[]): Promise<RelatedPortfolioData['relatedWork']> {
   if (categories.length === 0) return []
