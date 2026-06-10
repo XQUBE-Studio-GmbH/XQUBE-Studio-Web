@@ -48,7 +48,7 @@ import * as faqsCollectionMigration               from './migrations/20260610_fa
 import * as seedFaqsMigration                    from './migrations/20260610_seed_faqs.ts'
 import * as reseedFaqsMigration                  from './migrations/20260611_reseed_faqs.ts'
 import * as reseedFaqsV2Migration                from './migrations/20260612_reseed_faqs_v2.ts'
-import * as fixFaqIdsMigration                   from './migrations/20260613_fix_faq_ids.ts'
+import * as fixFaqIdsV2Migration                 from './migrations/20260614_fix_faq_ids_v2.ts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1922,9 +1922,9 @@ export default buildConfig({
         down: reseedFaqsV2Migration.down,
       },
       {
-        name: '20260613_fix_faq_ids',
-        up: fixFaqIdsMigration.up,
-        down: fixFaqIdsMigration.down,
+        name: '20260614_fix_faq_ids_v2',
+        up: fixFaqIdsV2Migration.up,
+        down: fixFaqIdsV2Migration.down,
       },
     ],
     migrationDir: path.resolve(dirname, 'migrations'),
