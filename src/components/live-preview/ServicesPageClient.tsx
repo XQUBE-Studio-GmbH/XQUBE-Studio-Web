@@ -38,7 +38,7 @@ const tools = [
   { category: 'Photogrammetry',      items: 'RealityCapture · Agisoft Metashape' },
   { category: 'Rigging & Animation', items: 'Blender · Mixamo · Character Creator' },
   { category: 'Game Engines',        items: 'Unreal Engine 5 · Unity · UEFN · Roblox Studio' },
-  { category: 'Rendering',           items: 'Marmoset Toolbag · Megascans' },
+  { category: 'Rendering',           items: 'Marmoset Toolbag · Unreal Engine 5' },
   { category: 'Concepting',          items: 'PureRef · Midjourney · Gemini' },
   { category: 'Generative 3D',       items: 'Meshy AI · Tripo 3D · ComfyUI' },
   { category: 'Version Control',     items: 'Perforce · Git LFS' },
