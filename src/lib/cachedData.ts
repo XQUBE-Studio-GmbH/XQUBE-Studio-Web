@@ -39,6 +39,24 @@ import type {
   FAQItem,
 } from '@/types/cms'
 
+// ─── Dev timeout wrapper ──────────────────────────────────────────────────────
+// In production: transparent passthrough.
+// In local dev: if Payload can't reach Supabase within 5 s (DNS/SSL/auth hang),
+// throw so the existing catch blocks return empty fallback data instead of
+// blocking the page indefinitely.
+const DEV_TIMEOUT_MS = 5000
+
+function getPayloadForFrontend() {
+  const init = getPayload({ config })
+  if (process.env.NODE_ENV === 'production') return init
+  return Promise.race([
+    init,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('[cachedData] Payload init timed out — is Supabase reachable from localhost?')), DEV_TIMEOUT_MS)
+    ),
+  ])
+}
+
 // ─── Local type: NavigationGlobal (mirrors layout.tsx local interface) ─────────
 
 export interface NavigationGlobal {
@@ -59,7 +77,7 @@ export interface LayoutData {
 
 async function _fetchLayoutData(): Promise<LayoutData> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const [nav, settings] = await Promise.all([
       payload.findGlobal({ slug: 'navigation' })               as Promise<NavigationGlobal>,
       payload.findGlobal({ slug: 'site-settings', depth: 1 }) as Promise<SiteSettingsGlobal>,
@@ -89,7 +107,7 @@ export interface HomeData {
 
 async function _fetchHomeData(): Promise<HomeData> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const [hp, servicesRes, clientsRes, featuredRes, blogRes, ppGlobal] = await Promise.all([
       payload.findGlobal({ slug: 'home-page', depth: 2 }) as Promise<HomepageGlobal>,
       payload.find({ collection: 'services',   where: { featured: { equals: true } }, sort: 'order', limit: 4,   depth: 1 }),
@@ -148,7 +166,7 @@ export interface AboutData {
 
 async function _fetchAboutData(): Promise<AboutData> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const [ap, teamRes] = await Promise.all([
       payload.findGlobal({ slug: 'about-page' }) as Promise<AboutGlobal>,
       payload.find({ collection: 'team-members', sort: 'order', limit: 50, depth: 1 }),
@@ -178,7 +196,7 @@ export interface ServicesListData {
 
 async function _fetchServicesListData(): Promise<ServicesListData> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const [servicesRes, sp] = await Promise.all([
       payload.find({ collection: 'services', sort: 'order', limit: 20, depth: 1 }),
       payload.findGlobal({ slug: 'services-page' }) as Promise<ServicesPageGlobal>,
@@ -217,7 +235,7 @@ export interface RelatedPortfolioData {
 
 async function _fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({
       collection: 'services',
       where:      { slug: { equals: slug } },
@@ -238,7 +256,7 @@ export const getServiceBySlug = cache((slug: string) => _fetchServiceBySlug(slug
 async function _fetchRelatedPortfolio(categories: string[]): Promise<RelatedPortfolioData['relatedWork']> {
   if (categories.length === 0) return []
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({
       collection: 'portfolio',
       where: { and: [{ status: { equals: 'published' } }, { category: { in: categories } }] },
@@ -262,7 +280,7 @@ export const getRelatedPortfolioForService = (categories: string[]) =>
 
 async function _fetchOtherServices(currentSlug: string): Promise<ServiceItem[]> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({ collection: 'services', sort: 'order', limit: 10, depth: 0 })
     return (res.docs as unknown as ServiceItem[]).filter((s) => s.slug !== currentSlug)
   } catch (e) {
@@ -287,7 +305,7 @@ export interface PortfolioListData {
 
 async function _fetchPortfolioListData(): Promise<PortfolioListData> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const [itemsRes, pp] = await Promise.all([
       payload.find({
         collection: 'portfolio',
@@ -357,7 +375,7 @@ export interface PortfolioSlugItem {
 
 async function _fetchPortfolioItemBySlug(slug: string): Promise<PortfolioSlugItem | null> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({
       collection: 'portfolio',
       where: { slug: { equals: slug }, status: { equals: 'published' } },
@@ -380,7 +398,7 @@ export const getPortfolioItemBySlug = (slug: string) =>
 
 async function _fetchRelatedPortfolioItems(currentId: string, category?: string): Promise<PortfolioSlugItem[]> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({
       collection: 'portfolio',
       where: {
@@ -413,7 +431,7 @@ export interface BlogListData {
 
 async function _fetchBlogListData(): Promise<BlogListData> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const [postsRes, bp] = await Promise.all([
       payload.find({
         collection: 'blog-posts',
@@ -462,7 +480,7 @@ export interface BlogSlugPost {
 
 async function _fetchBlogPostBySlug(slug: string): Promise<BlogSlugPost | null> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({
       collection: 'blog-posts',
       where: { slug: { equals: slug }, status: { equals: 'published' } },
@@ -501,7 +519,7 @@ export interface ContactRawData {
 
 async function _fetchContactData(): Promise<ContactRawData> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const [settings, cp] = await Promise.all([
       payload.findGlobal({ slug: 'site-settings' }) as Promise<ContactRawData['settings']>,
       payload.findGlobal({ slug: 'contact-page' })  as Promise<ContactPageGlobal>,
@@ -523,7 +541,7 @@ export const getContactData = unstable_cache(
 
 async function _fetchGeneralFAQs(): Promise<FAQItem[]> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({
       collection: 'faqs',
       where: { category: { equals: 'general' } },
@@ -547,7 +565,7 @@ export const getGeneralFAQs = () =>
 
 async function _fetchServiceFAQs(serviceId: string): Promise<FAQItem[]> {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayloadForFrontend()
     const res = await payload.find({
       collection: 'faqs',
       where: {
