@@ -45,6 +45,7 @@ import type {
 // throw so the existing catch blocks return empty fallback data instead of
 // blocking the page indefinitely.
 const DEV_TIMEOUT_MS = 5000
+const DEV_TIMEOUT_MSG = '[cachedData] dev-timeout'
 
 function getPayloadForFrontend() {
   const init = getPayload({ config })
@@ -52,9 +53,17 @@ function getPayloadForFrontend() {
   return Promise.race([
     init,
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('[cachedData] Payload init timed out — is Supabase reachable from localhost?')), DEV_TIMEOUT_MS)
+      setTimeout(() => reject(new Error(DEV_TIMEOUT_MSG)), DEV_TIMEOUT_MS)
     ),
   ])
+}
+
+function logCacheError(fn: string, e: unknown) {
+  if (e instanceof Error && e.message === DEV_TIMEOUT_MSG) {
+    console.warn(`[cachedData] ${fn}: Supabase unreachable from localhost — rendering with empty data`)
+    return
+  }
+  console.error(`[cachedData] ${fn} error:`, e)
 }
 
 // ─── Local type: NavigationGlobal (mirrors layout.tsx local interface) ─────────
@@ -84,7 +93,7 @@ async function _fetchLayoutData(): Promise<LayoutData> {
     ])
     return { nav, settings }
   } catch (e) {
-    console.error('[cachedData] _fetchLayoutData error:', e)
+    logCacheError('_fetchLayoutData', e)
     return { nav: {}, settings: {} }
   }
 }
@@ -146,7 +155,7 @@ async function _fetchHomeData(): Promise<HomeData> {
       blogPosts: blogRes.docs as unknown as BlogPost[],
     }
   } catch (e) {
-    console.error('[cachedData] _fetchHomeData error:', e)
+    logCacheError('_fetchHomeData', e)
     return { hp: {} as HomepageGlobal, services: [], clients: [], featured: [], blogPosts: [] }
   }
 }
@@ -176,7 +185,7 @@ async function _fetchAboutData(): Promise<AboutData> {
       teamMembers: teamRes.docs as unknown as TeamMember[],
     }
   } catch (e) {
-    console.error('[cachedData] _fetchAboutData error:', e)
+    logCacheError('_fetchAboutData', e)
     return { ap: {} as AboutGlobal, teamMembers: [] }
   }
 }
@@ -206,7 +215,7 @@ async function _fetchServicesListData(): Promise<ServicesListData> {
       sp,
     }
   } catch (e) {
-    console.error('[cachedData] _fetchServicesListData error:', e)
+    logCacheError('_fetchServicesListData', e)
     return { services: [], sp: {} as ServicesPageGlobal }
   }
 }
@@ -244,7 +253,7 @@ async function _fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
     })
     return (res.docs[0] as unknown as ServiceItem) ?? null
   } catch (e) {
-    console.error('[cachedData] _fetchServiceBySlug error:', slug, e)
+    logCacheError('_fetchServiceBySlug', e)
     return null
   }
 }
@@ -266,7 +275,7 @@ async function _fetchRelatedPortfolio(categories: string[]): Promise<RelatedPort
     })
     return res.docs as unknown as RelatedPortfolioData['relatedWork']
   } catch (e) {
-    console.error('[cachedData] _fetchRelatedPortfolio error:', categories, e)
+    logCacheError('_fetchRelatedPortfolio', e)
     return []
   }
 }
@@ -284,7 +293,7 @@ async function _fetchOtherServices(currentSlug: string): Promise<ServiceItem[]> 
     const res = await payload.find({ collection: 'services', sort: 'order', limit: 10, depth: 0 })
     return (res.docs as unknown as ServiceItem[]).filter((s) => s.slug !== currentSlug)
   } catch (e) {
-    console.error('[cachedData] _fetchOtherServices error:', currentSlug, e)
+    logCacheError('_fetchOtherServices', e)
     return []
   }
 }
@@ -334,7 +343,7 @@ async function _fetchPortfolioListData(): Promise<PortfolioListData> {
 
     return { items, pp }
   } catch (e) {
-    console.error('[cachedData] _fetchPortfolioListData error:', e)
+    logCacheError('_fetchPortfolioListData', e)
     return { items: [] as PortfolioItem[], pp: {} as PortfolioPageGlobal }
   }
 }
@@ -384,7 +393,7 @@ async function _fetchPortfolioItemBySlug(slug: string): Promise<PortfolioSlugIte
     })
     return (res.docs[0] as unknown as PortfolioSlugItem) ?? null
   } catch (e) {
-    console.error('[cachedData] _fetchPortfolioItemBySlug error:', slug, e)
+    logCacheError('_fetchPortfolioItemBySlug', e)
     return null
   }
 }
@@ -410,7 +419,7 @@ async function _fetchRelatedPortfolioItems(currentId: string, category?: string)
     })
     return (res.docs as unknown as PortfolioSlugItem[]).filter((d) => d.id !== currentId).slice(0, 3)
   } catch (e) {
-    console.error('[cachedData] _fetchRelatedPortfolioItems error:', currentId, e)
+    logCacheError('_fetchRelatedPortfolioItems', e)
     return []
   }
 }
@@ -447,7 +456,7 @@ async function _fetchBlogListData(): Promise<BlogListData> {
       bp,
     }
   } catch (e) {
-    console.error('[cachedData] _fetchBlogListData error:', e)
+    logCacheError('_fetchBlogListData', e)
     return { posts: [] as BlogPost[], bp: {} as BlogPageGlobal }
   }
 }
@@ -489,7 +498,7 @@ async function _fetchBlogPostBySlug(slug: string): Promise<BlogSlugPost | null> 
     })
     return (res.docs[0] as unknown as BlogSlugPost) ?? null
   } catch (e) {
-    console.error('[cachedData] _fetchBlogPostBySlug error:', slug, e)
+    logCacheError('_fetchBlogPostBySlug', e)
     return null
   }
 }
@@ -526,7 +535,7 @@ async function _fetchContactData(): Promise<ContactRawData> {
     ])
     return { settings, cp }
   } catch (e) {
-    console.error('[cachedData] _fetchContactData error:', e)
+    logCacheError('_fetchContactData', e)
     return { settings: {}, cp: {} as ContactPageGlobal }
   }
 }
@@ -551,7 +560,7 @@ async function _fetchGeneralFAQs(): Promise<FAQItem[]> {
     })
     return res.docs as unknown as FAQItem[]
   } catch (e) {
-    console.error('[cachedData] _fetchGeneralFAQs error:', e)
+    logCacheError('_fetchGeneralFAQs', e)
     return []
   }
 }
@@ -580,7 +589,7 @@ async function _fetchServiceFAQs(serviceId: string): Promise<FAQItem[]> {
     })
     return res.docs as unknown as FAQItem[]
   } catch (e) {
-    console.error('[cachedData] _fetchServiceFAQs error:', serviceId, e)
+    logCacheError('_fetchServiceFAQs', e)
     return []
   }
 }
